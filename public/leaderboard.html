@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bloom — Leaderboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:#0d0b10; --surface:#12100f; --card:#1a1018;
+      --border:#2a1525; --border-bright:#5a2545;
+      --text:#f5ede8; --muted:#8a6878;
+      --accent:#d4789a; --accent-dim:rgba(212,120,154,0.12);
+      --accent-bright:#f0a8c0;
+      --green:#a8c5a0; --orange:#c96894; --red:#c97070; --purple:#b09cc0;
+      --rose:#f0a8c0; --gold:#e8a0b8;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(212,120,154,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(212,120,154,0.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+    body::after{content:'';position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:700px;height:500px;background:radial-gradient(ellipse,rgba(212,120,154,0.05) 0%,transparent 70%);pointer-events:none;z-index:0;}
+
+    nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;background:rgba(14,11,11,0.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
+    .nav-logo{font-family:'Space Grotesk',sans-serif;font-size:1.25rem;font-weight:700;color:var(--text);text-decoration:none;letter-spacing:-0.5px;display:flex;align-items:center;gap:10px;}
+    .logo-lotus{display:inline-flex;align-items:center;}
+    .nav-right{display:flex;align-items:center;gap:12px;}
+    .nav-pts{background:var(--accent-dim);color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:700;padding:6px 14px;border-radius:6px;border:1px solid rgba(212,120,154,0.25);}
+    .back-btn{background:var(--surface);color:var(--muted);font-size:0.875rem;font-weight:600;padding:8px 16px;border-radius:8px;text-decoration:none;border:1px solid var(--border);transition:all .2s;}
+    .back-btn:hover{color:var(--text);border-color:var(--border-bright);}
+
+    .hero{position:relative;z-index:1;text-align:center;padding:70px 24px 40px;}
+    .hero h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:700;letter-spacing:-1.5px;margin-bottom:10px;}
+    .hero p{color:var(--muted);font-size:0.95rem;max-width:480px;margin:0 auto;}
+
+    /* AUTH GATE */
+    .auth-gate{position:relative;z-index:1;max-width:420px;margin:0 auto 48px;padding:0 24px;}
+    .auth-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;}
+    .auth-card h3{font-family:'Space Grotesk',sans-serif;font-size:1.15rem;font-weight:700;margin-bottom:6px;}
+    .auth-card p{font-size:0.82rem;color:var(--muted);margin-bottom:20px;line-height:1.6;}
+    .auth-warning{background:rgba(212,149,106,0.08);border:1px solid rgba(212,149,106,0.25);border-radius:8px;padding:10px 14px;font-size:0.78rem;color:var(--orange);margin-bottom:18px;}
+    .auth-row{display:flex;gap:8px;}
+    .auth-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;color:var(--text);outline:none;transition:border-color .2s;}
+    .auth-input:focus{border-color:var(--accent);}
+    .auth-input:disabled{opacity:0.5;cursor:not-allowed;}
+    .auth-save{background:linear-gradient(135deg,var(--accent),var(--rose));color:#0d0b10;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.875rem;padding:11px 18px;border:none;border-radius:8px;cursor:pointer;white-space:nowrap;transition:all .2s;}
+    .auth-save:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(212,120,154,0.35);}
+    .auth-save:disabled{background:var(--border);cursor:not-allowed;transform:none;color:var(--muted);}
+    .auth-locked{margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted);display:none;align-items:center;gap:6px;}
+    .auth-locked.show{display:flex;}
+    .lock-icon{color:var(--orange);}
+
+    .status-bar{position:relative;z-index:1;max-width:680px;margin:0 auto 32px;padding:0 24px;display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;}
+    .status-pill{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted);display:flex;align-items:center;gap:6px;}
+    .status-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2s ease-in-out infinite;}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+    .podium{position:relative;z-index:1;display:flex;justify-content:center;align-items:flex-end;gap:12px;padding:0 24px 48px;flex-wrap:wrap;}
+    .podium-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px 20px;text-align:center;min-width:140px;transition:all .2s;position:relative;}
+    .podium-card.p-first{padding-bottom:36px;border-top:2px solid var(--gold);}
+    .podium-card.p-second{border-top:2px solid #8a7a7a;}
+    .podium-card.p-third{border-top:2px solid #6e4a3a;}
+    .podium-card:hover{transform:translateY(-4px);border-color:var(--border-bright);}
+    .pod-medal{font-size:1.8rem;margin-bottom:8px;}
+    .pod-name{font-family:'Space Grotesk',sans-serif;font-size:0.95rem;font-weight:700;margin-bottom:4px;word-break:break-word;}
+    .pod-pts{font-family:'JetBrains Mono',monospace;font-size:0.82rem;color:var(--accent);}
+    .you-tag{background:rgba(212,149,106,0.15);color:var(--orange);font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;margin-left:6px;}
+
+    .lb-container{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:0 24px 80px;}
+    .lb-header{display:flex;justify-content:space-between;padding:0 16px 8px;font-family:'JetBrains Mono',monospace;font-size:0.68rem;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+    .lb-row{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:14px;transition:all .2s;cursor:default;}
+    .lb-row:hover{border-color:var(--border-bright);transform:translateX(4px);}
+    .lb-row.is-you{border-color:rgba(212,120,154,0.4);background:rgba(212,120,154,0.04);}
+    .lb-rank-n{font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:700;color:var(--muted);width:32px;text-align:center;}
+    .lb-rank-n.top{color:var(--gold);}
+    .lb-avatar{width:36px;height:36px;border-radius:8px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:1.1rem;border:1px solid var(--border);}
+    .lb-info{flex:1;}
+    .lb-name-d{font-weight:600;font-size:0.9rem;display:flex;align-items:center;gap:6px;}
+    .lb-sub-d{font-size:0.72rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px;}
+    .lb-pts-d{font-family:'JetBrains Mono',monospace;font-size:0.85rem;color:var(--accent);font-weight:700;}
+    .empty-lb{text-align:center;padding:48px;color:var(--muted);font-size:0.9rem;}
+    .reset-note{text-align:center;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted);padding-bottom:20px;}
+
+    footer{border-top:1px solid var(--border);padding:32px 48px;text-align:center;}
+    .footer-lotus{margin-bottom:8px;display:flex;justify-content:center;}
+    .footer-team{font-family:'Space Grotesk',sans-serif;font-size:0.82rem;color:var(--accent-bright);font-weight:600;margin-bottom:4px;}
+    .footer-npo{font-size:0.75rem;color:var(--muted);}
+    .footer-npo span{color:var(--rose);}
+
+    @media(max-width:600px){nav{padding:0 20px;}.hero,.lb-container,.podium,.auth-gate{padding-left:16px;padding-right:16px;}}
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="nav-logo"><span class="logo-lotus"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 8px rgba(212,120,154,0.7));flex-shrink:0"><defs><linearGradient id="llg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f0b8cc"/><stop offset="100%" stop-color="#a85070"/></linearGradient><linearGradient id="llg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e89ab4"/><stop offset="100%" stop-color="#c06888"/></linearGradient></defs><path d="M14 22 C10 22 5 18 6 12 C8 15 11 17 14 18 Z" fill="url(#llg1)" opacity="0.85"/><path d="M14 22 C18 22 23 18 22 12 C20 15 17 17 14 18 Z" fill="url(#llg1)" opacity="0.85"/><path d="M14 22 C11 20 8 15 10 9 C11 13 12.5 16 14 18 Z" fill="url(#llg2)" opacity="0.9"/><path d="M14 22 C17 20 20 15 18 9 C17 13 15.5 16 14 18 Z" fill="url(#llg2)" opacity="0.9"/><path d="M14 22 C12 18 12 13 14 7 C16 13 16 18 14 22 Z" fill="#f5d0e4"/><ellipse cx="14" cy="18" rx="2" ry="2.2" fill="#fff0f6" opacity="0.8"/></svg></span>Bloom</a>
+    <div class="nav-right">
+      <div class="nav-pts" id="navPts">0 pts</div>
+      <a href="index.html" class="back-btn">← Home</a>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <h1>Global Leaderboard</h1>
+    <p>Anyone with the Bloom link competes here. Your score updates in real-time across all users.</p>
+  </div>
+
+  <div class="auth-gate">
+    <div class="auth-card" id="authCard">
+      <h3 id="authTitle">🔐 Set Your Username</h3>
+      <p id="authDesc">Choose a username to appear on the global leaderboard. <strong>This can only be set once — choose carefully.</strong></p>
+      <div class="auth-warning" id="authWarn">⚠️ Once saved, your username is permanent and visible to all users.</div>
+      <div class="auth-row">
+        <input class="auth-input" id="nameInput" type="text" placeholder="Enter username..." maxlength="20" autocomplete="off"/>
+        <button class="auth-save" id="savebtn" onclick="saveName()">Save</button>
+      </div>
+      <div class="auth-locked" id="authLocked">
+        <span class="lock-icon">🔒</span>
+        <span>Username locked — saves globally across all devices</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-pill"><span class="dot"></span> Global sync active</div>
+    <div class="status-pill" id="playerCount">Loading players...</div>
+    <div class="status-pill" id="yourRank">Your rank: —</div>
+  </div>
+
+  <div class="podium" id="podium">
+    <div style="color:var(--muted);font-size:0.85rem;padding:20px">Loading leaderboard...</div>
+  </div>
+
+  <div class="lb-container">
+    <div class="lb-header"><span>Rank / Coder</span><span>Points</span></div>
+    <div id="lbList"></div>
+    <div class="reset-note">// challenges reset daily at 00:00 UTC</div>
+  </div>
+
+  <footer>
+    <div class="footer-lotus"><svg width="32" height="32" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 8px rgba(212,120,154,0.5))"><defs><linearGradient id="flg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f0b8cc"/><stop offset="100%" stop-color="#a85070"/></linearGradient><linearGradient id="flg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e89ab4"/><stop offset="100%" stop-color="#c06888"/></linearGradient></defs><path d="M14 22 C10 22 5 18 6 12 C8 15 11 17 14 18 Z" fill="url(#flg1)" opacity="0.85"/><path d="M14 22 C18 22 23 18 22 12 C20 15 17 17 14 18 Z" fill="url(#flg1)" opacity="0.85"/><path d="M14 22 C11 20 8 15 10 9 C11 13 12.5 16 14 18 Z" fill="url(#flg2)" opacity="0.9"/><path d="M14 22 C17 20 20 15 18 9 C17 13 15.5 16 14 18 Z" fill="url(#flg2)" opacity="0.9"/><path d="M14 22 C12 18 12 13 14 7 C16 13 16 18 14 22 Z" fill="#f5d0e4"/><ellipse cx="14" cy="18" rx="2" ry="2.2" fill="#fff0f6" opacity="0.8"/></svg></div>
+    <div class="footer-team">Lotus Logic</div>
+    <div class="footer-npo">A proud initiative of <span>Rising Roots</span></div>
+  </footer>
+
+  <script>
+  const STORAGE_KEY = 'bloomLeaderboard_v2';
+
+  let myName = localStorage.getItem('bloomName') || '';
+  let myPts  = parseInt(localStorage.getItem('bloomPoints') || '0');
+  let nameLocked = !!localStorage.getItem('bloomNameLocked');
+
+  document.getElementById('navPts').textContent = myPts + ' pts';
+
+  const nameInput = document.getElementById('nameInput');
+  const saveBtn = document.getElementById('savebtn');
+  const authLocked = document.getElementById('authLocked');
+  const authWarn = document.getElementById('authWarn');
+
+  if (nameLocked && myName) {
+    nameInput.value = myName;
+    nameInput.disabled = true;
+    saveBtn.disabled = true;
+    saveBtn.textContent = '✓ Locked';
+    authLocked.classList.add('show');
+    authWarn.style.display = 'none';
+    document.getElementById('authDesc').textContent = 'You are signed in as ' + myName + '. Your score syncs globally.';
+    document.getElementById('authTitle').textContent = '✅ Signed In';
+  } else if (myName) {
+    nameInput.value = myName;
+  }
+
+  async function saveName() {
+    const n = nameInput.value.trim();
+    if (!n || n.length < 2) { alert('Enter at least 2 characters.'); return; }
+    if (nameLocked) return;
+    myName = n;
+    localStorage.setItem('bloomName', n);
+    localStorage.setItem('bloomNameLocked', '1');
+    nameLocked = true;
+    nameInput.disabled = true;
+    saveBtn.disabled = true;
+    saveBtn.textContent = '✓ Locked';
+    authLocked.classList.add('show');
+    authWarn.style.display = 'none';
+    document.getElementById('authDesc').textContent = 'You are signed in as ' + n + '. Your score syncs globally.';
+    document.getElementById('authTitle').textContent = '✅ Signed In';
+    await pushToGlobal();
+    await loadBoard();
+  }
+
+  async function getGlobalBoard() {
+    try {
+      const result = await window.storage.get(STORAGE_KEY, true);
+      return result ? JSON.parse(result.value) : [];
+    } catch(e) {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    }
+  }
+
+  async function setGlobalBoard(board) {
+    try {
+      await window.storage.set(STORAGE_KEY, JSON.stringify(board), true);
+    } catch(e) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(board));
+    }
+  }
+
+  async function pushToGlobal() {
+    if (!myName) return;
+    const board = await getGlobalBoard();
+    const idx = board.findIndex(p => p.name === myName);
+    if (idx >= 0) {
+      board[idx].pts = Math.max(board[idx].pts, myPts);
+      board[idx].updated = Date.now();
+    } else {
+      board.push({ name: myName, pts: myPts, updated: Date.now() });
+    }
+    await setGlobalBoard(board);
+    localStorage.setItem('bloomLeaderboard', JSON.stringify(board));
+  }
+
+  const avatars = ['🦊','🐱','🦄','🌻','🐶','🦋','🐸','⚡','🌟','🚀','🔥','🎯','🥷','🤖','👾'];
+
+  async function loadBoard() {
+    await pushToGlobal();
+    const board = await getGlobalBoard();
+    board.sort((a,b) => b.pts - a.pts);
+
+    document.getElementById('playerCount').textContent = board.length + ' global players';
+    const myRank = board.findIndex(p => p.name === myName);
+    document.getElementById('yourRank').textContent = myRank >= 0 ? 'Rank #' + (myRank+1) : 'Not ranked yet';
+
+    const podium = document.getElementById('podium');
+    if (!board.length) {
+      podium.innerHTML = '<div style="color:var(--muted);font-size:0.85rem;padding:20px">No players yet — complete a challenge to appear!</div>';
+    } else {
+      const top3 = board.slice(0,3);
+      let podiumOrder, podiumClass, medals;
+      if (top3.length >= 3) {
+        podiumOrder = [top3[1], top3[0], top3[2]];
+        podiumClass = ['p-second','p-first','p-third'];
+        medals = ['🥈','🥇','🥉'];
+      } else if (top3.length === 2) {
+        podiumOrder = [top3[1], top3[0]];
+        podiumClass = ['p-second','p-first'];
+        medals = ['🥈','🥇'];
+      } else {
+        podiumOrder = [top3[0]];
+        podiumClass = ['p-first'];
+        medals = ['🥇'];
+      }
+      podium.innerHTML = podiumOrder.map((p,i) => `
+        <div class="podium-card ${podiumClass[i]}">
+          <div class="pod-medal">${medals[i]}</div>
+          <div class="pod-name">${p.name}${p.name===myName?'<span class="you-tag">YOU</span>':''}</div>
+          <div class="pod-pts">${p.pts} pts</div>
+        </div>`).join('');
+    }
+
+    const list = document.getElementById('lbList');
+    if (!board.length) {
+      list.innerHTML = '<div class="empty-lb">No solves yet — be the first on the board!</div>';
+    } else {
+      list.innerHTML = '';
+      board.forEach((p,i) => {
+        const isYou = p.name === myName;
+        const av = avatars[i % avatars.length];
+        const rankStr = i < 3 ? ['🥇','🥈','🥉'][i] : '#'+(i+1);
+        const row = document.createElement('div');
+        row.className = 'lb-row' + (isYou ? ' is-you' : '');
+        const owned = isYou ? JSON.parse(localStorage.getItem('bloomOwned')||'[]') : [];
+        let badges = '';
+        if (isYou) {
+          ['badge_crown','badge_trophy','badge_star','badge_robot','badge_bloom'].forEach(b => {
+            if (owned.includes(b)) badges += {'badge_crown':'👑','badge_trophy':'🏆','badge_star':'⭐','badge_robot':'🤖','badge_bloom':'🌸'}[b]||'';
+          });
+        }
+        row.innerHTML = `
+          <div class="lb-rank-n${i<3?' top':''}">${rankStr}</div>
+          <div class="lb-avatar">${av}</div>
+          <div class="lb-info">
+            <div class="lb-name-d">${p.name}${isYou?'<span class="you-tag">YOU</span>':''} ${badges}</div>
+            <div class="lb-sub-d">bloom_coder · ${p.pts} pts total</div>
+          </div>
+          <div class="lb-pts-d">${p.pts}</div>`;
+        list.appendChild(row);
+      });
+    }
+  }
+
+  loadBoard();
+  </script>
+</body>
+</html>

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bloom — Shop</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#0d0b10;--surface:#12100f;--card:#1a1018;--border:#2a1525;--border-bright:#5a2545;--text:#f5ede8;--muted:#8a6878;--accent:#d4789a;--accent-dim:rgba(212,120,154,0.12);--accent-bright:#f0a8c0;--green:#a8c5a0;--orange:#c96894;--red:#c97070;--purple:#b09cc0;--rose:#f0a8c0;--gold:#e8a0b8;}
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(212,120,154,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(212,120,154,0.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+    body::after{content:'';position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:700px;height:500px;background:radial-gradient(ellipse,rgba(212,120,154,0.05) 0%,transparent 70%);pointer-events:none;z-index:0;}
+
+    nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;background:rgba(14,11,11,0.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
+    .nav-logo{font-family:'Space Grotesk',sans-serif;font-size:1.25rem;font-weight:700;color:var(--text);text-decoration:none;letter-spacing:-0.5px;display:flex;align-items:center;gap:10px;}
+    .logo-lotus{display:inline-flex;align-items:center;}
+    .nav-right{display:flex;align-items:center;gap:12px;}
+    .nav-pts{background:var(--accent-dim);color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:700;padding:6px 14px;border-radius:6px;border:1px solid rgba(212,120,154,0.25);}
+    .back-btn{background:var(--surface);color:var(--muted);font-size:0.875rem;font-weight:600;padding:8px 16px;border-radius:8px;text-decoration:none;border:1px solid var(--border);transition:all .2s;}
+    .back-btn:hover{color:var(--text);border-color:var(--border-bright);}
+
+    .hero{position:relative;z-index:1;text-align:center;padding:60px 24px 36px;}
+    .hero h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(2rem,5vw,3rem);font-weight:700;letter-spacing:-1px;margin-bottom:8px;}
+    .hero p{color:var(--muted);font-size:0.9rem;}
+    .hero strong{color:var(--accent);}
+
+    /* INFINITE BANNER */
+    .infinite-banner{
+      position:relative;z-index:1;
+      max-width:1100px;margin:0 auto 20px;padding:0 24px;
+    }
+    .infinite-inner{
+      background:linear-gradient(135deg,rgba(212,120,154,0.08),rgba(232,180,160,0.05));
+      border:1px solid rgba(212,120,154,0.25);
+      border-radius:12px;padding:16px 24px;
+      display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    }
+    .inf-icon{font-size:1.6rem;}
+    .inf-text{flex:1;}
+    .inf-title{font-family:'Space Grotesk',sans-serif;font-size:0.95rem;font-weight:700;color:var(--accent-bright);margin-bottom:2px;}
+    .inf-desc{font-size:0.78rem;color:var(--muted);line-height:1.5;}
+    .inf-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+    .inf-tag{background:var(--accent-dim);color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:4px;border:1px solid rgba(212,120,154,0.2);}
+
+    /* ACTIVE PERKS BAR */
+    .perks-bar{position:relative;z-index:1;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 22px;margin:0 auto 32px;max-width:1100px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+    .perks-bar-label{font-family:'JetBrains Mono',monospace;font-size:0.68rem;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;white-space:nowrap;}
+    .perk-chip{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-size:0.75rem;font-weight:600;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:5px;color:var(--text);}
+    .perk-chip.consumable{border-color:rgba(212,149,106,0.3);color:var(--orange);}
+    #noPerks{font-size:0.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+
+    /* SHOP SECTIONS */
+    .shop-wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 24px 80px;}
+    .sec-label{font-family:'JetBrains Mono',monospace;font-size:0.72rem;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .sec-label span{font-size:0.65rem;font-weight:500;color:var(--border-bright);}
+    .sec-label.infinite-sec{color:var(--accent);}
+    .prize-grid{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:40px;}
+    .prize-card{
+      background:var(--card);border:1px solid var(--border);border-radius:14px;
+      padding:22px 18px;width:172px;text-align:center;transition:all .2s;position:relative;overflow:hidden;
+    }
+    .prize-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--rose));opacity:0;transition:opacity .2s;}
+    .prize-card:hover:not(.cant-afford):not(.owned-card){transform:translateY(-5px);border-color:var(--border-bright);box-shadow:0 12px 32px rgba(0,0,0,0.5);}
+    .prize-card:hover:not(.cant-afford):not(.owned-card)::before{opacity:1;}
+    .prize-card.owned-card{border-color:rgba(168,197,160,0.3);}
+    .prize-card.owned-card::before{background:var(--green);opacity:1;}
+    .prize-card.active-perk{border-color:rgba(212,149,106,0.3);}
+    .prize-card.active-perk::before{background:var(--orange);opacity:1;}
+    .prize-card.cant-afford{opacity:0.4;}
+    /* Infinite items never dim — always purchasable */
+    .prize-card.infinite-item{border-color:rgba(212,120,154,0.2);}
+    .prize-card.infinite-item::after{content:'♾️';position:absolute;top:6px;left:8px;font-size:0.65rem;}
+    .badge-corner{position:absolute;top:8px;right:8px;font-family:'JetBrains Mono',monospace;font-size:0.62rem;font-weight:700;padding:2px 7px;border-radius:4px;}
+    .owned-corner{background:rgba(168,197,160,0.12);color:var(--green);}
+    .active-corner{background:rgba(212,149,106,0.12);color:var(--orange);}
+    .prize-icon-d{font-size:2.4rem;margin-bottom:10px;display:block;}
+    .prize-name-d{font-family:'Space Grotesk',sans-serif;font-size:0.92rem;font-weight:700;margin-bottom:4px;}
+    .prize-desc-d{font-size:0.72rem;color:var(--muted);margin-bottom:8px;line-height:1.5;}
+    .prize-effect-d{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--accent);margin-bottom:10px;display:block;}
+    .prize-cost-d{font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--text);font-weight:700;margin-bottom:12px;}
+    .buy-btn-d{width:100%;padding:8px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--rose));color:#0d0b10;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.8rem;cursor:pointer;transition:all .2s;}
+    .buy-btn-d:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 12px rgba(212,120,154,0.35);}
+    .buy-btn-d:disabled{background:var(--border);cursor:not-allowed;color:var(--muted);}
+    .buy-btn-d.owned-btn{background:rgba(168,197,160,0.12);color:var(--green);border:1px solid rgba(168,197,160,0.3);}
+    .buy-btn-d.active-btn{background:rgba(212,149,106,0.12);color:var(--orange);border:1px solid rgba(212,149,106,0.3);}
+    /* Infinite buy button — never disabled */
+    .buy-btn-d.infinite-btn{background:linear-gradient(135deg,var(--accent),var(--gold));}
+
+    /* MODAL */
+    .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);z-index:200;align-items:center;justify-content:center;}
+    .modal-bg.show{display:flex;}
+    .modal{background:var(--card);border:1px solid var(--border-bright);border-radius:20px;padding:40px 36px;text-align:center;max-width:360px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,0.7);animation:popIn .3s ease;}
+    @keyframes popIn{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}
+    .m-icon-d{font-size:3rem;margin-bottom:12px;}
+    .modal h2{font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px;}
+    .modal p{font-size:0.82rem;color:var(--muted);margin-bottom:8px;}
+    .m-effect-d{background:var(--accent-dim);color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:0.75rem;font-weight:700;padding:8px 14px;border-radius:8px;margin:12px 0 20px;display:inline-block;border:1px solid rgba(212,120,154,0.2);}
+    .modal-btns{display:flex;gap:8px;justify-content:center;}
+    .m-confirm{background:linear-gradient(135deg,var(--accent),var(--rose));color:#0d0b10;font-family:'DM Sans',sans-serif;font-weight:700;padding:10px 22px;border:none;border-radius:8px;cursor:pointer;transition:all .2s;}
+    .m-confirm:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(212,120,154,0.4);}
+    .m-cancel{background:var(--surface);color:var(--muted);border:1px solid var(--border);font-family:'DM Sans',sans-serif;font-weight:700;padding:10px 22px;border-radius:8px;cursor:pointer;transition:all .2s;}
+    .m-cancel:hover{color:var(--text);border-color:var(--border-bright);}
+
+    #toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);color:var(--text);border:1px solid var(--border-bright);padding:12px 24px;border-radius:10px;font-weight:600;font-size:0.875rem;transition:transform .3s;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,0.5);pointer-events:none;}
+    #toast.show{transform:translateX(-50%) translateY(0);}
+
+    footer{border-top:1px solid var(--border);padding:32px 48px;text-align:center;}
+    .footer-lotus{margin-bottom:8px;display:flex;justify-content:center;}
+    .footer-team{font-family:'Space Grotesk',sans-serif;font-size:0.82rem;color:var(--accent-bright);font-weight:600;margin-bottom:4px;}
+    .footer-npo{font-size:0.75rem;color:var(--muted);}
+    .footer-npo span{color:var(--rose);}
+
+    @media(max-width:600px){nav{padding:0 16px;}.shop-wrap,.perks-bar,.infinite-banner{margin-left:16px;margin-right:16px;}}
+  </style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo"><span class="logo-lotus"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 8px rgba(212,120,154,0.7));flex-shrink:0"><defs><linearGradient id="llg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f0b8cc"/><stop offset="100%" stop-color="#a85070"/></linearGradient><linearGradient id="llg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e89ab4"/><stop offset="100%" stop-color="#c06888"/></linearGradient></defs><path d="M14 22 C10 22 5 18 6 12 C8 15 11 17 14 18 Z" fill="url(#llg1)" opacity="0.85"/><path d="M14 22 C18 22 23 18 22 12 C20 15 17 17 14 18 Z" fill="url(#llg1)" opacity="0.85"/><path d="M14 22 C11 20 8 15 10 9 C11 13 12.5 16 14 18 Z" fill="url(#llg2)" opacity="0.9"/><path d="M14 22 C17 20 20 15 18 9 C17 13 15.5 16 14 18 Z" fill="url(#llg2)" opacity="0.9"/><path d="M14 22 C12 18 12 13 14 7 C16 13 16 18 14 22 Z" fill="#f5d0e4"/><ellipse cx="14" cy="18" rx="2" ry="2.2" fill="#fff0f6" opacity="0.8"/></svg></span>Bloom</a>
+  <div class="nav-right">
+    <div class="nav-pts">⭐ <span id="navPoints">0</span> pts</div>
+    <a href="index.html" class="back-btn">← Home</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>Prize Shop</h1>
+  <p>Spend your Bloom Points on gameplay perks. You have <strong id="heroPoints">0</strong> pts.</p>
+</div>
+
+<!-- INFINITE BANNER -->
+<div class="infinite-banner">
+  <div class="infinite-inner">
+    <div class="inf-icon">♾️</div>
+    <div class="inf-text">
+      <div class="inf-title">Prizes Never Run Out — Even After You Finish the Course</div>
+      <div class="inf-desc">Consumable items can be bought unlimited times. Bonus Challenges, Mastery Rounds, and Speed Runs keep generating new points forever — so you always have something to earn and spend.</div>
+      <div class="inf-tags">
+        <span class="inf-tag">∞ CONSUMABLES</span>
+        <span class="inf-tag">∞ BONUS CHALLENGES</span>
+        <span class="inf-tag">∞ MASTERY ROUNDS</span>
+        <span class="inf-tag">∞ PRESTIGE MODE</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="perks-bar">
+  <div class="perks-bar-label">// active_perks</div>
+  <span id="noPerks">none — buy something below</span>
+</div>
+
+<div class="shop-wrap">
+  <div class="sec-label">// robot_skins <span>Your robot becomes this emoji</span></div>
+  <div class="prize-grid" id="skinGrid"></div>
+
+  <div class="sec-label">// trail_effects <span>Leaves a trail as you move</span></div>
+  <div class="prize-grid" id="trailGrid"></div>
+
+  <div class="sec-label">// gameplay_perks <span>Real in-game advantages — buy as many as you need ♾️</span></div>
+  <div class="prize-grid" id="gameGrid"></div>
+
+  <div class="sec-label">// badges <span>Show off on the leaderboard</span></div>
+  <div class="prize-grid" id="badgeGrid"></div>
+
+  <div class="sec-label infinite-sec">// ∞ infinite_items <span>Always available — buy unlimited times</span></div>
+  <div class="prize-grid" id="specialGrid"></div>
+</div>
+
+<div class="modal-bg" id="confirmModal">
+  <div class="modal">
+    <div class="m-icon-d" id="mIcon">🎁</div>
+    <h2 id="mTitle">Prize</h2>
+    <p id="mDesc">Description</p>
+    <div class="m-effect-d" id="mEffect">Effect</div>
+    <div class="modal-btns">
+      <button class="m-confirm" id="mConfirm">Buy for <span id="mCost">0</span> pts</button>
+      <button class="m-cancel" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<footer>
+  <div class="footer-lotus"><svg width="32" height="32" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 8px rgba(212,120,154,0.5))"><defs><linearGradient id="flg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f0b8cc"/><stop offset="100%" stop-color="#a85070"/></linearGradient><linearGradient id="flg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e89ab4"/><stop offset="100%" stop-color="#c06888"/></linearGradient></defs><path d="M14 22 C10 22 5 18 6 12 C8 15 11 17 14 18 Z" fill="url(#flg1)" opacity="0.85"/><path d="M14 22 C18 22 23 18 22 12 C20 15 17 17 14 18 Z" fill="url(#flg1)" opacity="0.85"/><path d="M14 22 C11 20 8 15 10 9 C11 13 12.5 16 14 18 Z" fill="url(#flg2)" opacity="0.9"/><path d="M14 22 C17 20 20 15 18 9 C17 13 15.5 16 14 18 Z" fill="url(#flg2)" opacity="0.9"/><path d="M14 22 C12 18 12 13 14 7 C16 13 16 18 14 22 Z" fill="#f5d0e4"/><ellipse cx="14" cy="18" rx="2" ry="2.2" fill="#fff0f6" opacity="0.8"/></svg></div>
+  <div class="footer-team">Lotus Logic</div>
+  <div class="footer-npo">A proud initiative of <span>Rising Roots</span></div>
+</footer>
+
+<script>
+// infinite: true = can be bought unlimited times (no "owned" locking)
+const PRIZES = [
+  {id:'skin_fire',   cat:'skin',    icon:'🔥', name:'Fire Bot',       desc:'A fire-breathing robot.',          effect:'Robot → 🔥', cost:50,  infinite:false},
+  {id:'skin_galaxy', cat:'skin',    icon:'🌌', name:'Galaxy Bot',     desc:'Travels through the cosmos.',      effect:'Robot → 🌌', cost:60,  infinite:false},
+  {id:'skin_dino',   cat:'skin',    icon:'🦕', name:'Dino Bot',       desc:'Prehistoric power.',               effect:'Robot → 🦕', cost:55,  infinite:false},
+  {id:'skin_alien',  cat:'skin',    icon:'👾', name:'Alien Bot',      desc:'Extraterrestrial coder.',          effect:'Robot → 👾', cost:45,  infinite:false},
+  {id:'skin_ninja',  cat:'skin',    icon:'🥷', name:'Ninja Bot',      desc:'Silent and fast.',                 effect:'Robot → 🥷', cost:65,  infinite:false},
+  {id:'trail_star',  cat:'trail',   icon:'✦',  name:'Star Trail',     desc:'Leave stars in your wake.',        effect:'Trail → ✦',  cost:40,  infinite:false},
+  {id:'trail_heart', cat:'trail',   icon:'·',  name:'Dot Trail',      desc:'Minimal clean trail.',             effect:'Trail → ·',  cost:30,  infinite:false},
+  {id:'hint_token',  cat:'game',    icon:'💡', name:'3 Hints',        desc:'Three hint tokens. Buy again anytime.',  effect:'+3 hint tokens', cost:25, infinite:true},
+  {id:'hint_token5', cat:'game',    icon:'💡', name:'5 Hints',        desc:'Five hint tokens. Buy again anytime.',   effect:'+5 hint tokens', cost:40, infinite:true},
+  {id:'extra_hints', cat:'game',    icon:'💡', name:'10 Hints',       desc:'Bulk hints. Buy again anytime.',         effect:'+10 hint tokens', cost:70, infinite:true},
+  {id:'skip_one',    cat:'game',    icon:'⏭️', name:'Skip Pass',      desc:'Skip one challenge for half points.',    effect:'1× challenge skip', cost:75, infinite:true},
+  {id:'double_pts',  cat:'game',    icon:'💎', name:'2× Multiplier',  desc:'Double your next challenge reward. Stack them up!', effect:'2× pts on next solve', cost:80, infinite:true},
+  {id:'badge_bloom', cat:'badge',   icon:'🌸', name:'Bloom Badge',    desc:'The original Bloom badge.',        effect:'Badge on leaderboard', cost:60,  infinite:false},
+  {id:'badge_robot', cat:'badge',   icon:'🤖', name:'Robot Badge',    desc:'For the robot wrangler.',          effect:'Badge on leaderboard', cost:80,  infinite:false},
+  {id:'badge_trophy',cat:'badge',   icon:'🏆', name:'Trophy Badge',   desc:'For the relentlessly dedicated.', effect:'Badge on leaderboard', cost:120, infinite:false},
+  {id:'badge_star',  cat:'badge',   icon:'⭐', name:'Star Badge',     desc:'You are on your way.',             effect:'Badge on leaderboard', cost:75,  infinite:false},
+  {id:'badge_crown', cat:'badge',   icon:'👑', name:'Crown Badge',    desc:'Elite coders only.',               effect:'Badge on leaderboard', cost:250, infinite:false},
+  {id:'mystery_box', cat:'special', icon:'🎭', name:'Mystery Box',    desc:'Could be anything. Buy again anytime.', effect:'Random prize!', cost:35, infinite:true},
+  {id:'bonus_pts',   cat:'special', icon:'🎁', name:'Point Boost',    desc:'Instant +50 points. Buy as many as you want.', effect:'+50 points now', cost:45, infinite:true},
+  {id:'name_color',  cat:'special', icon:'🎨', name:'Glowing Name',   desc:'Your name stands out on the board.', effect:'Highlighted leaderboard name', cost:65, infinite:false},
+  {id:'prestige',    cat:'special', icon:'♾️', name:'Prestige Token', desc:'Marks you as a course-completionist. Buy again for each prestige rank.', effect:'Prestige badge + 100 bonus pts', cost:150, infinite:true},
+  {id:'mastery_round',cat:'special',icon:'🎯', name:'Mastery Round',  desc:'Unlock a bonus speed challenge for extra points.', effect:'+1 mastery challenge', cost:60, infinite:true},
+];
+
+let points = parseInt(localStorage.getItem('bloomPoints') || '0');
+let owned  = JSON.parse(localStorage.getItem('bloomOwned') || '[]');
+let pendingBuy = null;
+
+function render() {
+  document.getElementById('navPoints').textContent = points;
+  document.getElementById('heroPoints').textContent = points;
+  ['skin','trail','game','badge','special'].forEach(cat => renderGrid(cat+'Grid', cat));
+  renderPerks();
+}
+
+function renderGrid(gridId, cat) {
+  const grid = document.getElementById(gridId);
+  if (!grid) return;
+  grid.innerHTML = '';
+  PRIZES.filter(p => p.cat === cat).forEach(prize => {
+    const isOwned  = !prize.infinite && owned.includes(prize.id);
+    const isActive = isActivePerk(prize.id);
+    const canAfford = points >= prize.cost;
+    const card = document.createElement('div');
+    let cardClass = 'prize-card';
+    if (prize.infinite) cardClass += ' infinite-item';
+    if (isOwned) cardClass += ' owned-card';
+    if (isActive) cardClass += ' active-perk';
+    if (!canAfford && !isOwned && !prize.infinite) cardClass += ' cant-afford';
+    if (!canAfford && !prize.infinite) cardClass += ' cant-afford';
+    card.className = cardClass;
+
+    let corner = '';
+    if (isActive && !prize.infinite) corner = '<span class="badge-corner active-corner">ACTIVE</span>';
+    else if (isOwned) corner = '<span class="badge-corner owned-corner">OWNED</span>';
+    else if (prize.infinite) corner = '<span class="badge-corner" style="background:rgba(212,120,154,0.12);color:var(--accent);">∞</span>';
+
+    let btnTxt = 'Buy', btnClass = '', btnDisabled = '';
+    if (isOwned) { btnTxt='✓ Owned'; btnClass='owned-btn'; btnDisabled='disabled'; }
+    else if (!canAfford) { btnTxt='Need pts'; btnDisabled='disabled'; }
+    else if (prize.infinite) { btnTxt='Buy Again ♾️'; btnClass='infinite-btn'; }
+
+    card.innerHTML = `${corner}
+      <span class="prize-icon-d">${prize.icon}</span>
+      <div class="prize-name-d">${prize.name}</div>
+      <div class="prize-desc-d">${prize.desc}</div>
+      <span class="prize-effect-d">// ${prize.effect}</span>
+      <div class="prize-cost-d">${prize.cost} pts</div>
+      <button class="buy-btn-d ${btnClass}" ${btnDisabled} onclick="openModal('${prize.id}')">${btnTxt}</button>`;
+    grid.appendChild(card);
+  });
+}
+
+function isActivePerk(id) {
+  if (['hint_token','hint_token5','extra_hints'].includes(id)) return parseInt(localStorage.getItem('bloomHints')||'0')>0;
+  if (id==='skip_one')   return localStorage.getItem('bloomSkip')==='1';
+  if (id==='double_pts') return localStorage.getItem('bloomDouble')==='1';
+  return false;
+}
+
+function renderPerks() {
+  const bar = document.querySelector('.perks-bar');
+  bar.querySelectorAll('.perk-chip').forEach(c=>c.remove());
+  const noPerks = document.getElementById('noPerks');
+  const active = [];
+  owned.forEach(id => {
+    const p = PRIZES.find(x=>x.id===id);
+    if (p && ['skin','trail','badge'].includes(p.cat)) active.push({label:p.icon+' '+p.name,consumable:false});
+  });
+  const hints = parseInt(localStorage.getItem('bloomHints')||'0');
+  if (hints>0) active.push({label:'💡 '+hints+' hints',consumable:true});
+  if (localStorage.getItem('bloomSkip')==='1') active.push({label:'⏭️ Skip ready',consumable:true});
+  if (localStorage.getItem('bloomDouble')==='1') active.push({label:'💎 2× active',consumable:true});
+  const prestige = parseInt(localStorage.getItem('bloomPrestige')||'0');
+  if (prestige>0) active.push({label:'♾️ Prestige ×'+prestige,consumable:false});
+  const mastery = parseInt(localStorage.getItem('bloomMastery')||'0');
+  if (mastery>0) active.push({label:'🎯 '+mastery+' mastery rounds',consumable:true});
+  noPerks.style.display = active.length?'none':'inline';
+  active.forEach(a=>{
+    const chip=document.createElement('div');
+    chip.className='perk-chip'+(a.consumable?' consumable':'');
+    chip.textContent=a.label;
+    bar.appendChild(chip);
+  });
+}
+
+function openModal(prizeId) {
+  const prize = PRIZES.find(p=>p.id===prizeId);
+  if (!prize) return;
+  const isOwned = !prize.infinite && owned.includes(prizeId);
+  if (isOwned || points < prize.cost) return;
+  pendingBuy = prizeId;
+  document.getElementById('mIcon').textContent = prize.icon;
+  document.getElementById('mTitle').textContent = prize.name;
+  document.getElementById('mDesc').textContent = prize.desc;
+  document.getElementById('mEffect').textContent = '// ' + prize.effect;
+  document.getElementById('mCost').textContent = prize.cost;
+  document.getElementById('mConfirm').onclick = confirmBuy;
+  document.getElementById('confirmModal').classList.add('show');
+}
+function closeModal() { document.getElementById('confirmModal').classList.remove('show'); pendingBuy=null; }
+
+function confirmBuy() {
+  const prize = PRIZES.find(p=>p.id===pendingBuy);
+  if (!prize) return;
+  closeModal();
+  points -= prize.cost;
+  localStorage.setItem('bloomPoints', points);
+
+  // Non-infinite items go into owned list
+  if (!prize.infinite && !owned.includes(prize.id)) {
+    owned.push(prize.id);
+    localStorage.setItem('bloomOwned', JSON.stringify(owned));
+  }
+
+  // Apply effects
+  if (prize.id==='hint_token')   { const c=parseInt(localStorage.getItem('bloomHints')||'0'); localStorage.setItem('bloomHints',c+3); }
+  if (prize.id==='hint_token5')  { const c=parseInt(localStorage.getItem('bloomHints')||'0'); localStorage.setItem('bloomHints',c+5); }
+  if (prize.id==='extra_hints')  { const c=parseInt(localStorage.getItem('bloomHints')||'0'); localStorage.setItem('bloomHints',c+10); }
+  if (prize.id==='skip_one')     localStorage.setItem('bloomSkip','1');
+  if (prize.id==='double_pts')   localStorage.setItem('bloomDouble','1');
+  if (prize.id==='bonus_pts')    { points+=50; localStorage.setItem('bloomPoints',points); showToast('🎁 +50 bonus points!'); }
+  if (prize.id==='prestige')     {
+    const p=parseInt(localStorage.getItem('bloomPrestige')||'0')+1;
+    localStorage.setItem('bloomPrestige',p);
+    points+=100; localStorage.setItem('bloomPoints',points);
+    showToast('♾️ Prestige ×'+p+' unlocked! +100 bonus pts!');
+  }
+  if (prize.id==='mastery_round'){ const m=parseInt(localStorage.getItem('bloomMastery')||'0')+1; localStorage.setItem('bloomMastery',m); showToast('🎯 Mastery round added! ('+m+' queued)'); }
+  if (prize.id==='mystery_box') {
+    const opts=['hint_token','trail_star','skin_alien','double_pts','bonus_pts'];
+    const m=opts[Math.floor(Math.random()*opts.length)];
+    const mp=PRIZES.find(p=>p.id===m);
+    if (mp) {
+      if (mp.infinite || !owned.includes(m)) {
+        if (!mp.infinite) { owned.push(m); localStorage.setItem('bloomOwned',JSON.stringify(owned)); }
+        if (m==='bonus_pts') { points+=50; localStorage.setItem('bloomPoints',points); }
+        if (m==='hint_token') { const c=parseInt(localStorage.getItem('bloomHints')||'0'); localStorage.setItem('bloomHints',c+3); }
+        if (m==='double_pts') localStorage.setItem('bloomDouble','1');
+      }
+      showToast('🎭 Mystery: got '+mp.icon+' '+mp.name+'!');
+    }
+  }
+  render();
+  if (!['mystery_box','bonus_pts','prestige','mastery_round'].includes(prize.id)) showToast('✓ Unlocked "'+prize.name+'"');
+}
+
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+render();
+</script>
+</body>
+</html>

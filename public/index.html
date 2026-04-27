@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bloom — Master Real Code</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0d0b10;
+      --surface: #12100f;
+      --card: #1a1018;
+      --border: #2a1525;
+      --border-bright: #5a2545;
+      --text: #f5ede8;
+      --muted: #8a6878;
+      --accent: #d4789a;
+      --accent-dim: rgba(212,120,154,0.12);
+      --accent-bright: #f0a8c0;
+      --green: #a8c5a0;
+      --orange: #c96894;
+      --red: #c97070;
+      --purple: #b09cc0;
+      --rose: #f0a8c0;
+      --gold: #e8a0b8;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(212,120,154,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(212,120,154,0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* Lotus glow orb */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -200px; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 600px;
+      background: radial-gradient(ellipse, rgba(212,120,154,0.06) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px; height: 64px;
+      background: rgba(14,11,11,0.94);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text); text-decoration: none;
+      letter-spacing: -0.5px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .logo-lotus { font-size: 1.1rem; filter: drop-shadow(0 0 8px rgba(212,120,154,0.6)); }
+    .nav-links { display: flex; align-items: center; gap: 8px; }
+    .nav-link {
+      color: var(--muted); text-decoration: none;
+      font-size: 0.875rem; font-weight: 500;
+      padding: 8px 16px; border-radius: 8px; transition: all 0.2s;
+    }
+    .nav-link:hover { color: var(--text); background: rgba(212,120,154,0.08); }
+    .nav-pts {
+      background: var(--accent-dim); color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem; font-weight: 700;
+      padding: 6px 14px; border-radius: 6px;
+      border: 1px solid rgba(212,120,154,0.25);
+    }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--accent), var(--rose));
+      color: #0d0b10; font-size: 0.875rem; font-weight: 700;
+      padding: 8px 18px; border-radius: 8px;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(212,120,154,0.35); }
+
+    /* HERO */
+    .hero { position: relative; z-index: 1; padding: 100px 48px 80px; max-width: 1100px; margin: 0 auto; }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(212,120,154,0.25);
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem; font-weight: 500;
+      padding: 6px 14px; border-radius: 6px;
+      margin-bottom: 32px; letter-spacing: 0.5px;
+    }
+    .eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 2s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+    .hero h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2.8rem, 6vw, 5.5rem);
+      font-weight: 700; line-height: 1.05;
+      letter-spacing: -2px; margin-bottom: 24px; color: var(--text);
+    }
+    .hero h1 em { font-style: normal; background: linear-gradient(135deg, var(--accent), var(--rose)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero-sub { font-size: 1.125rem; color: var(--muted); max-width: 520px; line-height: 1.7; margin-bottom: 44px; font-weight: 400; }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--rose));
+      color: #0d0b10; font-family: 'DM Sans', sans-serif;
+      font-weight: 700; font-size: 0.95rem;
+      padding: 14px 28px; border-radius: 10px;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,120,154,0.4); }
+    .btn-ghost {
+      background: transparent; color: var(--muted);
+      font-family: 'DM Sans', sans-serif; font-weight: 600;
+      font-size: 0.95rem; padding: 14px 28px; border-radius: 10px;
+      text-decoration: none; border: 1px solid var(--border-bright);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--accent); }
+
+    /* CODE PREVIEW */
+    .code-preview { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto 100px; padding: 0 48px; }
+    .terminal { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: 0 24px 64px rgba(0,0,0,0.6); }
+    .term-bar { background: #1a1010; padding: 14px 20px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+    .term-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .td-r { background: #c97070; } .td-y { background: var(--orange); } .td-g { background: var(--green); }
+    .term-title { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--muted); margin-left: 8px; }
+    .term-body { display: grid; grid-template-columns: 1fr 1fr; }
+    .term-code { padding: 28px; border-right: 1px solid var(--border); }
+    .term-output { padding: 28px; }
+    .term-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; font-weight: 700; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; }
+    pre { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 1.9; color: #c8b8b0; }
+    .kw { color: #c9b4e8; } .fn { color: var(--rose); } .str { color: var(--green); }
+    .cm { color: #4a3535; } .num { color: var(--orange); } .op { color: var(--accent); }
+    .output-grid { display: grid; grid-template-columns: repeat(5, 44px); gap: 4px; }
+    .oc { width: 44px; height: 44px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+    .oc.robot { background: rgba(212,120,154,0.15); border-color: var(--accent); }
+    .oc.goal { background: rgba(168,197,160,0.15); border-color: var(--green); animation: glow 2s ease-in-out infinite; }
+    .oc.wall { background: #120d0d; border-color: var(--border); }
+    .oc.trail { background: rgba(212,120,154,0.07); border-color: rgba(212,120,154,0.2); }
+    @keyframes glow { 0%,100%{box-shadow:0 0 0 0 rgba(168,197,160,0)} 50%{box-shadow:0 0 0 6px rgba(168,197,160,0.2)} }
+
+    /* SECTIONS */
+    section { position: relative; z-index: 1; }
+    .section-header { text-align: center; padding: 0 24px 48px; }
+    .section-tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700; color: var(--accent); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 16px; }
+    .section-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.8rem, 3vw, 2.8rem); font-weight: 700; letter-spacing: -1px; color: var(--text); margin-bottom: 12px; }
+    .section-header p { color: var(--muted); font-size: 1rem; }
+
+    /* LEVELS */
+    .levels-section { padding: 80px 48px; max-width: 1100px; margin: 0 auto; }
+    .levels-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+    @media(max-width:900px) { .levels-grid { grid-template-columns: repeat(2,1fr); } .term-body{grid-template-columns:1fr;} .term-code{border-right:none;border-bottom:1px solid var(--border);} }
+    @media(max-width:600px) { nav{padding:0 20px;} .hero,.levels-section,.lang-section,.code-preview{padding-left:20px;padding-right:20px;} .levels-grid{grid-template-columns:1fr;} }
+
+    .level-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 24px 20px; transition: all 0.2s; position: relative; overflow: hidden; }
+    .level-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+    .lv-0::before { background: var(--green); }
+    .lv-1::before { background: var(--accent); }
+    .lv-2::before { background: var(--purple); }
+    .lv-3::before { background: var(--orange); }
+    .lv-4::before { background: linear-gradient(90deg, var(--accent), var(--rose)); }
+    .level-card:hover { border-color: var(--border-bright); transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+    .lv-icon { font-size: 1.8rem; margin-bottom: 14px; }
+    .lv-name { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+    .lv-weeks { font-size: 0.75rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-bottom: 12px; }
+    .lv-badge { display: inline-block; font-size: 0.68rem; font-weight: 700; padding: 3px 10px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px; }
+    .lv-0 .lv-badge { background: rgba(168,197,160,0.12); color: var(--green); }
+    .lv-1 .lv-badge { background: var(--accent-dim); color: var(--accent); }
+    .lv-2 .lv-badge { background: rgba(176,156,192,0.12); color: var(--purple); }
+    .lv-3 .lv-badge { background: rgba(212,149,106,0.12); color: var(--orange); }
+    .lv-4 .lv-badge { background: rgba(232,180,160,0.12); color: var(--rose); }
+    .lv-desc { font-size: 0.78rem; color: var(--muted); margin-top: 10px; line-height: 1.6; }
+
+    /* LANGUAGES */
+    .lang-section { padding: 80px 48px; max-width: 1100px; margin: 0 auto; }
+    .lang-grid { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .lang-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 28px 24px; width: 180px; text-align: center; text-decoration: none; color: var(--text); transition: all 0.2s; }
+    .lang-card:hover { border-color: var(--accent); transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
+    .lang-emoji { font-size: 2rem; margin-bottom: 10px; display: block; }
+    .lang-name { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.95rem; margin-bottom: 6px; }
+    .lang-desc { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
+
+    /* HOW IT WORKS */
+    .how-section { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 80px 48px; }
+    .steps { display: flex; justify-content: center; gap: 0; flex-wrap: wrap; max-width: 900px; margin: 0 auto; }
+    .step { flex: 1; min-width: 160px; max-width: 200px; text-align: center; padding: 0 20px; position: relative; }
+    .step:not(:last-child)::after { content: ''; position: absolute; top: 22px; right: -1px; width: 2px; height: 2px; border-top: 2px dashed var(--border-bright); width: 40%; right: -20%; }
+    .step-num { width: 44px; height: 44px; background: var(--accent-dim); border: 1px solid rgba(212,120,154,0.3); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.85rem; color: var(--accent); margin: 0 auto 16px; }
+    .step-icon { font-size: 1.5rem; margin-bottom: 10px; }
+    .step h3 { font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; font-weight: 600; margin-bottom: 6px; }
+    .step p { font-size: 0.78rem; color: var(--muted); line-height: 1.6; }
+
+    /* LB TEASER */
+    .lb-section { padding: 80px 48px; max-width: 700px; margin: 0 auto; text-align: center; }
+    .lb-table { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin: 32px 0; text-align: left; }
+    .lb-row-inner { display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+    .lb-row-inner:last-child { border-bottom: none; }
+    .lb-rank { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; width: 32px; color: var(--muted); }
+    .lb-name-t { flex: 1; font-weight: 600; font-size: 0.9rem; }
+    .lb-pts-t { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--accent); font-weight: 700; }
+
+    /* PRIZES */
+    .prizes-section { padding: 80px 48px; background: var(--surface); border-top: 1px solid var(--border); }
+    .prizes-section .section-header { margin: 0 auto 48px; }
+    .prizes-infinite-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(212,120,154,0.1); border: 1px solid rgba(212,120,154,0.3);
+      color: var(--accent); font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; font-weight: 700; padding: 6px 14px;
+      border-radius: 6px; margin-bottom: 32px; letter-spacing: 0.5px;
+    }
+    .prize-scroll { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; max-width: 1100px; margin: 0 auto; }
+    .prize-chip { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; text-align: center; min-width: 120px; transition: all 0.2s; }
+    .prize-chip:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(212,120,154,0.15); }
+    .pz-icon { font-size: 1.8rem; margin-bottom: 8px; display: block; }
+    .pz-name { font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; }
+    .pz-cost { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent); }
+
+    /* INFINITE PRIZES CALLOUT */
+    .infinite-callout {
+      position: relative; z-index: 1;
+      background: var(--card); border: 1px solid var(--border-bright);
+      border-radius: 16px; padding: 32px 40px;
+      max-width: 700px; margin: 48px auto 0;
+      text-align: center;
+    }
+    .infinite-callout::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--rose), var(--gold));
+      border-radius: 16px 16px 0 0;
+    }
+    .ic-icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .ic-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; }
+    .ic-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.7; max-width: 500px; margin: 0 auto; }
+    .ic-tags { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+    .ic-tag { background: var(--accent-dim); color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; font-weight: 700; padding: 4px 10px; border-radius: 5px; border: 1px solid rgba(212,120,154,0.2); }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 48px 32px;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .footer-lotus { font-size: 1.4rem; margin-bottom: 12px; filter: drop-shadow(0 0 8px rgba(212,120,154,0.4)); }
+    .footer-team { font-family: 'Space Grotesk', sans-serif; font-size: 0.88rem; color: var(--accent-bright); font-weight: 600; margin-bottom: 6px; }
+    .footer-npo { font-size: 0.78rem; color: var(--muted); margin-bottom: 16px; }
+    .footer-npo span { color: var(--rose); }
+    .footer-divider { width: 40px; height: 1px; background: var(--border-bright); margin: 14px auto; }
+    .footer-copy { font-size: 0.75rem; color: #5a3850; }
+
+    @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    .animate { animation: slideUp 0.6s ease both; }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <span class="logo-lotus"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 8px rgba(212,120,154,0.7));flex-shrink:0"><defs><linearGradient id="llg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f0b8cc"/><stop offset="100%" stop-color="#a85070"/></linearGradient><linearGradient id="llg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e89ab4"/><stop offset="100%" stop-color="#c06888"/></linearGradient></defs><path d="M14 22 C10 22 5 18 6 12 C8 15 11 17 14 18 Z" fill="url(#llg1)" opacity="0.85"/><path d="M14 22 C18 22 23 18 22 12 C20 15 17 17 14 18 Z" fill="url(#llg1)" opacity="0.85"/><path d="M14 22 C11 20 8 15 10 9 C11 13 12.5 16 14 18 Z" fill="url(#llg2)" opacity="0.9"/><path d="M14 22 C17 20 20 15 18 9 C17 13 15.5 16 14 18 Z" fill="url(#llg2)" opacity="0.9"/><path d="M14 22 C12 18 12 13 14 7 C16 13 16 18 14 22 Z" fill="#f5d0e4"/><ellipse cx="14" cy="18" rx="2" ry="2.2" fill="#fff0f6" opacity="0.8"/></svg></span>
+      Bloom
+    </a>
+    <div class="nav-links">
+      <a href="leaderboard.html" class="nav-link">Leaderboard</a>
+      <a href="shop.html" class="nav-link">Shop</a>
+      <div class="nav-pts" id="navPts">0 pts</div>
+      <a href="choose-mode.html?lang=python" class="nav-cta">Start Coding →</a>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-eyebrow animate">
+      <span class="eyebrow-dot"></span>
+      LIVE · DAILY CHALLENGES · GLOBAL LEADERBOARD
+    </div>
+    <h1 class="animate delay-1">Write real code.<br>Build <em>real things.</em></h1>
+    <p class="hero-sub animate delay-2">Bloom takes you from beginner robot puzzles to building actual applications. Every level unlocks harder, real-world coding challenges — with a global leaderboard to prove your skills.</p>
+    <div class="hero-actions animate delay-3">
+      <a href="choose-mode.html?lang=python" class="btn-primary">Start Today's Challenge →</a>
+      <a href="leaderboard.html" class="btn-ghost">View Leaderboard</a>
+    </div>
+  </div>
+
+  <div class="code-preview">
+    <div class="terminal">
+      <div class="term-bar">
+        <div class="term-dot td-r"></div>
+        <div class="term-dot td-y"></div>
+        <div class="term-dot td-g"></div>
+        <span class="term-title">bloom_challenge.py — Intermediate Level</span>
+      </div>
+      <div class="term-body">
+        <div class="term-code">
+          <div class="term-label">Your Code</div>
+          <pre><span class="cm"># Sort items by frequency count</span>
+<span class="kw">def</span> <span class="fn">freq_sort</span>(items):
+  counts = {}
+  <span class="kw">for</span> x <span class="kw">in</span> items:
+    counts[x] = counts.<span class="fn">get</span>(x, <span class="num">0</span>) + <span class="num">1</span>
+  <span class="kw">return</span> <span class="fn">sorted</span>(items,
+    key=<span class="kw">lambda</span> x: -counts[x])
+
+result = <span class="fn">freq_sort</span>([
+  <span class="str">"cat"</span>, <span class="str">"dog"</span>, <span class="str">"cat"</span>,
+  <span class="str">"bird"</span>, <span class="str">"cat"</span>, <span class="str">"dog"</span>
+])
+<span class="fn">print</span>(result)</pre>
+        </div>
+        <div class="term-output">
+          <div class="term-label">Live Grid (Beginner)</div>
+          <div class="output-grid">
+            <div class="oc robot">🤖</div>
+            <div class="oc"></div>
+            <div class="oc"></div>
+            <div class="oc wall"></div>
+            <div class="oc"></div>
+            <div class="oc trail">·</div>
+            <div class="oc trail">·</div>
+            <div class="oc"></div>
+            <div class="oc wall"></div>
+            <div class="oc"></div>
+            <div class="oc"></div>
+            <div class="oc trail">·</div>
+            <div class="oc"></div>
+            <div class="oc"></div>
+            <div class="oc goal">⭐</div>
+            <div class="oc wall"></div>
+            <div class="oc"></div>
+            <div class="oc"></div>
+            <div class="oc"></div>
+            <div class="oc"></div>
+            <div class="oc"></div>
+            <div class="oc"></div>
+            <div class="oc wall"></div>
+            <div class="oc"></div>
+            <div class="oc"></div>
+          </div>
+          <div style="margin-top:20px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--green);">✓ Path solved in 6 steps</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEVELS -->
+  <section>
+    <div class="levels-section">
+      <div class="section-header">
+        <div class="section-tag">// skill_progression</div>
+        <h2>5 Levels. Real Difficulty.</h2>
+        <p>Every level requires genuinely different skills. Nothing is repeated — only harder.</p>
+      </div>
+      <div class="levels-grid">
+        <div class="level-card lv-0">
+          <div class="lv-icon">🌱</div>
+          <div class="lv-name">Beginner</div>
+          <div class="lv-weeks">// 4–6 weeks</div>
+          <span class="lv-badge">START HERE</span>
+          <div class="lv-desc">Move a robot on a grid. Learn sequences, directions, basic logic.</div>
+        </div>
+        <div class="level-card lv-1">
+          <div class="lv-icon">🚀</div>
+          <div class="lv-name">Rookie</div>
+          <div class="lv-weeks">// 6–8 weeks</div>
+          <span class="lv-badge">LOOPS + PATHS</span>
+          <div class="lv-desc">Mazes, obstacles, loops. Navigate complex grids with fewer commands.</div>
+        </div>
+        <div class="level-card lv-2">
+          <div class="lv-icon">⚡</div>
+          <div class="lv-name">Intermediate</div>
+          <div class="lv-weeks">// 6–8 weeks</div>
+          <span class="lv-badge">REAL CODE</span>
+          <div class="lv-desc">Build working calculators, string processors, and data sorters.</div>
+        </div>
+        <div class="level-card lv-3">
+          <div class="lv-icon">🔥</div>
+          <div class="lv-name">Advanced</div>
+          <div class="lv-weeks">// 8–10 weeks</div>
+          <span class="lv-badge">ALGORITHMS</span>
+          <div class="lv-desc">Write APIs, DOM manipulators, search algorithms, data structures.</div>
+        </div>
+        <div class="level-card lv-4">
+          <div class="lv-icon">💎</div>
+          <div class="lv-name">Proficient</div>
+          <div class="lv-weeks">// 8–10 weeks</div>
+          <span class="lv-badge">FULL APPS</span>
+          <div class="lv-desc">Design systems, optimize algorithms, build real deployable apps.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LANGUAGES -->
+  <section>
+    <div class="lang-section">
+      <div class="section-header">
+        <div class="section-tag">// language_select</div>
+        <h2>Pick Your Language</h2>
+        <p>Same challenges, every language. Master one, try them all.</p>
+      </div>
+      <div class="lang-grid">
+        <a href="choose-mode.html?lang=python" class="lang-card">
+          <span class="lang-emoji">🐍</span>
+          <div class="lang-name">Python</div>
+          <div class="lang-desc">Beginner friendly. Industry standard.</div>
+        </a>
+        <a href="choose-mode.html?lang=javascript" class="lang-card">
+          <span class="lang-emoji">⚡</span>
+          <div class="lang-name">JavaScript</div>
+          <div class="lang-desc">The web's language. Runs everywhere.</div>
+        </a>
+        <a href="choose-mode.html?lang=blocks" class="lang-card">
+          <span class="lang-emoji">🧩</span>
+          <div class="lang-name">Blocks</div>
+          <div class="lang-desc">Visual drag-and-drop. No typing needed.</div>
+        </a>
+        <a href="choose-mode.html?lang=html" class="lang-card">
+          <span class="lang-emoji">🌐</span>
+          <div class="lang-name">HTML/CSS</div>
+          <div class="lang-desc">Build and style web pages visually.</div>
+        </a>
+        <a href="choose-mode.html?lang=java" class="lang-card">
+          <span class="lang-emoji">☕</span>
+          <div class="lang-name">Java</div>
+          <div class="lang-desc">Structured, typed, enterprise-grade.</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section">
+    <div class="section-header">
+      <div class="section-tag">// how_it_works</div>
+      <h2>Straightforward progression.</h2>
+      <p>No gimmicks. Just daily coding practice that actually makes you better.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-icon">🔐</div>
+        <h3>Create Account</h3>
+        <p>Set your username once. Your progress is saved globally.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-icon">🎓</div>
+        <h3>Pick Your Level</h3>
+        <p>Start where you're comfortable, progress naturally.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-icon">💻</div>
+        <h3>Solve Challenges</h3>
+        <p>Write real code. Build real things. Daily new problems.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-icon">⭐</div>
+        <h3>Earn Points</h3>
+        <p>Score points on every solve. Compete globally.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">05</div>
+        <div class="step-icon">🏆</div>
+        <h3>Top the Board</h3>
+        <p>Your name vs the world. Spend points in the shop.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- LB TEASER -->
+  <section>
+    <div class="lb-section">
+      <div class="section-header">
+        <div class="section-tag">// leaderboard</div>
+        <h2>Today's Top Coders</h2>
+        <p>Global leaderboard — anyone with the link competes against you.</p>
+      </div>
+      <div class="lb-table" id="lbTeaser">
+        <div class="lb-row-inner">
+          <span class="lb-rank">#1</span>
+          <span class="lb-name-t" style="color:var(--muted)">Loading...</span>
+          <span class="lb-pts-t">—</span>
+        </div>
+      </div>
+      <a href="leaderboard.html" class="btn-primary" style="display:inline-flex">View Full Leaderboard →</a>
+    </div>
+  </section>
+
+  <!-- PRIZES -->
+  <section class="prizes-section">
+    <div class="section-header">
+      <div class="section-tag">// prize_shop</div>
+      <h2>Spend Your Points</h2>
+      <p>Unlock perks that actually affect gameplay — and prizes never run out, ever.</p>
+    </div>
+    <div style="text-align:center;margin-bottom:32px;">
+      <div class="prizes-infinite-badge">♾️ &nbsp;Infinite Prizes — keep earning forever, even after completing the full course</div>
+    </div>
+    <div class="prize-scroll">
+      <div class="prize-chip"><span class="pz-icon">🔥</span><div class="pz-name">Fire Robot</div><div class="pz-cost">50 pts</div></div>
+      <div class="prize-chip"><span class="pz-icon">💡</span><div class="pz-name">Hint Tokens</div><div class="pz-cost">25 pts</div></div>
+      <div class="prize-chip"><span class="pz-icon">⏭️</span><div class="pz-name">Skip Pass</div><div class="pz-cost">75 pts</div></div>
+      <div class="prize-chip"><span class="pz-icon">💎</span><div class="pz-name">2× Points</div><div class="pz-cost">80 pts</div></div>
+      <div class="prize-chip"><span class="pz-icon">🌌</span><div class="pz-name">Galaxy Skin</div><div class="pz-cost">60 pts</div></div>
+      <div class="prize-chip"><span class="pz-icon">👑</span><div class="pz-name">Crown Badge</div><div class="pz-cost">250 pts</div></div>
+      <div class="prize-chip"><span class="pz-icon">🎭</span><div class="pz-name">Mystery Box</div><div class="pz-cost">35 pts</div></div>
+      <div class="prize-chip"><span class="pz-icon">🏆</span><div class="pz-name">Trophy Badge</div><div class="pz-cost">120 pts</div></div>
+    </div>
+
+    <div class="infinite-callout">
+      <div class="ic-icon">♾️</div>
+      <div class="ic-title">Prizes Never Stop — Even After You Finish</div>
+      <div class="ic-desc">Completed every challenge? Keep going. Bloom generates bonus challenges, mastery rounds, and speed runs so you can keep earning points and unlocking rewards forever. The shop always has something new to spend on.</div>
+      <div class="ic-tags">
+        <span class="ic-tag">∞ BONUS CHALLENGES</span>
+        <span class="ic-tag">∞ MASTERY ROUNDS</span>
+        <span class="ic-tag">∞ SPEED RUNS</span>
+        <span class="ic-tag">∞ PRESTIGE MODE</span>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:36px;">
+      <a href="shop.html" class="btn-primary">Open Shop →</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-lotus"><svg width="32" height="32" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 8px rgba(212,120,154,0.5))"><defs><linearGradient id="flg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f0b8cc"/><stop offset="100%" stop-color="#a85070"/></linearGradient><linearGradient id="flg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e89ab4"/><stop offset="100%" stop-color="#c06888"/></linearGradient></defs><path d="M14 22 C10 22 5 18 6 12 C8 15 11 17 14 18 Z" fill="url(#flg1)" opacity="0.85"/><path d="M14 22 C18 22 23 18 22 12 C20 15 17 17 14 18 Z" fill="url(#flg1)" opacity="0.85"/><path d="M14 22 C11 20 8 15 10 9 C11 13 12.5 16 14 18 Z" fill="url(#flg2)" opacity="0.9"/><path d="M14 22 C17 20 20 15 18 9 C17 13 15.5 16 14 18 Z" fill="url(#flg2)" opacity="0.9"/><path d="M14 22 C12 18 12 13 14 7 C16 13 16 18 14 22 Z" fill="#f5d0e4"/><ellipse cx="14" cy="18" rx="2" ry="2.2" fill="#fff0f6" opacity="0.8"/></svg></div>
+    <div class="footer-team">Lotus Logic</div>
+    <div class="footer-npo">A proud initiative of <span>Rising Roots</span> — empowering the next generation through code</div>
+    <div class="footer-divider"></div>
+    <div class="footer-copy">Bloom Coding Platform · Challenges reset daily at midnight · Global leaderboard powered by Bloom API</div>
+  </footer>
+
+  <script>
+    const pts = parseInt(localStorage.getItem('bloomPoints') || '0');
+    document.getElementById('navPts').textContent = pts + ' pts';
+
+    async function loadTeaser() {
+      try {
+        const raw = localStorage.getItem('bloomLeaderboard');
+        const players = raw ? JSON.parse(raw) : [];
+        players.sort((a,b)=>b.pts-a.pts);
+        const top5 = players.slice(0,5);
+        const table = document.getElementById('lbTeaser');
+        if(!top5.length) {
+          table.innerHTML = '<div class="lb-row-inner"><span class="lb-rank">#1</span><span class="lb-name-t" style="color:var(--muted)">Be the first on the board!</span><span class="lb-pts-t">0</span></div>';
+          return;
+        }
+        table.innerHTML = top5.map((p,i)=>`<div class="lb-row-inner"><span class="lb-rank">#${i+1}</span><span class="lb-name-t">${p.name}</span><span class="lb-pts-t">${p.pts}</span></div>`).join('');
+      } catch(e) {}
+    }
+    loadTeaser();
+  </script>
+</body>
+</html>

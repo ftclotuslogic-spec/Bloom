@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bloom — Choose Mode</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:#0d0b10; --surface:#12100f; --card:#1a1018;
+      --border:#2a1525; --border-bright:#5a2545;
+      --text:#f5ede8; --muted:#8a6878;
+      --accent:#d4789a; --accent-dim:rgba(212,120,154,0.12);
+      --accent-bright:#f0a8c0;
+      --green:#a8c5a0; --orange:#c96894;
+      --rose:#f0a8c0; --gold:#e8a0b8;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(212,120,154,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(212,120,154,0.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+    body::after{content:'';position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:700px;height:500px;background:radial-gradient(ellipse,rgba(212,120,154,0.05) 0%,transparent 70%);pointer-events:none;z-index:0;}
+
+    nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;background:rgba(14,11,11,0.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
+    .nav-logo{font-family:'Space Grotesk',sans-serif;font-size:1.25rem;font-weight:700;color:var(--text);text-decoration:none;letter-spacing:-0.5px;display:flex;align-items:center;gap:10px;}
+    .logo-lotus{display:inline-flex;align-items:center;}
+    .back-btn{background:var(--surface);color:var(--muted);font-size:0.875rem;font-weight:600;padding:8px 16px;border-radius:8px;text-decoration:none;border:1px solid var(--border);transition:all .2s;}
+    .back-btn:hover{color:var(--text);border-color:var(--border-bright);}
+
+    .hero{position:relative;z-index:1;text-align:center;padding:80px 24px 52px;}
+    .lang-tag{display:inline-flex;align-items:center;gap:8px;background:var(--accent-dim);border:1px solid rgba(212,120,154,0.25);color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:0.75rem;font-weight:500;padding:6px 14px;border-radius:6px;margin-bottom:28px;letter-spacing:0.5px;}
+    .hero h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:700;letter-spacing:-1.5px;margin-bottom:14px;}
+    .hero p{color:var(--muted);font-size:0.95rem;max-width:480px;margin:0 auto;}
+
+    .mode-cards{position:relative;z-index:1;display:flex;justify-content:center;gap:20px;flex-wrap:wrap;padding:0 24px 80px;}
+
+    .mode-card{
+      background:var(--card);border:1px solid var(--border);border-radius:20px;
+      padding:48px 40px;width:280px;text-align:center;text-decoration:none;color:var(--text);
+      transition:all .25s;position:relative;overflow:hidden;
+    }
+    .mode-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;transition:opacity .2s;opacity:0.6;}
+    .mode-card.blocks::before{background:linear-gradient(90deg,var(--orange),var(--rose));}
+    .mode-card.code::before{background:linear-gradient(90deg,var(--accent),var(--gold));}
+    .mode-card:hover{transform:translateY(-8px);box-shadow:0 20px 48px rgba(0,0,0,0.6);}
+    .mode-card.blocks:hover{border-color:rgba(212,149,106,0.4);}
+    .mode-card.blocks:hover::before{opacity:1;}
+    .mode-card.code:hover{border-color:rgba(212,120,154,0.4);}
+    .mode-card.code:hover::before{opacity:1;}
+
+    .mode-icon{font-size:3.5rem;margin-bottom:20px;display:block;}
+    .mode-title{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:700;letter-spacing:-0.5px;margin-bottom:12px;}
+    .mode-desc{font-size:0.875rem;color:var(--muted);line-height:1.7;}
+    .mode-tag{
+      display:inline-block;margin-top:24px;padding:5px 14px;border-radius:6px;
+      font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:700;letter-spacing:0.5px;
+    }
+    .blocks .mode-tag{background:rgba(212,149,106,0.1);color:var(--orange);}
+    .code .mode-tag{background:var(--accent-dim);color:var(--accent);}
+
+    .tip{position:relative;z-index:1;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 24px;max-width:480px;margin:-20px auto 0;text-align:center;font-size:0.82rem;color:var(--muted);}
+    .tip strong{color:var(--accent);}
+
+    footer{border-top:1px solid var(--border);padding:32px 48px;text-align:center;margin-top:60px;}
+    .footer-lotus{margin-bottom:8px;display:flex;justify-content:center;}
+    .footer-team{font-family:'Space Grotesk',sans-serif;font-size:0.82rem;color:var(--accent-bright);font-weight:600;margin-bottom:4px;}
+    .footer-npo{font-size:0.75rem;color:var(--muted);}
+    .footer-npo span{color:var(--rose);}
+  </style>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const lang = params.get('lang') || 'python';
+      const labels = { python:'🐍 Python', javascript:'⚡ JavaScript', blocks:'🧩 Blocks', html:'🌐 HTML/CSS', java:'☕ Java' };
+      document.getElementById('langBadge').textContent = labels[lang] || lang;
+      document.querySelectorAll('.mode-card').forEach(card => {
+        const href = card.getAttribute('href');
+        card.setAttribute('href', href + '&lang=' + lang);
+      });
+    });
+  </script>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="nav-logo"><span class="logo-lotus"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 8px rgba(212,120,154,0.7));flex-shrink:0"><defs><linearGradient id="llg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f0b8cc"/><stop offset="100%" stop-color="#a85070"/></linearGradient><linearGradient id="llg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e89ab4"/><stop offset="100%" stop-color="#c06888"/></linearGradient></defs><path d="M14 22 C10 22 5 18 6 12 C8 15 11 17 14 18 Z" fill="url(#llg1)" opacity="0.85"/><path d="M14 22 C18 22 23 18 22 12 C20 15 17 17 14 18 Z" fill="url(#llg1)" opacity="0.85"/><path d="M14 22 C11 20 8 15 10 9 C11 13 12.5 16 14 18 Z" fill="url(#llg2)" opacity="0.9"/><path d="M14 22 C17 20 20 15 18 9 C17 13 15.5 16 14 18 Z" fill="url(#llg2)" opacity="0.9"/><path d="M14 22 C12 18 12 13 14 7 C16 13 16 18 14 22 Z" fill="#f5d0e4"/><ellipse cx="14" cy="18" rx="2" ry="2.2" fill="#fff0f6" opacity="0.8"/></svg></span>Bloom</a>
+    <a href="index.html" class="back-btn">← Back</a>
+  </nav>
+
+  <div class="hero">
+    <div class="lang-tag" id="langBadge">🐍 Python</div>
+    <h1>How do you want to code?</h1>
+    <p>Choose a style. You can switch anytime — your progress carries over.</p>
+  </div>
+
+  <div class="mode-cards">
+    <a href="challenge.html?mode=blocks" class="mode-card blocks">
+      <span class="mode-icon">🧩</span>
+      <div class="mode-title">Block Coding</div>
+      <div class="mode-desc">Drag and snap colorful logic blocks together. No typing needed — pure visual programming.</div>
+      <span class="mode-tag">BEGINNER · VISUAL</span>
+    </a>
+    <a href="challenge.html?mode=code" class="mode-card code">
+      <span class="mode-icon">💻</span>
+      <div class="mode-title">Type Code</div>
+      <div class="mode-desc">Write real commands in a code editor. Intermediate and above require this mode — builds real skills.</div>
+      <span class="mode-tag">REAL · PROGRAMMING</span>
+    </a>
+  </div>
+
+  <div class="tip">
+    <strong>Tip:</strong> Block mode is for Beginner &amp; Rookie. Intermediate+ challenges require typed code — start here to build the habit early.
+  </div>
+
+  <footer>
+    <div class="footer-lotus"><svg width="32" height="32" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 8px rgba(212,120,154,0.5))"><defs><linearGradient id="flg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f0b8cc"/><stop offset="100%" stop-color="#a85070"/></linearGradient><linearGradient id="flg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e89ab4"/><stop offset="100%" stop-color="#c06888"/></linearGradient></defs><path d="M14 22 C10 22 5 18 6 12 C8 15 11 17 14 18 Z" fill="url(#flg1)" opacity="0.85"/><path d="M14 22 C18 22 23 18 22 12 C20 15 17 17 14 18 Z" fill="url(#flg1)" opacity="0.85"/><path d="M14 22 C11 20 8 15 10 9 C11 13 12.5 16 14 18 Z" fill="url(#flg2)" opacity="0.9"/><path d="M14 22 C17 20 20 15 18 9 C17 13 15.5 16 14 18 Z" fill="url(#flg2)" opacity="0.9"/><path d="M14 22 C12 18 12 13 14 7 C16 13 16 18 14 22 Z" fill="#f5d0e4"/><ellipse cx="14" cy="18" rx="2" ry="2.2" fill="#fff0f6" opacity="0.8"/></svg></div>
+    <div class="footer-team">Lotus Logic</div>
+    <div class="footer-npo">A proud initiative of <span>Rising Roots</span></div>
+  </footer>
+</body>
+</html>

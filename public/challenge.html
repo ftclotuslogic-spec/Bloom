@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bloom — Challenge</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#0d0b10;--surface:#12100f;--card:#1a1018;--border:#2a1525;--border-bright:#5a2545;--text:#f5ede8;--muted:#8a6878;--accent:#d4789a;--accent-dim:rgba(212,120,154,0.12);--green:#a8c5a0;--orange:#c96894;--red:#c97070;--purple:#b09cc0;--rose:#f0a8c0;--gold:#e8a0b8;--cell:52px;}
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(212,120,154,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(212,120,154,0.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+    nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;background:rgba(14,11,11,0.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
+    .nav-logo{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:8px;}
+    .logo-lotus{display:inline-flex;align-items:center;}
+    .nav-right{display:flex;align-items:center;gap:10px;}
+    .nav-pts{background:var(--accent-dim);color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:0.75rem;font-weight:700;padding:5px 12px;border-radius:6px;border:1px solid rgba(212,120,154,0.25);}
+    .back-btn{background:var(--surface);color:var(--muted);font-size:0.8rem;font-weight:600;padding:7px 14px;border-radius:7px;text-decoration:none;border:1px solid var(--border);transition:all .2s;}
+    .back-btn:hover{color:var(--text);border-color:var(--border-bright);}
+
+    .level-bar{display:flex;justify-content:center;gap:6px;padding:16px 24px 0;flex-wrap:wrap;position:relative;z-index:1;}
+    .lv-btn{padding:7px 16px;border-radius:7px;font-weight:700;font-size:0.78rem;font-family:'JetBrains Mono',monospace;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;transition:all .2s;letter-spacing:0.5px;}
+    .lv-btn:hover:not(.locked-lv){color:var(--text);border-color:var(--border-bright);}
+    .lv-btn.active{color:white;}
+    .lv-btn.lv-0.active{background:var(--green);border-color:var(--green);}
+    .lv-btn.lv-1.active{background:var(--accent);border-color:var(--accent);}
+    .lv-btn.lv-2.active{background:var(--purple);border-color:var(--purple);}
+    .lv-btn.lv-3.active{background:var(--orange);border-color:var(--orange);}
+    .lv-btn.lv-4.active{background:var(--red);border-color:var(--red);}
+    .lv-btn.locked-lv{opacity:0.3;cursor:not-allowed;}
+
+    .ch-header{display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px 24px 12px;text-align:center;position:relative;z-index:1;}
+    .day-tag{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:1px;}
+    .ch-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(1.3rem,2.5vw,1.8rem);font-weight:700;letter-spacing:-0.5px;}
+    .ch-desc{font-size:0.875rem;color:var(--muted);max-width:520px;}
+    .stats-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+    .stat{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:7px 14px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted);}
+    .stat b{color:var(--text);}
+
+    .ch-nav{display:flex;justify-content:center;gap:6px;padding:0 24px 14px;flex-wrap:wrap;position:relative;z-index:1;}
+    .ch-btn{padding:6px 14px;border-radius:6px;font-weight:700;font-size:0.75rem;font-family:'JetBrains Mono',monospace;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;transition:all .2s;}
+    .ch-btn:hover{color:var(--text);border-color:var(--accent);}
+    .ch-btn.active{background:var(--accent);border-color:var(--accent);color:white;}
+    .ch-btn.done{background:rgba(16,185,129,0.1);border-color:var(--green);color:var(--green);}
+    .ch-btn.locked{opacity:0.3;cursor:not-allowed;}
+
+    .game-layout{display:flex;gap:18px;padding:12px 24px 60px;justify-content:center;align-items:flex-start;flex-wrap:wrap;position:relative;z-index:1;}
+
+    .grid-panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;flex-shrink:0;}
+    .panel-label{font-family:'JetBrains Mono',monospace;font-size:0.68rem;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;}
+    #gameGrid{display:grid;gap:3px;margin:0 auto;}
+    .cell{width:var(--cell);height:var(--cell);border-radius:8px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.2rem;transition:background .15s,transform .1s;}
+    .cell.wall{background:#0d1220;border-color:var(--border);}
+    .cell.goal{background:rgba(16,185,129,0.1);border-color:var(--green);animation:gGoal 2s ease-in-out infinite;}
+    .cell.robot{background:var(--accent-dim);border-color:var(--accent);}
+    .cell.trail{background:rgba(59,130,246,0.05);border-color:rgba(59,130,246,0.15);}
+    .cell.error{background:rgba(239,68,68,0.15)!important;border-color:var(--red)!important;animation:shake .4s ease;}
+    .cell.success{background:rgba(16,185,129,0.15)!important;border-color:var(--green)!important;}
+    @keyframes gGoal{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}50%{box-shadow:0 0 0 6px rgba(16,185,129,0.15)}}
+    @keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}100%{transform:translateX(0)}}
+    .grid-legend{display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap;}
+    .legend-item{display:flex;align-items:center;gap:5px;font-size:0.68rem;font-weight:600;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+    .ls{width:12px;height:12px;border-radius:3px;border:1px solid;}
+    .ls-r{background:var(--accent-dim);border-color:var(--accent);}
+    .ls-g{background:rgba(16,185,129,0.1);border-color:var(--green);}
+    .ls-w{background:var(--surface);border-color:var(--border);}
+
+    .code-panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;flex:1;min-width:320px;max-width:580px;}
+    .panel-tabs{display:flex;gap:6px;margin-bottom:16px;}
+    .panel-tab{padding:7px 18px;border-radius:7px;font-weight:700;font-family:'JetBrains Mono',monospace;font-size:0.78rem;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:all .2s;}
+    .panel-tab.active{background:var(--accent);border-color:var(--accent);color:white;}
+
+    /* ── SCRATCH BLOCK AREA ── */
+    .scratch-mode{display:none;}
+    .scratch-mode.visible{display:flex;gap:12px;align-items:flex-start;}
+
+    /* Palette sidebar */
+    .palette-area{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 10px;width:168px;flex-shrink:0;overflow-y:auto;max-height:420px;}
+    .palette-sec{font-family:'JetBrains Mono',monospace;font-size:0.6rem;font-weight:700;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin:10px 0 6px 2px;}
+    .palette-sec:first-child{margin-top:2px;}
+    .palette-col{display:flex;flex-direction:column;gap:5px;}
+    /* Each palette block is an SVG wrapped in a draggable div */
+    .pb-wrap{cursor:grab;user-select:none;display:block;transition:transform .12s,filter .12s;}
+    .pb-wrap:hover{transform:translateY(-2px) scale(1.03);filter:brightness(1.12);}
+    .pb-wrap:active{cursor:grabbing;}
+    .pb-wrap.is-dragging{opacity:0.4;}
+
+    /* Script area */
+    .script-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;}
+    .script-area{
+      background:#0b1220;border:2px dashed #1e2d42;border-radius:12px;
+      padding:12px;min-height:230px;position:relative;
+      transition:border-color .2s,background .15s;
+      overflow-y:auto;max-height:380px;
+    }
+    .script-area.drag-over{border-color:var(--accent);background:rgba(59,130,246,0.06);}
+    /* Hat block — the anchor, no top margin adjustment needed */
+    .hat-svg-wrap{display:block;margin-bottom:0;}
+    /* Queue — zero-gap seamless snap */
+    #blockQueue{display:flex;flex-direction:column;gap:0;position:relative;}
+    /* Each qb-wrap gets -7px margin-top (= TAB_H) so the next block's
+       top slot slides flush over the previous block's bottom tab */
+    .qb-wrap{position:relative;display:block;cursor:grab;user-select:none;margin-top:-7px;}
+    .qb-wrap:first-child,.qb-wrap:nth-child(2){margin-top:0;}
+    .qb-wrap:active{cursor:grabbing;}
+    .drop-zone{height:0;border-radius:4px;transition:height .15s,background .15s;margin:0;}
+    .drop-zone.active{height:20px;background:rgba(59,130,246,0.18);border:1px dashed var(--accent);}
+    .qb-wrap .qb-del{
+      position:absolute;right:10px;top:calc(50% - 3.5px);transform:translateY(-50%);
+      width:17px;height:17px;border-radius:50%;background:rgba(0,0,0,0.45);
+      border:none;color:rgba(255,255,255,0.7);font-size:9px;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;z-index:10;
+      transition:background .15s;
+    }
+    .qb-wrap .qb-del:hover{background:rgba(239,68,68,0.85);color:white;}
+    .empty-script{color:var(--muted);font-size:0.78rem;font-family:'JetBrains Mono',monospace;padding:24px 12px;text-align:center;line-height:1.8;pointer-events:none;}
+    .clear-btn{background:rgba(239,68,68,0.08);color:var(--red);border:1px solid rgba(239,68,68,0.2);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;font-weight:700;padding:6px 14px;cursor:pointer;transition:all .15s;align-self:flex-start;}
+    .clear-btn:hover{background:rgba(239,68,68,0.18);}
+
+    /* Floating ghost during drag */
+    #dragGhost{position:fixed;pointer-events:none;z-index:9999;opacity:0.85;transform:scale(0.95);display:none;}
+
+    /* CODE TEXT MODE */
+    .code-editor-wrap{display:none;}
+    .code-editor-wrap.visible{display:block;}
+    .code-hint{background:var(--surface);border-radius:8px;padding:10px 14px;font-size:0.76rem;color:var(--muted);margin-bottom:10px;border-left:2px solid var(--accent);font-family:'JetBrains Mono',monospace;line-height:1.8;}
+    .code-hint code{color:var(--accent);}
+    #codeEditor{width:100%;min-height:130px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:0.82rem;color:var(--text);resize:vertical;outline:none;transition:border-color .2s;line-height:1.8;}
+    #codeEditor:focus{border-color:var(--accent);}
+
+    /* REAL CODE CHALLENGE */
+    .challenge-panel{display:none;}
+    .challenge-panel.visible{display:block;}
+    .challenge-problem{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;}
+    .prob-title{font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:700;margin-bottom:8px;}
+    .prob-desc{font-size:0.82rem;color:var(--muted);line-height:1.7;margin-bottom:12px;}
+    .prob-example{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;}
+    .prob-ex-label{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:1px;margin-bottom:6px;}
+    .prob-ex-code{font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--green);line-height:1.8;}
+    #realCodeEditor{width:100%;min-height:200px;background:#0a0e1a;border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:0.82rem;color:#94a3b8;resize:vertical;outline:none;transition:border-color .2s;line-height:1.9;}
+    #realCodeEditor:focus{border-color:var(--accent);}
+    .real-output-box{background:#0a0e1a;border:1px solid var(--border);border-radius:8px;padding:12px 16px;min-height:60px;font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--green);margin-top:10px;line-height:1.7;white-space:pre-wrap;}
+
+    /* BUTTONS */
+    .action-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+    .btn{padding:9px 18px;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;border:none;transition:all .2s;}
+    .btn-run{background:var(--accent);color:white;}.btn-run:hover{background:#2563eb;transform:translateY(-1px);}
+    .btn-reset{background:var(--surface);color:var(--muted);border:1px solid var(--border);}.btn-reset:hover{color:var(--text);border-color:var(--border-bright);}
+    .btn-hint{background:rgba(245,158,11,0.1);color:var(--orange);border:1px solid rgba(245,158,11,0.25);}.btn-hint:hover{background:rgba(245,158,11,0.2);}
+    .btn-skip{background:rgba(212,120,154,0.1);color:var(--purple);border:1px solid rgba(212,120,154,0.25);display:none;}.btn-skip:hover{background:rgba(212,120,154,0.2);}
+    .btn-tutor{background:rgba(212,120,154,0.12);color:#e890b8;border:1px solid rgba(212,120,154,0.3);}.btn-tutor:hover{background:rgba(212,120,154,0.22);}
+
+    #outputBox{display:none;margin-top:10px;padding:10px 14px;border-radius:8px;font-size:0.82rem;font-weight:600;font-family:'JetBrains Mono',monospace;}
+    #outputBox.success{background:rgba(16,185,129,0.1);border:1px solid var(--green);color:var(--green);}
+    #outputBox.error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.4);color:var(--red);}
+    #outputBox.info{background:var(--accent-dim);border:1px solid rgba(59,130,246,0.25);color:var(--accent);}
+    #hintBox{display:none;margin-top:10px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:8px;padding:10px 14px;font-size:0.8rem;color:var(--orange);}
+
+    /* AI TUTOR CHATBOT PANEL */
+    #tutorPanel{display:none;margin-top:12px;background:linear-gradient(135deg,rgba(212,120,154,0.07),rgba(59,130,246,0.04));border:1px solid rgba(212,120,154,0.25);border-radius:14px;overflow:hidden;}
+    #tutorPanel.visible{display:flex;flex-direction:column;}
+    .tutor-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;border-bottom:1px solid rgba(212,120,154,0.15);background:rgba(212,120,154,0.06);}
+    .tutor-header-left{display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.9rem;color:#f0a8c0;}
+    .tutor-uses-badge{font-family:'JetBrains Mono',monospace;font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:20px;border:1px solid;transition:all .3s;}
+    .tutor-uses-badge.ok{background:rgba(168,197,160,0.1);border-color:rgba(168,197,160,0.35);color:var(--green);}
+    .tutor-uses-badge.warn{background:rgba(233,160,184,0.12);border-color:rgba(233,160,184,0.4);color:#e8a0b8;animation:warnPulse 1.2s ease-in-out 3;}
+    .tutor-uses-badge.empty{background:rgba(201,112,112,0.1);border-color:rgba(201,112,112,0.35);color:var(--red);}
+    @keyframes warnPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08);box-shadow:0 0 0 4px rgba(233,160,184,0.2);}}
+    .tutor-close-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:0;line-height:1;transition:color .15s;}
+    .tutor-close-btn:hover{color:var(--text);}
+
+    /* Chat messages */
+    #tutorMessages{display:flex;flex-direction:column;gap:10px;padding:14px 16px;max-height:340px;overflow-y:auto;}
+    .chat-bubble{max-width:88%;padding:10px 14px;border-radius:12px;font-size:0.82rem;line-height:1.75;}
+    .chat-bubble.bud{align-self:flex-start;background:rgba(212,120,154,0.1);border:1px solid rgba(212,120,154,0.2);color:#e8d0da;border-radius:12px 12px 12px 3px;}
+    .chat-bubble.user{align-self:flex-end;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:#c8d8f0;border-radius:12px 12px 3px 12px;}
+    .chat-bubble code{background:rgba(212,120,154,0.18);color:#e890b8;padding:1px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.78rem;}
+    .chat-bubble strong{color:#e2e8f0;}
+    .chat-bubble.typing::after{content:'▋';animation:blink .7s step-end infinite;}
+    @keyframes blink{50%{opacity:0}}
+    .chat-warn-msg{text-align:center;font-size:0.75rem;font-family:'JetBrains Mono',monospace;color:#e8a0b8;background:rgba(233,160,184,0.08);border:1px solid rgba(233,160,184,0.2);border-radius:8px;padding:7px 12px;margin:0 4px;}
+    .chat-empty-msg{text-align:center;font-size:0.78rem;color:var(--muted);padding:18px 12px;font-family:'JetBrains Mono',monospace;}
+
+    /* Chat input row */
+    #tutorInputRow{display:flex;gap:8px;padding:10px 14px 12px;border-top:1px solid rgba(212,120,154,0.12);}
+    #tutorInput{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--text);outline:none;transition:border-color .2s;resize:none;min-height:36px;max-height:80px;}
+    #tutorInput:focus{border-color:var(--accent);}
+    #tutorInput:disabled{opacity:0.45;cursor:not-allowed;}
+    #tutorSendBtn{background:var(--accent);color:white;border:none;border-radius:8px;padding:8px 14px;font-weight:700;font-size:0.82rem;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+    #tutorSendBtn:hover:not(:disabled){background:#c05880;transform:translateY(-1px);}
+    #tutorSendBtn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+
+    /* TEACH TOAST — appears after error */
+    #teachToast{display:none;position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:500;background:var(--card);border:1px solid rgba(212,120,154,0.35);border-radius:14px;padding:14px 20px;max-width:420px;width:90%;box-shadow:0 12px 40px rgba(0,0,0,0.5);animation:slideUp .3s ease;}
+    #teachToast.show{display:flex;gap:12px;align-items:flex-start;}
+    @keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+    .toast-icon{font-size:1.4rem;flex-shrink:0;}
+    .toast-body{flex:1;}
+    .toast-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.88rem;margin-bottom:4px;color:#f0a8c0;}
+    .toast-msg{font-size:0.8rem;color:var(--muted);line-height:1.6;}
+    .toast-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:0;flex-shrink:0;}
+
+    /* WIN MODAL */
+    .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:200;align-items:center;justify-content:center;}
+    .modal-bg.show{display:flex;}
+    .modal{background:var(--card);border:1px solid var(--border-bright);border-radius:20px;padding:48px 40px;text-align:center;max-width:400px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,0.6);animation:popIn .3s ease;}
+    @keyframes popIn{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}
+    .win-icon{font-size:3rem;margin-bottom:12px;}
+    .modal h2{font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px;}
+    .win-pts{font-family:'JetBrains Mono',monospace;font-size:1.2rem;color:var(--accent);font-weight:700;margin:16px 0;}
+    .modal p{font-size:0.875rem;color:var(--muted);margin-bottom:24px;}
+    .modal-btns{display:flex;gap:10px;justify-content:center;}
+    .m-next{background:var(--accent);color:white;font-family:'DM Sans',sans-serif;font-weight:700;padding:11px 24px;border:none;border-radius:9px;cursor:pointer;transition:all .2s;}
+    .m-next:hover{background:#2563eb;transform:translateY(-1px);}
+    .m-home{background:var(--surface);color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:700;padding:11px 24px;border:1px solid var(--border);border-radius:9px;cursor:pointer;text-decoration:none;}
+
+    @media(max-width:700px){.scratch-mode.visible{flex-direction:column;}.palette-area{width:100%;max-height:none;}.palette-col{flex-direction:row;flex-wrap:wrap;}}
+    @media(max-width:600px){nav{padding:0 16px;}.game-layout{padding:12px 16px 40px;}.ch-header,.ch-nav,.level-bar{padding-left:16px;padding-right:16px;}}
+  </style>
+</head>
+<body>
+
+<!-- Floating drag ghost -->
+<div id="dragGhost"></div>
+
+<nav>
+  <a href="index.html" class="nav-logo"><span class="logo-lotus"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 8px rgba(212,120,154,0.7));flex-shrink:0"><defs><linearGradient id="llg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f0b8cc"/><stop offset="100%" stop-color="#a85070"/></linearGradient><linearGradient id="llg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e89ab4"/><stop offset="100%" stop-color="#c06888"/></linearGradient></defs><path d="M14 22 C10 22 5 18 6 12 C8 15 11 17 14 18 Z" fill="url(#llg1)" opacity="0.85"/><path d="M14 22 C18 22 23 18 22 12 C20 15 17 17 14 18 Z" fill="url(#llg1)" opacity="0.85"/><path d="M14 22 C11 20 8 15 10 9 C11 13 12.5 16 14 18 Z" fill="url(#llg2)" opacity="0.9"/><path d="M14 22 C17 20 20 15 18 9 C17 13 15.5 16 14 18 Z" fill="url(#llg2)" opacity="0.9"/><path d="M14 22 C12 18 12 13 14 7 C16 13 16 18 14 22 Z" fill="#f5d0e4"/><ellipse cx="14" cy="18" rx="2" ry="2.2" fill="#fff0f6" opacity="0.8"/></svg></span>Bloom</a>
+  <div class="nav-right">
+    <div class="nav-pts">⭐ <span id="navPts">0</span></div>
+    <a href="index.html" class="back-btn">← Home</a>
+  </div>
+</nav>
+
+<div class="level-bar">
+  <button class="lv-btn lv-0" onclick="selectLevel(0)">🌱 Beginner</button>
+  <button class="lv-btn lv-1" onclick="selectLevel(1)">🚀 Rookie</button>
+  <button class="lv-btn lv-2" onclick="selectLevel(2)">⚡ Intermediate</button>
+  <button class="lv-btn lv-3" onclick="selectLevel(3)">🔥 Advanced</button>
+  <button class="lv-btn lv-4" onclick="selectLevel(4)">💎 Proficient</button>
+</div>
+
+<div class="ch-header">
+  <div class="day-tag">DAILY CHALLENGE · <span id="dateDisplay"></span></div>
+  <div class="ch-title" id="chalTitle">Loading...</div>
+  <div class="ch-desc" id="chalDesc">—</div>
+  <div class="stats-row">
+    <div class="stat">Steps: <b id="stepsUsed">0</b></div>
+    <div class="stat">Reward: <b id="ptsReward">0</b> pts</div>
+    <div class="stat" id="diffStat">Difficulty: <b>—</b></div>
+  </div>
+</div>
+
+<div class="ch-nav" id="chalNav"></div>
+
+<div class="game-layout">
+  <div class="grid-panel" id="gridPanel">
+    <div class="panel-label">// grid</div>
+    <div id="gameGrid"></div>
+    <div class="grid-legend">
+      <div class="legend-item"><div class="ls ls-r"></div>Robot</div>
+      <div class="legend-item"><div class="ls ls-g"></div>Goal</div>
+      <div class="legend-item"><div class="ls ls-w"></div>Wall</div>
+    </div>
+  </div>
+
+  <div class="code-panel" id="codePanel">
+    <div class="panel-tabs" id="panelTabs">
+      <button class="panel-tab active" id="tabBlocks" onclick="switchTab('blocks')">🧩 Blocks</button>
+      <button class="panel-tab" id="tabCode" onclick="switchTab('code')">💻 Type Code</button>
+    </div>
+
+    <!-- ── SCRATCH BLOCKS MODE ── -->
+    <div class="scratch-mode visible" id="scratchMode">
+
+      <!-- Palette sidebar -->
+      <div class="palette-area" id="paletteArea">
+        <div class="palette-sec">Motion</div>
+        <div class="palette-col" id="motionPalette"></div>
+        <div class="palette-sec" style="margin-top:14px;">Control</div>
+        <div class="palette-col" id="controlPalette"></div>
+      </div>
+
+      <!-- Script area -->
+      <div class="script-col">
+        <div class="script-area" id="scriptArea">
+          <div class="hat-svg-wrap" id="hatWrap"></div>
+          <div id="blockQueue">
+            <div class="empty-script">⬅ Drag blocks here<br><span style="font-size:0.7rem;opacity:0.55">or click a block to add it</span></div>
+          </div>
+        </div>
+        <button class="clear-btn" onclick="clearBlocks()">✕ Clear All</button>
+      </div>
+    </div>
+
+    <!-- TEXT CODE MODE (grid) -->
+    <div class="code-editor-wrap" id="codeEditorWrap">
+      <div class="code-hint" id="codeHint">Use <code>move("up")</code>, <code>move("down")</code>, <code>move("left")</code>, <code>move("right")</code></div>
+      <textarea id="codeEditor" spellcheck="false" placeholder="// write your moves here..."></textarea>
+    </div>
+
+    <!-- REAL CODE CHALLENGE (Intermediate+) -->
+    <div class="challenge-panel" id="realChallengePanel">
+      <div class="challenge-problem">
+        <div class="prob-title" id="probTitle">Challenge</div>
+        <div class="prob-desc" id="probDesc">Description</div>
+        <div class="prob-example">
+          <div class="prob-ex-label">// EXAMPLE</div>
+          <div class="prob-ex-code" id="probExample">—</div>
+        </div>
+      </div>
+      <textarea id="realCodeEditor" spellcheck="false" placeholder="// write your solution here..."></textarea>
+      <div class="real-output-box" id="realOutputBox">// output will appear here</div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn-run" onclick="runCode()">▶ Run</button>
+      <button class="btn btn-reset" id="resetBtn" onclick="resetRobot()">↺ Reset</button>
+      <button class="btn btn-hint" id="hintBtn" onclick="showHint()">💡 Hint (<span id="hintCount">0</span>)</button>
+      <button class="btn btn-tutor" id="tutorBtn" onclick="openTutor()" style="display:inline-flex;">🌱 Ask Bud</button>
+      <button class="btn btn-skip" id="skipBtn" onclick="skipChallenge()">⏭ Skip</button>
+    </div>
+    <div id="outputBox"></div>
+    <div id="hintBox"></div>
+
+    <!-- AI TUTOR CHATBOT -->
+    <div id="tutorPanel">
+      <div class="tutor-header">
+        <div class="tutor-header-left">🌱 Bud <span style="font-size:0.75rem;font-weight:400;color:var(--muted);font-family:'DM Sans',sans-serif;">· your coding buddy</span></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="tutor-uses-badge ok" id="tutorUsesBadge">2 asks left</span>
+          <button class="tutor-close-btn" onclick="closeTutor()">✕</button>
+        </div>
+      </div>
+      <div id="tutorMessages">
+        <div class="chat-empty-msg">Ask Bud anything about this challenge 👇</div>
+      </div>
+      <div id="tutorInputRow">
+        <textarea id="tutorInput" rows="1" placeholder="Type your question…" onkeydown="handleTutorKey(event)"></textarea>
+        <button id="tutorSendBtn" onclick="sendTutorMessage()">Send ↑</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TEACH TOAST (error teaching) -->
+<div id="teachToast">
+  <div class="toast-icon">💡</div>
+  <div class="toast-body">
+    <div class="toast-title" id="toastTitle">What happened?</div>
+    <div class="toast-msg" id="toastMsg"></div>
+  </div>
+  <button class="toast-close" onclick="closeToast()">✕</button>
+</div>
+
+<!-- WIN MODAL -->
+<div class="modal-bg" id="winModal">
+  <div class="modal">
+    <div class="win-icon">✅</div>
+    <h2>Challenge Solved!</h2>
+    <div class="win-pts" id="ptsEarnedDisplay">+0 pts</div>
+    <p id="winMessage">Great work!</p>
+    <div class="modal-btns">
+      <button class="m-next" onclick="nextChallenge()">Next Challenge →</button>
+      <a href="index.html" class="m-home">Home</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// SVG PUZZLE BLOCK RENDERER — SEAMLESS SNAP SYSTEM
+// Blocks connect with ZERO gap — the tab from one block sits
+// flush inside the slot of the next, forming one solid stack.
+//
+// Key insight: every block SVG is exactly BLOCK_H tall (no extra
+// space). The bottom tab extends BELOW the viewBox using
+// overflow:visible, and the next block's top slot is cut so the
+// tab fits perfectly flush — no overlap, no gap.
+// ═══════════════════════════════════════════════════════════════
+
+const BLOCK_W = 152;
+const BLOCK_H = 38;   // visual body height (not counting tab)
+const TAB_H   = 7;    // tab/slot height
+const TAB_X   = 14;   // tab left x
+const TAB_W   = 24;   // tab width
+const TAB_R   = 3;    // tab corner radius
+
+/*
+  BLOCK PATH ANATOMY
+  ──────────────────
+  Top edge (y=0): flat OR has a slot (rectangular cutout going DOWN)
+  Body: rectangle from y=0..BLOCK_H with rounded outer corners
+  Bottom edge (y=BLOCK_H): has a tab sticking DOWN by TAB_H px
+
+  The slot on top is EXACTLY the same shape as the tab on the
+  bottom of the block above — so they fit together with 0 gap.
+
+  Coordinate system:
+    (0,0) = top-left of block body
+    Tab extends from y=BLOCK_H to y=BLOCK_H+TAB_H
+*/
+
+function buildBlockPath(w, h, hasTopSlot, hasBottomTab) {
+  // Tab/slot shape params
+  const tx = TAB_X, tw = TAB_W, th = TAB_H, tr = TAB_R;
+  const r = 5; // outer corner radius
+
+  // Top-left start
+  // We trace clockwise: top-left → top-right → bottom-right → bottom-left → close
+
+  let d = '';
+
+  if (hasTopSlot) {
+    // Top edge: flat left section, slot going DOWN, flat right section
+    // Slot goes DOWN (into the block) by th px — exactly matching the tab above
+    d += `M${r},0 `;
+    d += `H${tx} `;
+    d += `v${th} `; // slot: go down
+    d += `h${tw} `; // slot: go right
+    d += `v${-th} `; // slot: go back up
+    d += `H${w - r} `;
+    d += `Q${w},0 ${w},${r} `;
+  } else {
+    // Flat top (hat block or first block with no slot)
+    d += `M0,0 H${w} `;
+    // no radius on hat — handled separately
+  }
+
+  // Right side going down
+  d += `V${h} `;
+
+  if (hasBottomTab) {
+    // Bottom edge with tab going DOWN
+    d += `H${tx + tw} `;
+    d += `v${th} `; // tab: go down
+    d += `h${-tw} `; // tab: go left
+    d += `v${-th} `; // tab: go back up
+    d += `H${r} `;
+    d += `Q0,${h} 0,${h - r} `;
+  } else {
+    // Flat bottom
+    d += `H${r} Q0,${h} 0,${h - r} `;
+  }
+
+  // Left side going up
+  d += `V${r} `;
+
+  if (hasTopSlot) {
+    d += `Q0,0 ${r},0 Z`;
+  } else {
+    d += `Z`;
+  }
+
+  return d;
+}
+
+/*
+  PRECISE SEAMLESS PATH
+  ─────────────────────
+  Uses a single continuous path per block that describes:
+  - The outer silhouette including tab (extending below)
+  - The slot cutout on top (using a "hole" via even-odd or
+    by carving into the top edge path itself)
+
+  We use the "carve into top edge" approach so we only need
+  one path element and fill-rule:nonzero works perfectly.
+*/
+function seamlessBlockPath(w, h, hasTopSlot, hasBottomTab) {
+  const tx = TAB_X, tw = TAB_W, th = TAB_H;
+  const r = 5;
+  let d = '';
+
+  // Start at top-left (after corner)
+  d += `M${r},0 `;
+
+  if (hasTopSlot) {
+    // Go right to slot start
+    d += `H${tx} `;
+    // Slot carved down then back up
+    d += `v${th} h${tw} v${-th} `;
+    // Continue right to corner
+    d += `H${w-r} Q${w},0 ${w},${r} `;
+  } else {
+    d += `H${w-r} Q${w},0 ${w},${r} `;
+  }
+
+  // Right edge down to bottom-right corner
+  d += `V${h-r} Q${w},${h} ${w-r},${h} `;
+
+  if (hasBottomTab) {
+    // Go left to tab start (tab is at TAB_X..TAB_X+TAB_W)
+    d += `H${tx+tw} `;
+    // Tab goes DOWN by th
+    d += `v${th} h${-tw} v${-th} `;
+    // Continue left to bottom-left corner
+    d += `H${r} Q0,${h} 0,${h-r} `;
+  } else {
+    d += `H${r} Q0,${h} 0,${h-r} `;
+  }
+
+  // Left edge back up
+  d += `V${r} Q0,0 ${r},0 Z`;
+
+  return d;
+}
+
+/*
+  HAT BLOCK PATH — rounded pill top, flat sides, tab at bottom, no slot on top
+*/
+function hatBlockPath(w, h) {
+  const tx = TAB_X, tw = TAB_W, th = TAB_H;
+  const r = 12; // rounded top corners
+  const br = 4; // smaller bottom corners
+  // Top-left → top-right (rounded) → right side → bottom-right (small radius)
+  // → bottom edge with tab → bottom-left (small radius) → left side → close
+  const d = `M${r},0 H${w-r} Q${w},0 ${w},${r} V${h-br} Q${w},${h} ${w-br},${h} H${tx+tw} v${th} h${-tw} v${-th} H${br} Q0,${h} 0,${h-br} V${r} Q0,0 ${r},0 Z`;
+  return d;
+}
+
+const BLOCK_DEFS = {
+  up:      { label:'▲  move up',     color:'#4C97FF', shade:'#2a6fcc', cat:'motion' },
+  down:    { label:'▼  move down',   color:'#4C97FF', shade:'#2a6fcc', cat:'motion' },
+  left:    { label:'◀  move left',   color:'#4C97FF', shade:'#2a6fcc', cat:'motion' },
+  right:   { label:'▶  move right',  color:'#4C97FF', shade:'#2a6fcc', cat:'motion' },
+  repeat2: { label:'↻  repeat  2×',  color:'#FF8C00', shade:'#b86000', cat:'control' },
+  repeat3: { label:'↻  repeat  3×',  color:'#FF8C00', shade:'#b86000', cat:'control' },
+  repeat4: { label:'↻  repeat  4×',  color:'#FF8C00', shade:'#b86000', cat:'control' },
+  repeat5: { label:'↻  repeat  5×',  color:'#FF8C00', shade:'#b86000', cat:'control' },
+};
+
+/*
+  SVG dimensions:
+  - viewBox height = BLOCK_H + TAB_H  (body + tab below)
+  - The TAB_H extra space at the bottom is where the tab lives
+  - overflow: visible so the tab draws outside if needed
+  - The NEXT block is positioned flush — its y=0 aligns with
+    the previous block's y=BLOCK_H, so the tab slots in perfectly
+*/
+function makePuzzleSVG(type) {
+  const def = BLOCK_DEFS[type];
+  if (!def) return document.createElement('div');
+
+  const w = BLOCK_W, h = BLOCK_H;
+  // SVG canvas: body height only. Tab overflows below via overflow:visible
+  // but we give it TAB_H extra in viewBox so it's not clipped by the SVG element itself
+  const svgH = h + TAB_H;
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('width', w);
+  svg.setAttribute('height', svgH);
+  svg.setAttribute('viewBox', `0 0 ${w} ${svgH}`);
+  svg.style.cssText = 'display:block;overflow:visible;margin-bottom:0;';
+
+  const path = seamlessBlockPath(w, h, true, true);
+
+  // Drop shadow (offset the same path slightly)
+  const shadow = document.createElementNS('http://www.w3.org/2000/svg','path');
+  shadow.setAttribute('d', path);
+  shadow.setAttribute('transform', 'translate(1.5,2)');
+  shadow.setAttribute('fill', 'rgba(0,0,0,0.22)');
+  shadow.setAttribute('filter', 'blur(2px)');
+  svg.appendChild(shadow);
+
+  // Main body fill
+  const body = document.createElementNS('http://www.w3.org/2000/svg','path');
+  body.setAttribute('d', path);
+  body.setAttribute('fill', def.color);
+  svg.appendChild(body);
+
+  // Inner top highlight (gives 3D depth)
+  const highlight = document.createElementNS('http://www.w3.org/2000/svg','path');
+  highlight.setAttribute('d', seamlessBlockPath(w, h, true, true));
+  highlight.setAttribute('fill', 'none');
+  highlight.setAttribute('stroke', 'rgba(255,255,255,0.22)');
+  highlight.setAttribute('stroke-width', '1.5');
+  highlight.setAttribute('stroke-linejoin', 'round');
+  svg.appendChild(highlight);
+
+  // Bottom shade strip (gives bottom depth)
+  const shade = document.createElementNS('http://www.w3.org/2000/svg','rect');
+  shade.setAttribute('x', '4');
+  shade.setAttribute('y', String(h - 7));
+  shade.setAttribute('width', String(w - 8));
+  shade.setAttribute('height', '5');
+  shade.setAttribute('rx', '2');
+  shade.setAttribute('fill', def.shade);
+  shade.setAttribute('opacity', '0.55');
+  svg.appendChild(shade);
+
+  // Label text — vertically centered in the body (not the tab)
+  const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+  txt.setAttribute('x', '16');
+  txt.setAttribute('y', String(h / 2));
+  txt.setAttribute('dominant-baseline', 'central');
+  txt.setAttribute('font-family', "'JetBrains Mono', monospace");
+  txt.setAttribute('font-size', '12.5');
+  txt.setAttribute('font-weight', '700');
+  txt.setAttribute('fill', 'rgba(255,255,255,0.97)');
+  txt.setAttribute('pointer-events', 'none');
+  txt.setAttribute('letter-spacing', '0.3');
+  txt.textContent = def.label;
+  svg.appendChild(txt);
+
+  return svg;
+}
+
+function makeHatSVG() {
+  // Hat must be wide enough to contain "▶  when run is clicked"
+  // at font-size 12 JetBrains Mono ≈ 175px — use full BLOCK_W (152)
+  // but increase height to 40 so text has breathing room
+  const w = BLOCK_W, h = BLOCK_H; // match block width & height exactly
+  const svgH = h + TAB_H;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('width', w);
+  svg.setAttribute('height', svgH);
+  svg.setAttribute('viewBox', `0 0 ${w} ${svgH}`);
+  svg.style.cssText = 'display:block;overflow:visible;margin-bottom:0;';
+
+  const path = hatBlockPath(w, h);
+
+  const body = document.createElementNS('http://www.w3.org/2000/svg','path');
+  body.setAttribute('d', path);
+  body.setAttribute('fill', '#FF8C00');
+  svg.appendChild(body);
+
+  // Shade strip at bottom (matches regular blocks)
+  const shade = document.createElementNS('http://www.w3.org/2000/svg','rect');
+  shade.setAttribute('x', '4');
+  shade.setAttribute('y', String(h - 7));
+  shade.setAttribute('width', String(w - 8));
+  shade.setAttribute('height', '5');
+  shade.setAttribute('rx', '2');
+  shade.setAttribute('fill', '#b86000');
+  shade.setAttribute('opacity', '0.55');
+  svg.appendChild(shade);
+
+  const highlight = document.createElementNS('http://www.w3.org/2000/svg','path');
+  highlight.setAttribute('d', path);
+  highlight.setAttribute('fill', 'none');
+  highlight.setAttribute('stroke', 'rgba(255,255,255,0.22)');
+  highlight.setAttribute('stroke-width', '1.5');
+  svg.appendChild(highlight);
+
+  // Text — shrink font slightly so it fits in BLOCK_W without clipping
+  const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+  txt.setAttribute('x', '12');
+  txt.setAttribute('y', String(h / 2));
+  txt.setAttribute('dominant-baseline', 'central');
+  txt.setAttribute('font-family', "'JetBrains Mono', monospace");
+  txt.setAttribute('font-size', '11');
+  txt.setAttribute('font-weight', '700');
+  txt.setAttribute('fill', 'rgba(255,255,255,0.97)');
+  txt.setAttribute('pointer-events', 'none');
+  txt.setAttribute('letter-spacing', '0.2');
+  txt.textContent = '▶  when run clicked';
+  svg.appendChild(txt);
+
+  return svg;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DATA — LEVELS
+// ═══════════════════════════════════════════════════════════════
+const LEVELS = [
+  {
+    name:'Beginner', key:'lv0', isGrid:true,
+    challenges:[
+      { title:'Move to the Star', desc:'Guide your robot to the goal — no walls, just open space.', pts:10, rows:4, cols:4, start:[0,0], goal:[3,3], walls:[], hint:'Try adding move right blocks, then move down blocks.', steps:7 },
+      { title:'First Turn', desc:'You must turn — reach the star in the corner.', pts:12, rows:4, cols:4, start:[0,0], goal:[0,3], walls:[], hint:'Only move right — three times!', steps:4 },
+      { title:'Navigate the Edge', desc:'Stay along the bottom row to reach the goal.', pts:14, rows:4, cols:5, start:[3,0], goal:[3,4], walls:[], hint:'Four "move right" blocks will do it!', steps:5 },
+      { title:'Simple Cross', desc:'Go across then down. Two directions, one path.', pts:16, rows:5, cols:5, start:[0,0], goal:[4,4], walls:[], hint:'4 right, then 4 down.', steps:9 },
+      { title:'S-Curve', desc:'Navigate from top-right to bottom-left.', pts:18, rows:5, cols:5, start:[0,4], goal:[4,0], walls:[], hint:'4 left, then 4 down.', steps:9 },
+    ]
+  },
+  {
+    name:'Rookie', key:'lv1', isGrid:true,
+    challenges:[
+      { title:'First Wall', desc:'A wall blocks the straight path — find the way around it!', pts:20, rows:5, cols:5, start:[0,0], goal:[4,4], walls:[[2,2],[2,3]], hint:'Go around the wall: try going right, then down, then right again.', steps:10 },
+      { title:'The Maze', desc:'Multiple walls force you to think ahead.', pts:25, rows:5, cols:5, start:[0,0], goal:[4,4], walls:[[1,1],[1,2],[2,1],[3,3],[3,4]], hint:'Try going right first then down to avoid the cluster.', steps:10 },
+      { title:'Tight Corridor', desc:'A narrow corridor — only one route works.', pts:30, rows:6, cols:6, start:[0,0], goal:[5,5], walls:[[0,1],[1,1],[2,1],[3,1],[4,1],[4,2],[4,3],[4,4],[3,4],[2,4]], hint:'Go down the left edge, then navigate across the bottom.', steps:12 },
+      { title:'Repeat Yourself', desc:'Use repeat blocks — this path is long but has a pattern.', pts:35, rows:5, cols:8, start:[0,0], goal:[4,7], walls:[[1,2],[1,3],[1,4],[3,2],[3,3],[3,4]], hint:'Combine repeat blocks with direction blocks for efficiency!', steps:15 },
+      { title:'The Gauntlet', desc:'Navigate a complex 7×7 maze. Only experts find the path first try.', pts:40, rows:7, cols:7, start:[0,0], goal:[6,6], walls:[[0,2],[1,2],[2,0],[2,1],[2,2],[2,4],[3,4],[4,4],[4,5],[4,6],[5,1],[5,2],[5,3]], hint:'Try exploring the top edge first.', steps:18 },
+    ]
+  },
+  {
+    name:'Intermediate', key:'lv2', isGrid:false,
+    challenges:[
+      { title:'Build a Calculator', desc:'Write a function called `calculate(a, op, b)` that takes two numbers and an operator (+, -, *, /) and returns the result. Handle division by zero by returning "Error".', pts:50, hint:'Use if/elif statements to check the op value. Return a/b for division.', example:'calculate(10, "+", 5)  →  15\ncalculate(10, "/", 0)  →  "Error"\ncalculate(8, "*", 3)  →  24', difficulty:'Medium', tests:[{code:'calculate(10, "+", 5)',expected:'15'},{code:'calculate(10, "-", 3)',expected:'7'},{code:'calculate(4, "*", 3)',expected:'12'},{code:'calculate(10, "/", 2)',expected:'5.0'},{code:'calculate(10, "/", 0)',expected:'Error'}], starterCode:'def calculate(a, op, b):\n    # Your code here\n    pass\n' },
+      { title:'Reverse Words', desc:'Write a function `reverse_words(sentence)` that reverses the ORDER of words in a sentence, but keeps each word intact.', pts:55, hint:'Split the sentence, reverse the list, then join it back.', example:'reverse_words("hello world")  →  "world hello"\nreverse_words("I love coding")  →  "coding love I"', difficulty:'Medium', tests:[{code:'reverse_words("hello world")',expected:'"world hello"'},{code:'reverse_words("I love coding")',expected:'"coding love I"'},{code:'reverse_words("one")',expected:'"one"'}], starterCode:'def reverse_words(sentence):\n    # Your code here\n    pass\n' },
+      { title:'Count Vowels', desc:'Write a function `count_vowels(text)` that returns the number of vowels (a, e, i, o, u — case insensitive) in a string.', pts:55, hint:'Loop through each character and check if it is in "aeiouAEIOU".', example:'count_vowels("hello")  →  2\ncount_vowels("BLOOM")  →  2\ncount_vowels("xyz")  →  0', difficulty:'Easy', tests:[{code:'count_vowels("hello")',expected:'2'},{code:'count_vowels("BLOOM")',expected:'2'},{code:'count_vowels("xyz")',expected:'0'},{code:'count_vowels("aeiou")',expected:'5'}], starterCode:'def count_vowels(text):\n    # Your code here\n    pass\n' },
+      { title:'FizzBuzz List', desc:'Write a function `fizzbuzz(n)` that returns a list from 1 to n where multiples of 3 are "Fizz", multiples of 5 are "Buzz", and multiples of both are "FizzBuzz".', pts:60, hint:'Use the modulo operator %. Check 15 first, then 3, then 5.', example:'fizzbuzz(5)  →  [1, 2, "Fizz", 4, "Buzz"]\nfizzbuzz(15)[-1]  →  "FizzBuzz"', difficulty:'Medium', tests:[{code:'fizzbuzz(5)',expected:"[1, 2, 'Fizz', 4, 'Buzz']"},{code:'fizzbuzz(3)[-1]',expected:"'Fizz'"},{code:'fizzbuzz(15)[-1]',expected:"'FizzBuzz'"}], starterCode:"def fizzbuzz(n):\n    result = []\n    for i in range(1, n+1):\n        # Your code here\n        pass\n    return result\n" },
+      { title:'Sort by Length', desc:'Write a function `sort_by_length(words)` that sorts a list of strings by their length, shortest first. If two words are the same length, keep alphabetical order.', pts:65, hint:'Use sorted() with a key. You can use a tuple (len(w), w) as the key.', example:'sort_by_length(["apple","cat","hi","dog"])  →  ["hi","cat","dog","apple"]', difficulty:'Hard', tests:[{code:'sort_by_length(["apple","cat","hi","dog"])',expected:"['hi', 'cat', 'dog', 'apple']"},{code:'sort_by_length(["a","bb","ccc"])',expected:"['a', 'bb', 'ccc']"},{code:'sort_by_length(["bat","cat","ant"])',expected:"['ant', 'bat', 'cat']"}], starterCode:'def sort_by_length(words):\n    # Your code here\n    pass\n' },
+    ]
+  },
+  {
+    name:'Advanced', key:'lv3', isGrid:false,
+    challenges:[
+      { title:'Binary Search', desc:'Implement `binary_search(arr, target)` that searches a SORTED list for target and returns its index, or -1 if not found. Must run in O(log n) — no using .index()!', pts:80, hint:'Track low/mid/high pointers. Compare arr[mid] to target each iteration.', example:'binary_search([1,3,5,7,9,11], 7)  →  3\nbinary_search([1,3,5,7,9], 6)  →  -1', difficulty:'Hard', tests:[{code:'binary_search([1,3,5,7,9,11], 7)',expected:'3'},{code:'binary_search([1,3,5,7,9], 6)',expected:'-1'},{code:'binary_search([2,4,6,8], 2)',expected:'0'},{code:'binary_search([2,4,6,8], 8)',expected:'3'}], starterCode:'def binary_search(arr, target):\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        # Your code here\n        pass\n    return -1\n' },
+      { title:'Flatten Nested List', desc:'Write `flatten(lst)` that takes a deeply nested list and returns a flat list of all values. Must handle any depth of nesting.', pts:85, hint:'Use recursion: if an item is a list, flatten it too. Otherwise append the item.', example:'flatten([1,[2,[3,4]],5])  →  [1,2,3,4,5]', difficulty:'Hard', tests:[{code:'flatten([1,[2,[3,4]],5])',expected:'[1, 2, 3, 4, 5]'},{code:'flatten([[1,2],[3,[4,5]]])',expected:'[1, 2, 3, 4, 5]'},{code:'flatten([1,2,3])',expected:'[1, 2, 3]'}], starterCode:'def flatten(lst):\n    result = []\n    for item in lst:\n        # Your code here\n        pass\n    return result\n' },
+      { title:'Group by Key', desc:'Write `group_by(items, key_fn)` that groups a list of items using a key function. Returns a dict where keys are the results of key_fn and values are lists of matching items.', pts:90, hint:'Call key_fn(item) for each item. Build a dict: if key not in dict, create an empty list. Then append.', example:'group_by([1,2,3,4,5,6], lambda x: x%2)  →  {1:[1,3,5], 0:[2,4,6]}', difficulty:'Hard', tests:[{code:'group_by([1,2,3,4,5,6], lambda x: x%2)',expected:'{1: [1, 3, 5], 0: [2, 4, 6]}'},{code:'group_by(["hi","hello","hey","bye"], lambda s: s[0])',expected:"{'h': ['hi', 'hello', 'hey'], 'b': ['bye']}"}], starterCode:'def group_by(items, key_fn):\n    result = {}\n    for item in items:\n        # Your code here\n        pass\n    return result\n' },
+      { title:'LRU Cache', desc:'Implement a simple LRU (Least Recently Used) cache class with capacity. It must have `get(key)` and `put(key, value)` methods. get returns -1 if key not found.', pts:100, hint:'Use an OrderedDict from collections. Move accessed items to the end. When full, remove the first item.', example:'cache = LRUCache(2)\ncache.put(1,1)\ncache.put(2,2)\ncache.get(1)  →  1\ncache.put(3,3)\ncache.get(2)  →  -1', difficulty:'Expert', tests:[{code:'c=LRUCache(2);c.put(1,1);c.put(2,2);c.get(1)',expected:'1'},{code:'c=LRUCache(2);c.put(1,1);c.put(2,2);c.get(1);c.put(3,3);c.get(2)',expected:'-1'}], starterCode:'from collections import OrderedDict\n\nclass LRUCache:\n    def __init__(self, capacity):\n        self.cap = capacity\n        self.cache = OrderedDict()\n    def get(self, key):\n        pass\n    def put(self, key, value):\n        pass\n' },
+      { title:'Graph BFS', desc:'Write `bfs(graph, start, end)` that returns the shortest path from start to end in an undirected graph (adjacency list). Return the path as a list, or [] if no path.', pts:110, hint:'Use a queue and a visited set. Track the path by storing (node, path_so_far) in the queue.', example:'graph = {"A":["B","C"],"B":["D"],"C":["D"],"D":[]}\nbfs(graph,"A","D")  →  ["A","B","D"]', difficulty:'Expert', tests:[{code:'g={"A":["B","C"],"B":["D"],"C":["D"],"D":[]};len(bfs(g,"A","D"))',expected:'3'},{code:'g={"A":["B"],"B":["C"],"C":[]};bfs(g,"A","C")',expected:"['A', 'B', 'C']"},{code:'g={"A":["B"],"B":[]};bfs(g,"A","Z")',expected:'[]'}], starterCode:'from collections import deque\n\ndef bfs(graph, start, end):\n    queue = deque([[start]])\n    visited = set()\n    while queue:\n        path = queue.popleft()\n        node = path[-1]\n        if node == end:\n            return path\n        if node not in visited:\n            visited.add(node)\n            for neighbor in graph.get(node, []):\n                pass\n    return []\n' },
+    ]
+  },
+  {
+    name:'Proficient', key:'lv4', isGrid:false,
+    challenges:[
+      { title:'Trie Data Structure', desc:'Build a complete Trie class with insert(word), search(word), and starts_with(prefix) methods.', pts:130, hint:'Each node is a dict with children. Use a special "_end" key to mark word endings.', example:'t = Trie()\nt.insert("apple")\nt.search("apple")  →  True\nt.search("app")    →  False\nt.starts_with("app")  →  True', difficulty:'Expert', tests:[{code:'t=Trie();t.insert("apple");t.search("apple")',expected:'True'},{code:'t=Trie();t.insert("apple");t.search("app")',expected:'False'},{code:'t=Trie();t.insert("apple");t.starts_with("app")',expected:'True'},{code:'t=Trie();t.insert("apple");t.starts_with("xyz")',expected:'False'}], starterCode:'class Trie:\n    def __init__(self):\n        self.root = {}\n    def insert(self, word):\n        pass\n    def search(self, word):\n        pass\n    def starts_with(self, prefix):\n        pass\n' },
+      { title:'Memoized Fibonacci', desc:'Write an efficient `fib(n)` using memoization. Must compute fib(50) instantly. Also write `fib_sequence(n)` returning the first n Fibonacci numbers.', pts:135, hint:"Use a dictionary to cache already-computed values. Or use Python's functools.lru_cache.", example:'fib(10)  →  55\nfib(50)  →  12586269025\nfib_sequence(6)  →  [0,1,1,2,3,5]', difficulty:'Hard', tests:[{code:'fib(10)',expected:'55'},{code:'fib(50)',expected:'12586269025'},{code:'fib_sequence(6)',expected:'[0, 1, 1, 2, 3, 5]'}], starterCode:'memo = {}\n\ndef fib(n):\n    pass\n\ndef fib_sequence(n):\n    pass\n' },
+      { title:'Rate Limiter', desc:'Build a RateLimiter class that allows at most `max_calls` calls within a `window_seconds` sliding window.', pts:150, hint:'Store a list of timestamps. Remove timestamps older than (current - window). Check if len < max_calls.', example:'rl = RateLimiter(3, 10)\nrl.is_allowed(1)  → True\nrl.is_allowed(9)  → True\nrl.is_allowed(11) → False', difficulty:'Expert', tests:[{code:'rl=RateLimiter(3,10);rl.is_allowed(1);rl.is_allowed(5);rl.is_allowed(9);rl.is_allowed(11)',expected:'False'},{code:'rl=RateLimiter(3,10);rl.is_allowed(1);rl.is_allowed(5);rl.is_allowed(9);rl.is_allowed(12)',expected:'True'}], starterCode:'class RateLimiter:\n    def __init__(self, max_calls, window_seconds):\n        self.max_calls = max_calls\n        self.window = window_seconds\n        self.calls = []\n    def is_allowed(self, timestamp):\n        pass\n' },
+      { title:'Regex Engine (Basic)', desc:'Implement `regex_match(pattern, text)` that supports: . (any char), * (zero or more of previous), ^ (start), $ (end).', pts:180, hint:'Handle ^ and $ by stripping them. Use recursion for * patterns.', example:'regex_match("a.c","abc")  →  True\nregex_match("a*b","aaab") →  True\nregex_match("^abc$","abc") → True', difficulty:'Elite', tests:[{code:'regex_match("a.c","abc")',expected:'True'},{code:'regex_match("a*b","aaab")',expected:'True'},{code:'regex_match("a*b","b")',expected:'True'},{code:'regex_match("a*b","c")',expected:'False'},{code:'regex_match("^abc$","abc")',expected:'True'}], starterCode:'def regex_match(pattern, text):\n    start_anchor = pattern.startswith("^")\n    end_anchor = pattern.endswith("$")\n    if start_anchor: pattern = pattern[1:]\n    if end_anchor: pattern = pattern[:-1]\n    def match(p, t, pi=0, ti=0):\n        pass\n    return match(pattern, text)\n' },
+      { title:'Mini Interpreter', desc:'Build `interpret(program)` that executes: SET x 5, ADD x 3, MUL x 2, PRINT x, IF x > 5 PRINT big. Returns list of printed values.', pts:200, hint:'Parse each line. Store variables in a dict. Handle IF by evaluating the condition then executing the inner command.', example:'interpret("SET x 5\\nADD x 3\\nPRINT x")  →  ["8"]\ninterpret("SET y 10\\nIF y > 5 PRINT big")  →  ["big"]', difficulty:'Elite', tests:[{code:'interpret("SET x 5\\nADD x 3\\nPRINT x")',expected:"['8']"},{code:'interpret("SET y 10\\nIF y > 5 PRINT big")',expected:"['big']"},{code:'interpret("SET n 3\\nMUL n 4\\nPRINT n")',expected:"['12']"}], starterCode:'def interpret(program):\n    vars = {}\n    output = []\n    lines = program.strip().split("\\n")\n    for line in lines:\n        parts = line.split()\n        cmd = parts[0]\n        if cmd == "SET":\n            pass\n        elif cmd == "ADD":\n            pass\n        elif cmd == "MUL":\n            pass\n        elif cmd == "PRINT":\n            pass\n        elif cmd == "IF":\n            pass\n    return output\n' },
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let currentLevelIdx = 0;
+let currentChallenge = 0;
+let currentMode = 'blocks';
+let blockSequence = [];   // array of block type strings
+let robotPos = [0,0];
+let totalPoints = parseInt(localStorage.getItem('bloomPoints') || '0');
+let completedMap = JSON.parse(localStorage.getItem('bloomCompleted3') || '{}');
+let hintCount = parseInt(localStorage.getItem('bloomHints') || '0');
+let skipReady = localStorage.getItem('bloomSkip') === '1';
+let doubleActive = localStorage.getItem('bloomDouble') === '1';
+const owned = JSON.parse(localStorage.getItem('bloomOwned') || '[]');
+let errorCount = 0;       // consecutive errors, triggers deeper teaching
+let toastTimer = null;
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('navPts').textContent = totalPoints;
+  document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  document.getElementById('hintCount').textContent = hintCount;
+  if (skipReady) document.getElementById('skipBtn').style.display = 'inline-flex';
+
+  buildPalette();
+  document.getElementById('hatWrap').appendChild(makeHatSVG());
+  setupDragAndDrop();
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('mode') === 'code') switchTab('code');
+
+  updateLevelButtons();
+  selectLevel(0);
+});
+
+function getRobotEmoji() { return owned.includes('skin_fire')&&'🔥'||owned.includes('skin_galaxy')&&'🌌'||owned.includes('skin_dino')&&'🦕'||owned.includes('skin_alien')&&'👾'||owned.includes('skin_ninja')&&'🥷'||'🤖'; }
+function getTrailEmoji() { return owned.includes('trail_star')&&'✦'||'·'; }
+
+// ═══════════════════════════════════════════════════════════════
+// PALETTE BUILDER
+// ═══════════════════════════════════════════════════════════════
+function buildPalette() {
+  const motionTypes = ['up','down','left','right'];
+  const controlTypes = ['repeat2','repeat3','repeat4','repeat5'];
+
+  motionTypes.forEach(type => {
+    const wrap = document.createElement('div');
+    wrap.className = 'pb-wrap';
+    wrap.dataset.blockType = type;
+    wrap.title = 'Drag or click to add';
+    wrap.appendChild(makePuzzleSVG(type));
+    // Click fallback
+    wrap.addEventListener('click', () => addBlock(type));
+    document.getElementById('motionPalette').appendChild(wrap);
+  });
+
+  controlTypes.forEach(type => {
+    const wrap = document.createElement('div');
+    wrap.className = 'pb-wrap';
+    wrap.dataset.blockType = type;
+    wrap.title = 'Drag or click to add';
+    wrap.appendChild(makePuzzleSVG(type));
+    wrap.addEventListener('click', () => addBlock(type));
+    document.getElementById('controlPalette').appendChild(wrap);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DRAG & DROP SYSTEM
+// ═══════════════════════════════════════════════════════════════
+let dragState = null; // { type, sourceWrap, insertIdx }
+
+function setupDragAndDrop() {
+  const scriptArea = document.getElementById('scriptArea');
+
+  // Palette blocks — pointer events
+  document.getElementById('paletteArea').addEventListener('pointerdown', onPalettePointerDown);
+  scriptArea.addEventListener('dragover', e => { e.preventDefault(); scriptArea.classList.add('drag-over'); });
+  scriptArea.addEventListener('dragleave', () => scriptArea.classList.remove('drag-over'));
+  scriptArea.addEventListener('drop', onScriptDrop);
+
+  // Also handle global pointermove/up for custom drag
+  document.addEventListener('pointermove', onGlobalPointerMove);
+  document.addEventListener('pointerup', onGlobalPointerUp);
+}
+
+function onPalettePointerDown(e) {
+  const wrap = e.target.closest('.pb-wrap');
+  if (!wrap) return;
+  const type = wrap.dataset.blockType;
+  startDrag(type, wrap, e);
+}
+
+function startDrag(type, sourceWrap, e) {
+  dragState = { type, sourceWrap, fromQueue: false };
+  sourceWrap && sourceWrap.classList.add('is-dragging');
+
+  const ghost = document.getElementById('dragGhost');
+  ghost.innerHTML = '';
+  ghost.appendChild(makePuzzleSVG(type));
+  ghost.style.display = 'block';
+  positionGhost(e);
+}
+
+function positionGhost(e) {
+  const ghost = document.getElementById('dragGhost');
+  ghost.style.left = (e.clientX - 12) + 'px';
+  ghost.style.top  = (e.clientY - 20) + 'px';
+}
+
+function onGlobalPointerMove(e) {
+  if (!dragState) return;
+  positionGhost(e);
+  // Highlight scriptArea if hovering
+  const sa = document.getElementById('scriptArea');
+  const r = sa.getBoundingClientRect();
+  const over = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+  sa.classList.toggle('drag-over', over);
+}
+
+function onGlobalPointerUp(e) {
+  if (!dragState) return;
+  const ghost = document.getElementById('dragGhost');
+  ghost.style.display = 'none';
+
+  const sa = document.getElementById('scriptArea');
+  const r = sa.getBoundingClientRect();
+  const dropped = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+
+  if (dropped) {
+    addBlock(dragState.type);
+  }
+
+  if (dragState.sourceWrap) dragState.sourceWrap.classList.remove('is-dragging');
+  sa.classList.remove('drag-over');
+  dragState = null;
+}
+
+// HTML5 drag fallback for palette blocks
+function enableH5Drag() {
+  document.querySelectorAll('.pb-wrap').forEach(wrap => {
+    wrap.setAttribute('draggable', 'true');
+    wrap.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('blockType', wrap.dataset.blockType);
+    });
+  });
+}
+
+function onScriptDrop(e) {
+  e.preventDefault();
+  document.getElementById('scriptArea').classList.remove('drag-over');
+  const type = e.dataTransfer && e.dataTransfer.getData('blockType');
+  if (type && BLOCK_DEFS[type]) addBlock(type);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BLOCK QUEUE MANAGEMENT
+// ═══════════════════════════════════════════════════════════════
+function addBlock(type) {
+  if (!BLOCK_DEFS[type]) return;
+  blockSequence.push(type);
+  renderQueue();
+}
+
+function removeBlockAt(idx) {
+  blockSequence.splice(idx, 1);
+  renderQueue();
+}
+
+function clearBlocks() {
+  blockSequence = [];
+  renderQueue();
+}
+
+function renderQueue() {
+  const q = document.getElementById('blockQueue');
+  q.innerHTML = '';
+
+  if (!blockSequence.length) {
+    q.innerHTML = '<div class="empty-script">⬅ Drag blocks here<br><span style="font-size:0.7rem;opacity:0.55">or click a block to add it</span></div>';
+    return;
+  }
+
+  blockSequence.forEach((type, i) => {
+    // Drop zone before each block (zero height normally)
+    const dz = document.createElement('div');
+    dz.className = 'drop-zone';
+    q.appendChild(dz);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'qb-wrap';
+    wrap.dataset.idx = i;
+    // Every block after the hat needs -TAB_H margin to snap flush
+    // The hat SVG also has a tab, so first queue block snaps to it too
+    wrap.style.marginTop = '-7px';
+    wrap.appendChild(makePuzzleSVG(type));
+
+    // Delete button
+    const del = document.createElement('button');
+    del.className = 'qb-del';
+    del.textContent = '✕';
+    del.title = 'Remove block';
+    del.addEventListener('click', (e) => { e.stopPropagation(); removeBlockAt(i); });
+    wrap.appendChild(del);
+
+    // Make queue blocks draggable for reordering
+    wrap.setAttribute('draggable','true');
+    wrap.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('blockType', type);
+      e.dataTransfer.setData('queueIdx', i);
+    });
+
+    q.appendChild(wrap);
+  });
+
+  // Final drop zone
+  const dzLast = document.createElement('div');
+  dzLast.className = 'drop-zone';
+  q.appendChild(dzLast);
+}
+
+function expandBlocks(seq) {
+  const moves = [];
+  for (let i = 0; i < seq.length; i++) {
+    const b = seq[i];
+    if (b.startsWith('repeat')) {
+      const n = parseInt(b.replace('repeat',''));
+      // collect all subsequent non-repeat blocks as the body
+      const body = [];
+      for (let j = i+1; j < seq.length; j++) {
+        if (!seq[j].startsWith('repeat')) body.push(seq[j]);
+        else break;
+      }
+      if (body.length) {
+        for (let k = 0; k < n; k++) moves.push(...body);
+        i += body.length; // skip the consumed body blocks
+      }
+    } else {
+      moves.push(b);
+    }
+  }
+  return moves;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LEVEL & CHALLENGE NAV
+// ═══════════════════════════════════════════════════════════════
+function updateLevelButtons() {
+  document.querySelectorAll('.lv-btn').forEach((btn, i) => {
+    btn.classList.remove('active','locked-lv');
+    if (!isLevelUnlocked(i)) btn.classList.add('locked-lv');
+  });
+}
+
+function isLevelUnlocked(idx) {
+  if (idx === 0) return true;
+  const done = completedMap[LEVELS[idx-1].key] || [];
+  return done.length >= 3;
+}
+
+function selectLevel(idx) {
+  if (!isLevelUnlocked(idx)) { showOutput('Complete 3 challenges in the previous level to unlock!','error'); return; }
+  currentLevelIdx = idx;
+  currentChallenge = 0;
+  document.querySelectorAll('.lv-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+  buildChallengeNav();
+  loadChallenge(0);
+}
+
+function buildChallengeNav() {
+  const nav = document.getElementById('chalNav');
+  const level = LEVELS[currentLevelIdx];
+  const done = completedMap[level.key] || [];
+  nav.innerHTML = '';
+  level.challenges.forEach((ch, i) => {
+    const isDone = done.includes(i);
+    const btn = document.createElement('button');
+    btn.className = 'ch-btn' + (isDone?' done':'') + (i===currentChallenge?' active':'');
+    btn.textContent = (isDone?'✓ ':'') + (i+1);
+    btn.title = ch.title;
+    btn.onclick = () => loadChallenge(i);
+    nav.appendChild(btn);
+  });
+}
+
+function loadChallenge(idx) {
+  currentChallenge = idx;
+  blockSequence = [];
+  errorCount = 0;
+  renderQueue();
+  document.getElementById('outputBox').style.display = 'none';
+  document.getElementById('hintBox').style.display = 'none';
+  document.getElementById('tutorPanel').classList.remove('visible');
+  document.getElementById('stepsUsed').textContent = '0';
+  closeToast();
+  resetBudChat();
+
+  const level = LEVELS[currentLevelIdx];
+  const ch = level.challenges[idx];
+
+  document.getElementById('chalTitle').textContent = ch.title;
+  document.getElementById('chalDesc').textContent = ch.desc;
+  document.getElementById('ptsReward').textContent = ch.pts + (doubleActive?' (×2)':'');
+  document.getElementById('diffStat').innerHTML = 'Difficulty: <b>' + (ch.difficulty || level.name) + '</b>';
+
+  buildChallengeNav();
+
+  // Show tutor button for Intermediate and above
+  document.getElementById('tutorBtn').style.display = 'inline-flex';
+
+  if (level.isGrid) {
+    document.getElementById('gridPanel').style.display = 'block';
+    document.getElementById('panelTabs').style.display = 'flex';
+    document.getElementById('realChallengePanel').classList.remove('visible');
+    document.getElementById('resetBtn').style.display = 'inline-flex';
+    robotPos = [...ch.start];
+    renderGrid();
+    const hintEl = document.getElementById('codeHint');
+    const lang = new URLSearchParams(window.location.search).get('lang') || 'python';
+    if (hintEl) hintEl.innerHTML = lang === 'java' ? 'move("up");  move("down");  move("left");  move("right");' : 'move("up")  move("down")  move("left")  move("right")';
+    if (document.getElementById('codeEditor')) document.getElementById('codeEditor').value = '';
+  } else {
+    document.getElementById('gridPanel').style.display = 'none';
+    document.getElementById('panelTabs').style.display = 'none';
+    document.getElementById('scratchMode').classList.remove('visible');
+    document.getElementById('codeEditorWrap').classList.remove('visible');
+    document.getElementById('realChallengePanel').classList.add('visible');
+    document.getElementById('resetBtn').style.display = 'none';
+    document.getElementById('probTitle').textContent = ch.title;
+    document.getElementById('probDesc').textContent = ch.desc;
+    document.getElementById('probExample').textContent = ch.example;
+    document.getElementById('realCodeEditor').value = ch.starterCode || '';
+    document.getElementById('realOutputBox').textContent = '// output will appear here';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GRID RENDERING
+// ═══════════════════════════════════════════════════════════════
+function renderGrid() {
+  const ch = LEVELS[currentLevelIdx].challenges[currentChallenge];
+  const grid = document.getElementById('gameGrid');
+  grid.style.gridTemplateColumns = `repeat(${ch.cols}, var(--cell))`;
+  grid.innerHTML = '';
+  for (let r = 0; r < ch.rows; r++) {
+    for (let c = 0; c < ch.cols; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.id = `cell-${r}-${c}`;
+      const isWall = ch.walls.some(w => w[0]===r && w[1]===c);
+      const isGoal = ch.goal[0]===r && ch.goal[1]===c;
+      const isRobot = robotPos[0]===r && robotPos[1]===c;
+      if (isWall)        { cell.classList.add('wall'); }
+      else if (isRobot)  { cell.classList.add('robot'); cell.textContent = getRobotEmoji(); }
+      else if (isGoal)   { cell.classList.add('goal'); cell.textContent = '⭐'; }
+      grid.appendChild(cell);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════════
+function switchTab(mode) {
+  currentMode = mode;
+  document.getElementById('tabBlocks').classList.toggle('active', mode==='blocks');
+  document.getElementById('tabCode').classList.toggle('active', mode==='code');
+  document.getElementById('scratchMode').classList.toggle('visible', mode==='blocks');
+  document.getElementById('codeEditorWrap').classList.toggle('visible', mode==='code');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CODE PARSING (grid text mode)
+// ═══════════════════════════════════════════════════════════════
+function parseCodeMoves(code) {
+  const moves = [];
+  const lines = code.split('\n');
+  lines.forEach(line => {
+    line = line.trim();
+    const repeatMatch = line.match(/repeat\s*\(?\s*(\d+)\s*\)?/i) || line.match(/for.*range\((\d+)\)/i);
+    if (repeatMatch) {
+      const n = parseInt(repeatMatch[1]);
+      const inner = code.match(/repeat.*?\{([^}]+)\}/s);
+      if (inner) { const im = parseCodeMoves(inner[1]); for (let i=0;i<n;i++) moves.push(...im); }
+      return;
+    }
+    const m = line.match(/move\s*\(\s*["'](\w+)["']\s*\)/i);
+    if (m) moves.push(m[1].toLowerCase());
+  });
+  return moves;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RUN CODE
+// ═══════════════════════════════════════════════════════════════
+function runCode() {
+  const level = LEVELS[currentLevelIdx];
+  if (!level.isGrid) { runRealCode(); return; }
+
+  resetRobotSilent();
+  document.getElementById('hintBox').style.display = 'none';
+  document.getElementById('tutorPanel').classList.remove('visible');
+
+  let moves;
+  if (currentMode === 'blocks') {
+    if (!blockSequence.length) {
+      showOutput('Add some blocks first! Drag blocks from the left panel onto the script area.','error');
+      showTeach('No blocks yet!', 'Drag a block from the left panel and drop it onto the script area. Try "move right" or "move down" to get started!');
+      return;
+    }
+    moves = expandBlocks(blockSequence);
+  } else {
+    const code = document.getElementById('codeEditor').value;
+    moves = parseCodeMoves(code);
+    if (!moves.length) { showOutput('Write some move() commands first!','error'); return; }
+  }
+
+  document.getElementById('stepsUsed').textContent = moves.length;
+  animateMoves(moves, 0, [...LEVELS[currentLevelIdx].challenges[currentChallenge].start]);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SMART TEACHING — Error explainer with progressive depth
+// ═══════════════════════════════════════════════════════════════
+const TEACH_MSGS = {
+  wall: [
+    { title:'Hit a Wall!', msg:'Your robot bumped into a wall. Walls are the dark squares. Look at the grid — find a path that goes around them.' },
+    { title:'Still hitting walls!', msg:'Try planning the path step-by-step in your head first. Trace a route around the dark squares with your finger on the screen before placing blocks.' },
+    { title:'Let\'s rethink the route 🗺️', msg:'Try this: count how many steps right and down you need from the robot to the star, and whether any wall squares are in the way. You may need to detour up or left to get around a cluster.' },
+  ],
+  offmap: [
+    { title:'Walked off the map!', msg:'Your robot went outside the grid boundaries. The grid is the box on the left — make sure your path stays inside it.' },
+    { title:'Off the edge again!', msg:'Count the rows and columns carefully. The grid goes from row 0 (top) to the last row (bottom). Don\'t add more moves than the grid has space for.' },
+  ],
+  goal: [
+    { title:'Didn\'t reach the goal ⭐', msg:'Your robot stopped too early or went the wrong way. The goal is the star ⭐. Make sure your last move ends exactly on that square.' },
+    { title:'So close! But not quite ⭐', msg:'Count exactly how many squares the robot needs to travel horizontally and vertically to reach the star. Each block is one step — no more, no less.' },
+    { title:'Let\'s count together 🔢', msg:'Look at the robot\'s position (blue square) and the star\'s position. If the star is 3 squares to the right and 2 squares down, you need exactly 3 "move right" blocks and 2 "move down" blocks (in the right order!).' },
+  ],
+};
+
+function getTeachMsg(errorType) {
+  const list = TEACH_MSGS[errorType] || TEACH_MSGS.goal;
+  const level = Math.min(errorCount, list.length - 1);
+  return list[level];
+}
+
+function showTeach(title, msg) {
+  document.getElementById('toastTitle').textContent = title;
+  document.getElementById('toastMsg').textContent = msg;
+  const toast = document.getElementById('teachToast');
+  toast.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(closeToast, 7000);
+}
+
+function closeToast() {
+  document.getElementById('teachToast').classList.remove('show');
+  if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
+}
+
+function onGridError(errorType, stepNum) {
+  errorCount++;
+  const teach = getTeachMsg(errorType);
+
+  const stepNote = stepNum ? ` (at step ${stepNum})` : '';
+  const shortMsg = {
+    wall: `Hit a wall${stepNote}! Your robot can\'t move through dark squares.`,
+    offmap: `Walked off the map${stepNote}! Stay inside the grid.`,
+    goal: 'Robot didn\'t reach the star ⭐ — try a different path.',
+  }[errorType] || 'Something went wrong.';
+
+  showOutput(shortMsg, 'error');
+  // Delay toast slightly so output is visible first
+  setTimeout(() => showTeach(teach.title, teach.msg), 400);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GRID ANIMATION
+// ═══════════════════════════════════════════════════════════════
+function animateMoves(moves, idx, pos) {
+  const ch = LEVELS[currentLevelIdx].challenges[currentChallenge];
+  if (idx >= moves.length) {
+    if (pos[0]===ch.goal[0] && pos[1]===ch.goal[1]) { onWin(); }
+    else onGridError('goal', null);
+    return;
+  }
+  const dir = moves[idx];
+  let [r, c] = pos;
+  if (dir==='up') r--;
+  else if (dir==='down') r++;
+  else if (dir==='left') c--;
+  else if (dir==='right') c++;
+  else { animateMoves(moves, idx+1, pos); return; }
+
+  if (r<0||r>=ch.rows||c<0||c>=ch.cols) { markError(pos[0],pos[1]); onGridError('offmap', idx+1); return; }
+  if (ch.walls.some(w=>w[0]===r&&w[1]===c)) { markError(r,c); onGridError('wall', idx+1); return; }
+
+  const prev = document.getElementById(`cell-${pos[0]}-${pos[1]}`);
+  if (prev) { prev.classList.remove('robot'); prev.textContent=getTrailEmoji(); prev.classList.add('trail'); }
+  const next = document.getElementById(`cell-${r}-${c}`);
+  if (next) { next.classList.remove('goal','trail'); next.classList.add('robot'); next.textContent=getRobotEmoji(); }
+  robotPos = [r, c];
+  setTimeout(() => animateMoves(moves, idx+1, [r,c]), 300);
+}
+
+function markError(r,c) {
+  const cell = document.getElementById(`cell-${r}-${c}`);
+  if (cell) { cell.classList.add('error'); setTimeout(()=>cell.classList.remove('error'),800); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AI TUTOR — Bud chatbot with 2-ask limit per challenge
+// ═══════════════════════════════════════════════════════════════
+const BUD_MAX_ASKS = 2;
+let budAsksUsed = 0;          // resets on loadChallenge
+let budChatHistory = [];      // Gemini turn history for this challenge
+
+function openTutor() {
+  const panel = document.getElementById('tutorPanel');
+  panel.classList.add('visible');
+  updateBudBadge();
+  scrollTutorBottom();
+  document.getElementById('tutorInput').focus();
+}
+
+function closeTutor() {
+  document.getElementById('tutorPanel').classList.remove('visible');
+}
+
+function resetBudChat() {
+  budAsksUsed = 0;
+  budChatHistory = [];
+  const msgs = document.getElementById('tutorMessages');
+  if (msgs) msgs.innerHTML = '<div class="chat-empty-msg">Ask Bud anything about this challenge 👇</div>';
+  updateBudBadge();
+  const input = document.getElementById('tutorInput');
+  const sendBtn = document.getElementById('tutorSendBtn');
+  if (input) { input.disabled = false; input.value = ''; }
+  if (sendBtn) sendBtn.disabled = false;
+}
+
+function updateBudBadge() {
+  const badge = document.getElementById('tutorUsesBadge');
+  if (!badge) return;
+  const left = BUD_MAX_ASKS - budAsksUsed;
+  if (left > 1) {
+    badge.textContent = left + ' asks left';
+    badge.className = 'tutor-uses-badge ok';
+  } else if (left === 1) {
+    badge.textContent = '1 ask left ⚠️';
+    badge.className = 'tutor-uses-badge warn';
+  } else {
+    badge.textContent = 'No asks left';
+    badge.className = 'tutor-uses-badge empty';
+  }
+}
+
+function handleTutorKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendTutorMessage();
+  }
+}
+
+function appendBubble(text, role, isTyping = false) {
+  const msgs = document.getElementById('tutorMessages');
+  // Remove empty state placeholder
+  const empty = msgs.querySelector('.chat-empty-msg');
+  if (empty) empty.remove();
+
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-bubble ' + role + (isTyping ? ' typing' : '');
+  if (!isTyping) {
+    bubble.innerHTML = formatBudText(text);
+  } else {
+    bubble.textContent = text;
+  }
+  msgs.appendChild(bubble);
+  scrollTutorBottom();
+  return bubble;
+}
+
+function appendWarnMsg(text) {
+  const msgs = document.getElementById('tutorMessages');
+  const div = document.createElement('div');
+  div.className = 'chat-warn-msg';
+  div.textContent = text;
+  msgs.appendChild(div);
+  scrollTutorBottom();
+}
+
+function scrollTutorBottom() {
+  const msgs = document.getElementById('tutorMessages');
+  if (msgs) msgs.scrollTop = msgs.scrollHeight;
+}
+
+function formatBudText(raw) {
+  return '<p>' + raw
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br>') + '</p>';
+}
+
+function getUserCode() {
+  const level = LEVELS[currentLevelIdx];
+  const isGrid = level.isGrid;
+  if (isGrid) {
+    const textEd = document.getElementById('codeEditor');
+    const blockQueue = document.getElementById('blockQueue');
+    if (textEd && textEd.offsetParent !== null) return textEd.value || '';
+    if (blockQueue) {
+      const blockTexts = [...blockQueue.querySelectorAll('.qb-wrap')].map(b => b.getAttribute('data-cmd') || b.textContent.replace(/[×✕]/g,'').trim()).filter(Boolean);
+      return blockTexts.length ? 'Blocks placed: ' + blockTexts.join(', ') : '';
+    }
+  } else {
+    const realEd = document.getElementById('realCodeEditor');
+    return realEd ? realEd.value : '';
+  }
+  return '';
+}
+
+async function sendTutorMessage() {
+  const input = document.getElementById('tutorInput');
+  const sendBtn = document.getElementById('tutorSendBtn');
+  const userText = (input.value || '').trim();
+  if (!userText) return;
+  if (budAsksUsed >= BUD_MAX_ASKS) return;
+
+  appendBubble(userText, 'user');
+  input.value = '';
+  input.disabled = true;
+  sendBtn.disabled = true;
+
+  const typingBubble = appendBubble('Bud is thinking...', 'bud', true);
+
+  const level = LEVELS[currentLevelIdx];
+  const ch = level.challenges[currentChallenge];
+  const isGrid = level.isGrid;
+  const userCode = getUserCode();
+
+  const urlLang = new URLSearchParams(window.location.search).get('lang') || 'python';
+  const langLabels = { python: 'Python', javascript: 'JavaScript', java: 'Java', html: 'HTML/CSS', blocks: 'Block Coding' };
+  const langName = langLabels[urlLang] || urlLang;
+
+  const modeDesc = currentMode === 'blocks'
+    ? 'BLOCK CODING mode. Student drags visual puzzle blocks. The ONLY blocks that exist are exactly these 8 — do not invent or mention any others: [▲ move up] [▼ move down] [◀ move left] [▶ move right] [↻ repeat 2×] [↻ repeat 3×] [↻ repeat 4×] [↻ repeat 5×]. Motion blocks are blue. Repeat blocks are orange. There is no start block, no on-start, no hat block the student interacts with — they just drag blocks into the script area and hit Run. Always refer to blocks by their exact label.'
+    : ('TYPE CODE mode. Student types real ' + langName + '. Use ' + langName + ' syntax in any examples.');
+
+  // For grid challenges: compute exact directions needed so Bud never gives wrong advice
+  let gridInfo = '';
+  if (isGrid) {
+    const sr = ch.start[0], sc = ch.start[1];
+    const gr = ch.goal[0],  gc = ch.goal[1];
+    const rowDiff = gr - sr; // positive = need to go DOWN, negative = need to go UP
+    const colDiff = gc - sc; // positive = need to go RIGHT, negative = need to go LEFT
+    const needDown  = rowDiff > 0 ? rowDiff + ' down' : '';
+    const needUp    = rowDiff < 0 ? Math.abs(rowDiff) + ' up' : '';
+    const needRight = colDiff > 0 ? colDiff + ' right' : '';
+    const needLeft  = colDiff < 0 ? Math.abs(colDiff) + ' left' : '';
+    const moves = [needRight, needLeft, needDown, needUp].filter(Boolean).join(', ');
+    const wallList = ch.walls && ch.walls.length ? ch.walls.map(w => 'row ' + w[0] + ' col ' + w[1]).join('; ') : 'none';
+    gridInfo = 'Grid is ' + ch.rows + ' rows x ' + ch.cols + ' cols. '
+      + 'Robot starts at row ' + sr + ' col ' + sc + ' (row 0 = TOP, col 0 = LEFT). '
+      + 'Goal (star) is at row ' + gr + ' col ' + gc + '. '
+      + 'Straight-line moves needed if no walls: ' + moves + '. '
+      + 'Walls at: ' + wallList + '. '
+      + 'IMPORTANT: row increases going DOWN, col increases going RIGHT.';
+  }
+
+  const challengeContext = isGrid
+    ? ('"' + ch.title + '": ' + ch.desc + '. ' + gridInfo)
+    : ('"' + ch.title + '": ' + ch.desc + (ch.example ? '. Example: ' + ch.example : ''));
+
+  const codeContext = userCode ? ('Student code so far: ' + userCode) : 'No code written yet.';
+
+  // IMPORTANT: Keep system prompt short — the longer it is, the fewer tokens left for the answer
+  const systemPrompt = 'You are Bud, a coding buddy in a kids app (ages 10+).\n'
+    + 'Mode: ' + modeDesc + '\n'
+    + 'Level: ' + level.name + '\n'
+    + 'Challenge: ' + challengeContext + '\n'
+    + codeContext + '\n\n'
+    + 'HOW TO REPLY — follow exactly:\n'
+    + '- Write 3 to 4 short lines only. Never more.\n'
+    + '- Each line = one simple idea. No paragraphs.\n'
+    + '- Never write the full solution.\n'
+    + '- Never ask a question at the end.\n'
+    + '- Always finish your last line completely.\n'
+    + '- One emoji at the very start, that is all.';
+
+  // Correct structure: system_instruction is separate, contents is ONLY the chat turns
+  const newUserTurn = { role: 'user', parts: [{ text: userText }] };
+  budChatHistory.push(newUserTurn);
+
+  try {
+    const GEMINI_KEY = 'AQ.Ab8RN6LvqZh-CT7wey1hcvJul5kHqGmjn9FJ0Ka_0p75XmeG9Q';
+    const response = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + GEMINI_KEY,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: systemPrompt }] },
+          contents: budChatHistory,
+          generationConfig: { maxOutputTokens: 220, temperature: 0.4 }
+        })
+      }
+    );
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error?.message || response.statusText);
+    }
+
+    const data = await response.json();
+    const candidate = data.candidates?.[0];
+    const finishReason = candidate?.finishReason || 'UNKNOWN';
+    let raw = (candidate?.content?.parts?.map(function(p) { return p.text || ''; }).join('') || '').trim();
+
+    console.log('[Bud] finishReason:', finishReason, '| tokens:', data.usageMetadata?.candidatesTokenCount, '| chars:', raw.length);
+
+    if (!raw) throw new Error('Empty Bud response');
+
+    // Safety net: if cut off, trim to last complete sentence
+    if (finishReason === 'MAX_TOKENS') {
+      const lastPunct = Math.max(raw.lastIndexOf('.'), raw.lastIndexOf('!'), raw.lastIndexOf('?'));
+      if (lastPunct > 20) raw = raw.substring(0, lastPunct + 1);
+    }
+
+    budChatHistory.push({ role: 'model', parts: [{ text: raw }] });
+    typingBubble.classList.remove('typing');
+    typingBubble.innerHTML = formatBudText(raw);
+    scrollTutorBottom();
+
+  } catch(err) {
+    budChatHistory.pop();
+    typingBubble.classList.remove('typing');
+    typingBubble.textContent = "Bud couldn't connect right now — try again!";
+    console.error('Bud error:', err);
+    input.disabled = false;
+    sendBtn.disabled = false;
+    return;
+  }
+
+  budAsksUsed++;
+  updateBudBadge();
+
+  const left = BUD_MAX_ASKS - budAsksUsed;
+  if (left === 1) {
+    appendWarnMsg('Last ask remaining for this challenge — make it count!');
+  } else if (left === 0) {
+    appendWarnMsg("You've used both asks for this challenge. Try applying Bud's hints and give it a go!");
+    input.disabled = true;
+    sendBtn.disabled = true;
+  } else {
+    input.disabled = false;
+    sendBtn.disabled = false;
+    input.focus();
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// REAL CODE RUNNER (Intermediate+) with teaching on failure
+// ═══════════════════════════════════════════════════════════════
+async function runRealCode() {
+  const ch = LEVELS[currentLevelIdx].challenges[currentChallenge];
+  const userCode = document.getElementById('realCodeEditor').value;
+  const outBox = document.getElementById('realOutputBox');
+  outBox.textContent = '// running...';
+  outBox.style.color = 'var(--muted)';
+
+  try {
+    const allTests = ch.tests.map(t => `${t.code} → expected: ${t.expected}`).join('\n');
+    const prompt = `You are a Python code evaluator. The user wrote this code:
+
+\`\`\`python
+${userCode}
+\`\`\`
+
+Run these tests against their code:
+${allTests}
+
+For each test, execute the test code after their code runs, and check if the output matches the expected value.
+
+Return ONLY valid JSON like this (no markdown, no explanation):
+{"passed": [true, false, true], "results": ["15 ✓", "Error: got None ✗", "5.0 ✓"], "all_pass": false, "failure_concept": "Brief 1-sentence explanation of the main thing the student got wrong, or empty string if all passed"}
+
+Be strict: types matter, None is not "Error", numbers must match exactly.`;
+
+    const GEMINI_KEY = 'AQ.Ab8RN6LvqZh-CT7wey1hcvJul5kHqGmjn9FJ0Ka_0p75XmeG9Q';
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 1000 }
+      })
+    });
+
+    const data = await response.json();
+    const raw = data.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(clean);
+
+    const lines = result.results.map((r, i) =>
+      (result.passed[i] ? '✓' : '✗') + ' Test ' + (i+1) + ': ' + r
+    ).join('\n');
+    outBox.textContent = lines;
+
+    if (result.all_pass) {
+      outBox.style.color = 'var(--green)';
+      outBox.textContent += '\n\n✅ All tests passed!';
+      errorCount = 0;
+      onWin();
+    } else {
+      outBox.style.color = 'var(--red)';
+      errorCount++;
+      showOutput('Some tests failed — check the output above.', 'error');
+      // Show a teaching toast with the failure concept
+      if (result.failure_concept) {
+        setTimeout(() => showTeach('What went wrong?', result.failure_concept + (errorCount >= 2 ? ' Click 🌱 Ask Bud for a full breakdown.' : '')), 400);
+      }
+      // After 2+ failures, nudge the tutor
+      if (errorCount >= 2) {
+        document.getElementById('tutorBtn').style.display = 'inline-flex';
+        document.getElementById('tutorBtn').style.animation = 'none';
+        document.getElementById('tutorBtn').style.boxShadow = '0 0 0 2px rgba(212,120,154,0.5)';
+      }
+    }
+
+  } catch(err) {
+    outBox.textContent = '// Could not evaluate — check your syntax.';
+    outBox.style.color = 'var(--red)';
+    showOutput('Syntax error or network issue. Double-check your code.', 'error');
+    setTimeout(() => showTeach('Syntax Error?', 'A syntax error means Python can\'t even read your code. Check for: missing colons (:) after def/if/for, unmatched parentheses, or wrong indentation (use 4 spaces per level).'), 400);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HINT
+// ═══════════════════════════════════════════════════════════════
+function showHint() {
+  if (hintCount <= 0) { showOutput('No hint tokens left! Buy more in the shop.','error'); return; }
+  hintCount--;
+  localStorage.setItem('bloomHints', hintCount);
+  document.getElementById('hintCount').textContent = hintCount;
+  const ch = LEVELS[currentLevelIdx].challenges[currentChallenge];
+  document.getElementById('hintBox').textContent = '💡 ' + ch.hint;
+  document.getElementById('hintBox').style.display = 'block';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SKIP
+// ═══════════════════════════════════════════════════════════════
+function skipChallenge() {
+  if (!skipReady) return;
+  const ch = LEVELS[currentLevelIdx].challenges[currentChallenge];
+  const half = Math.floor(ch.pts / 2);
+  totalPoints += half;
+  localStorage.setItem('bloomPoints', totalPoints);
+  skipReady = false;
+  localStorage.setItem('bloomSkip','0');
+  markDone(); buildChallengeNav(); renderPoints(); updateLeaderboard();
+  document.getElementById('skipBtn').style.display = 'none';
+  showOutput('Skipped — earned ' + half + ' pts.','info');
+  setTimeout(() => {
+    const next = currentChallenge + 1;
+    if (next < LEVELS[currentLevelIdx].challenges.length) loadChallenge(next);
+  }, 2000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WIN + POINTS
+// ═══════════════════════════════════════════════════════════════
+function onWin() {
+  closeToast();
+  const ch = LEVELS[currentLevelIdx].challenges[currentChallenge];
+  let earned = ch.pts;
+  if (doubleActive) { earned *= 2; doubleActive = false; localStorage.setItem('bloomDouble','0'); }
+  totalPoints += earned;
+  localStorage.setItem('bloomPoints', totalPoints);
+  renderPoints(); markDone(); buildChallengeNav(); updateLeaderboard();
+  document.getElementById('ptsEarnedDisplay').textContent = '+' + earned + ' pts';
+  document.getElementById('winMessage').textContent = LEVELS[currentLevelIdx].name + ' · Challenge ' + (currentChallenge+1) + ' complete';
+  document.getElementById('winModal').classList.add('show');
+  if (LEVELS[currentLevelIdx].isGrid) {
+    const g = document.getElementById(`cell-${ch.goal[0]}-${ch.goal[1]}`);
+    if (g) g.classList.add('success');
+  }
+}
+
+function renderPoints() { document.getElementById('navPts').textContent = totalPoints; }
+
+function markDone() {
+  const key = LEVELS[currentLevelIdx].key;
+  if (!completedMap[key]) completedMap[key] = [];
+  if (!completedMap[key].includes(currentChallenge)) {
+    completedMap[key].push(currentChallenge);
+    localStorage.setItem('bloomCompleted3', JSON.stringify(completedMap));
+  }
+}
+
+function nextChallenge() {
+  document.getElementById('winModal').classList.remove('show');
+  const next = currentChallenge + 1;
+  updateLevelButtons();
+  if (next < LEVELS[currentLevelIdx].challenges.length) loadChallenge(next);
+  else if (currentLevelIdx < LEVELS.length-1) showOutput('🎉 Level complete! You unlocked ' + LEVELS[currentLevelIdx+1].name + '!','info');
+  else showOutput('🏆 You completed ALL levels! You are a Bloom Master!','info');
+}
+
+function resetRobot() { resetRobotSilent(); showOutput('Reset — try again.','info'); }
+function resetRobotSilent() { robotPos = [...LEVELS[currentLevelIdx].challenges[currentChallenge].start]; renderGrid(); }
+function showOutput(msg, type) {
+  const b = document.getElementById('outputBox');
+  b.textContent = msg; b.className = type; b.style.display = 'block';
+}
+
+async function updateLeaderboard() {
+  const name = localStorage.getItem('bloomName') || 'Anonymous';
+  const pts = totalPoints;
+  let board = JSON.parse(localStorage.getItem('bloomLeaderboard') || '[]');
+  const idx = board.findIndex(p => p.name === name);
+  if (idx >= 0) board[idx].pts = pts; else board.push({ name, pts, updated: Date.now() });
+  localStorage.setItem('bloomLeaderboard', JSON.stringify(board));
+  try {
+    const STORAGE_KEY = 'bloomLeaderboard_v2';
+    let global = await window.storage.get(STORAGE_KEY, true);
+    let globalBoard = global ? JSON.parse(global.value) : [];
+    const gi = globalBoard.findIndex(p => p.name === name);
+    if (gi >= 0) globalBoard[gi].pts = Math.max(globalBoard[gi].pts, pts);
+    else globalBoard.push({ name, pts, updated: Date.now() });
+    await window.storage.set(STORAGE_KEY, JSON.stringify(globalBoard), true);
+  } catch(e) {}
+}
+</script>
+<footer style="border-top:1px solid var(--border);padding:24px 48px;text-align:center;font-size:0.75rem;color:var(--muted);"><span style="filter:drop-shadow(0 0 5px rgba(212,120,154,0.4));margin-right:8px;">🪷</span><span style="font-family:Space Grotesk,sans-serif;font-weight:600;color:#f0a8c0;">Lotus Logic</span> &nbsp;·&nbsp; A proud initiative of <span style="color:#f0a8c0;">Rising Roots</span></footer></body>
+</html>

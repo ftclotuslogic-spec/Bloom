@@ -1,0 +1,60 @@
+const express = require("express");
+const fetch = require("node-fetch");
+const dotenv = require("dotenv");
+const cors = require("cors");
+
+dotenv.config();
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.use(express.static("public"));
+
+if (!process.env.API_KEY) {
+  console.error("⚠️  WARNING: API_KEY is not set in .env — AI features will not work.");
+}
+
+// AI route — proxies to Gemini so the API key stays server-side
+app.post("/api/bloom", async (req, res) => {
+  try {
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: "API_KEY not configured on server." });
+    }
+
+    // Ensure a model is always set
+    const body = { ...req.body };
+    if (!body.model) {
+      body.model = "gemini-2.5-flash";
+    }
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${body.model}:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // Strip the model field — it's in the URL, not the body
+        body: JSON.stringify({ ...body, model: undefined })
+      }
+    );
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("Gemini API error:", response.status, errText);
+      return res.status(response.status).json({ error: errText });
+    }
+
+    const data = await response.json();
+    res.json(data);
+
+  } catch (err) {
+    console.error("Server error:", err.message);
+    res.status(500).json({ error: "Server failed: " + err.message });
+  }
+});
+
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Bloom App running → http://localhost:${PORT}`);
+});
