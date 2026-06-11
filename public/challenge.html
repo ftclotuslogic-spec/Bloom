@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -983,11 +984,12 @@ let doubleActive = localStorage.getItem('bloomDouble') === '1';
 const owned = JSON.parse(localStorage.getItem('bloomOwned') || '[]');
 let errorCount = 0;       // consecutive errors, triggers deeper teaching
 let toastTimer = null;
+let instructorOverride = {};  // populated from server on load
 
 // ═══════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('navPts').textContent = totalPoints;
   document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
   document.getElementById('hintCount').textContent = hintCount;
@@ -1000,9 +1002,58 @@ window.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   if (params.get('mode') === 'code') switchTab('code');
 
+  // Sync with server — fetch instructor overrides for this student
+  await syncWithServer();
+
   updateLevelButtons();
   selectLevel(0);
+
+  // Re-sync every 30s so instructor changes apply without refresh
+  setInterval(syncWithServer, 30000);
 });
+
+async function syncWithServer() {
+  const name = localStorage.getItem('bloomName');
+  if (!name) return;
+  const params = new URLSearchParams(window.location.search);
+  const lang = params.get('lang') || 'python';
+  try {
+    // Build level summary
+    const levelSummary = { byLevel: {} };
+    let highestLevel = 0;
+    completedMap && Object.keys(completedMap).forEach((key, idx) => {
+      const count = (completedMap[key] || []).length;
+      if (count > 0) { levelSummary.byLevel[idx] = count; highestLevel = Math.max(highestLevel, idx); }
+    });
+    levelSummary.highestLevel = highestLevel;
+    levelSummary.highestLevelName = ['Beginner','Rookie','Explorer','Intermediate','Advanced','Proficient'][highestLevel] || 'Beginner';
+
+    const challengesSolved = Object.values(completedMap || {}).reduce((s, arr) => s + arr.length, 0);
+
+    const res = await fetch('/api/student/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name,
+        pts: totalPoints,
+        completedMap,
+        currentView: { screen: 'game', lang, level: currentLevelIdx, challengeIdx: currentChallenge },
+        challengesSolved,
+        levelSummary
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.override) {
+        instructorOverride = data.override;
+        // Re-render buttons in case limits changed
+        updateLevelButtons();
+      }
+    }
+  } catch (e) {
+    // Server not running — silent fail, game still works offline
+  }
+}
 
 function getRobotEmoji() { return owned.includes('skin_fire')&&'🔥'||owned.includes('skin_galaxy')&&'🌌'||owned.includes('skin_dino')&&'🦕'||owned.includes('skin_alien')&&'👾'||owned.includes('skin_ninja')&&'🥷'||'🤖'; }
 function getTrailEmoji() { return owned.includes('trail_star')&&'✦'||'·'; }
@@ -1224,10 +1275,24 @@ function updateLevelButtons() {
 }
 
 function isLevelUnlocked(idx) {
+  // Instructor lock takes priority
+  if (instructorOverride.locked) return false;
+
+  // Per-level override
+  if (instructorOverride.levels) {
+    const lvl = instructorOverride.levels[String(idx)];
+    if (lvl && typeof lvl.enabled === 'boolean') return lvl.enabled;
+  }
+
+  // maxLevel cap
+  if (instructorOverride.maxLevel !== null && typeof instructorOverride.maxLevel !== 'undefined') {
+    if (idx > Number(instructorOverride.maxLevel)) return false;
+  }
+
+  // Default: must complete previous level
   if (idx === 0) return true;
   const prev = LEVELS[idx-1];
   const done = completedMap[prev.key] || [];
-  // Count only non-lesson challenges completed
   const practiceCount = prev.challenges.filter(ch => ch.type !== 'lesson').length;
   return done.length >= Math.min(3, Math.ceil(practiceCount * 0.6));
 }
@@ -1245,8 +1310,15 @@ function buildChallengeNav() {
   const nav = document.getElementById('chalNav');
   const level = LEVELS[currentLevelIdx];
   const done = completedMap[level.key] || [];
+
+  // Check instructor challenge limit for this level
+  const lvlOverride = (instructorOverride.levels || {})[String(currentLevelIdx)];
+  const maxChallenges = (typeof lvlOverride?.maxChallenges === 'number') ? lvlOverride.maxChallenges : null;
+
   nav.innerHTML = '';
   level.challenges.forEach((ch, i) => {
+    // Hide challenges beyond instructor limit
+    if (maxChallenges !== null && i >= maxChallenges) return;
     const isDone = done.includes(i);
     const isLesson = ch.type === 'lesson';
     const btn = document.createElement('button');
@@ -1935,6 +2007,8 @@ async function updateLeaderboard() {
   } catch(e) {
     console.warn('Could not sync score to leaderboard:', e);
   }
+  // Also sync full student activity so instructor sees live progress
+  await syncWithServer();
 }
 </script>
 <!-- ── DEV MODE PANEL ── -->
