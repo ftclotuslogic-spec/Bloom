@@ -91,10 +91,10 @@
 </head>
 <body>
   <nav>
-    <a href="index.html" class="nav-logo"><span class="logo-lotus"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 8px rgba(212,120,154,0.7));flex-shrink:0"><defs><linearGradient id="llg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f0b8cc"/><stop offset="100%" stop-color="#a85070"/></linearGradient><linearGradient id="llg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e89ab4"/><stop offset="100%" stop-color="#c06888"/></linearGradient></defs><path d="M14 22 C10 22 5 18 6 12 C8 15 11 17 14 18 Z" fill="url(#llg1)" opacity="0.85"/><path d="M14 22 C18 22 23 18 22 12 C20 15 17 17 14 18 Z" fill="url(#llg1)" opacity="0.85"/><path d="M14 22 C11 20 8 15 10 9 C11 13 12.5 16 14 18 Z" fill="url(#llg2)" opacity="0.9"/><path d="M14 22 C17 20 20 15 18 9 C17 13 15.5 16 14 18 Z" fill="url(#llg2)" opacity="0.9"/><path d="M14 22 C12 18 12 13 14 7 C16 13 16 18 14 22 Z" fill="#f5d0e4"/><ellipse cx="14" cy="18" rx="2" ry="2.2" fill="#fff0f6" opacity="0.8"/></svg></span>Bloom</a>
+    <a href="../index.html" class="nav-logo"><span class="logo-lotus"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 8px rgba(212,120,154,0.7));flex-shrink:0"><defs><linearGradient id="llg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f0b8cc"/><stop offset="100%" stop-color="#a85070"/></linearGradient><linearGradient id="llg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e89ab4"/><stop offset="100%" stop-color="#c06888"/></linearGradient></defs><path d="M14 22 C10 22 5 18 6 12 C8 15 11 17 14 18 Z" fill="url(#llg1)" opacity="0.85"/><path d="M14 22 C18 22 23 18 22 12 C20 15 17 17 14 18 Z" fill="url(#llg1)" opacity="0.85"/><path d="M14 22 C11 20 8 15 10 9 C11 13 12.5 16 14 18 Z" fill="url(#llg2)" opacity="0.9"/><path d="M14 22 C17 20 20 15 18 9 C17 13 15.5 16 14 18 Z" fill="url(#llg2)" opacity="0.9"/><path d="M14 22 C12 18 12 13 14 7 C16 13 16 18 14 22 Z" fill="#f5d0e4"/><ellipse cx="14" cy="18" rx="2" ry="2.2" fill="#fff0f6" opacity="0.8"/></svg></span>Bloom</a>
     <div class="nav-right">
       <div class="nav-pts" id="navPts">0 pts</div>
-      <a href="index.html" class="back-btn">← Home</a>
+      <a href="../index.html" class="back-btn">← Home</a>
     </div>
   </nav>
 
@@ -142,32 +142,37 @@
   </footer>
 
   <script>
-  const STORAGE_KEY = 'bloomLeaderboard_v2';
-
   let myName = localStorage.getItem('bloomName') || '';
   let myPts  = parseInt(localStorage.getItem('bloomPoints') || '0');
   let nameLocked = !!localStorage.getItem('bloomNameLocked');
+  let pollTimer = null;
 
   document.getElementById('navPts').textContent = myPts + ' pts';
 
   const nameInput = document.getElementById('nameInput');
-  const saveBtn = document.getElementById('savebtn');
+  const saveBtn   = document.getElementById('savebtn');
   const authLocked = document.getElementById('authLocked');
-  const authWarn = document.getElementById('authWarn');
+  const authWarn   = document.getElementById('authWarn');
 
+  // ── Restore UI if already signed in ────────────────────────────────────────
   if (nameLocked && myName) {
+    lockUI(myName);
+  } else if (myName) {
     nameInput.value = myName;
+  }
+
+  function lockUI(name) {
+    nameInput.value = name;
     nameInput.disabled = true;
     saveBtn.disabled = true;
     saveBtn.textContent = '✓ Locked';
     authLocked.classList.add('show');
     authWarn.style.display = 'none';
-    document.getElementById('authDesc').textContent = 'You are signed in as ' + myName + '. Your score syncs globally.';
+    document.getElementById('authDesc').textContent = 'You are signed in as ' + name + '. Your score syncs globally.';
     document.getElementById('authTitle').textContent = '✅ Signed In';
-  } else if (myName) {
-    nameInput.value = myName;
   }
 
+  // ── Save username and push to server ───────────────────────────────────────
   async function saveName() {
     const n = nameInput.value.trim();
     if (!n || n.length < 2) { alert('Enter at least 2 characters.'); return; }
@@ -176,118 +181,112 @@
     localStorage.setItem('bloomName', n);
     localStorage.setItem('bloomNameLocked', '1');
     nameLocked = true;
-    nameInput.disabled = true;
-    saveBtn.disabled = true;
-    saveBtn.textContent = '✓ Locked';
-    authLocked.classList.add('show');
-    authWarn.style.display = 'none';
-    document.getElementById('authDesc').textContent = 'You are signed in as ' + n + '. Your score syncs globally.';
-    document.getElementById('authTitle').textContent = '✅ Signed In';
-    await pushToGlobal();
+    lockUI(n);
+    await pushScore();
     await loadBoard();
   }
 
-  async function getGlobalBoard() {
-    try {
-      const result = await window.storage.get(STORAGE_KEY, true);
-      return result ? JSON.parse(result.value) : [];
-    } catch(e) {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    }
-  }
-
-  async function setGlobalBoard(board) {
-    try {
-      await window.storage.set(STORAGE_KEY, JSON.stringify(board), true);
-    } catch(e) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(board));
-    }
-  }
-
-  async function pushToGlobal() {
+  // ── Push current user's score to server ────────────────────────────────────
+  async function pushScore() {
     if (!myName) return;
-    const board = await getGlobalBoard();
-    const idx = board.findIndex(p => p.name === myName);
-    if (idx >= 0) {
-      board[idx].pts = Math.max(board[idx].pts, myPts);
-      board[idx].updated = Date.now();
-    } else {
-      board.push({ name: myName, pts: myPts, updated: Date.now() });
+    try {
+      await fetch('/api/leaderboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: myName, pts: myPts })
+      });
+    } catch (e) {
+      console.warn('Could not sync score:', e);
     }
-    await setGlobalBoard(board);
-    localStorage.setItem('bloomLeaderboard', JSON.stringify(board));
   }
 
+  // ── Fetch leaderboard from server and render ────────────────────────────────
   const avatars = ['🦊','🐱','🦄','🌻','🐶','🦋','🐸','⚡','🌟','🚀','🔥','🎯','🥷','🤖','👾'];
 
   async function loadBoard() {
-    await pushToGlobal();
-    const board = await getGlobalBoard();
-    board.sort((a,b) => b.pts - a.pts);
+    let players = [];
+    try {
+      const res  = await fetch('/api/leaderboard');
+      const data = await res.json();
+      players = data.players || [];
+    } catch (e) {
+      console.warn('Could not load leaderboard:', e);
+    }
 
-    document.getElementById('playerCount').textContent = board.length + ' global players';
-    const myRank = board.findIndex(p => p.name === myName);
-    document.getElementById('yourRank').textContent = myRank >= 0 ? 'Rank #' + (myRank+1) : 'Not ranked yet';
+    // ── Status bar ────────────────────────────────────────────────────────────
+    document.getElementById('playerCount').textContent = players.length + ' global players';
+    const myRank = players.findIndex(p => p.name === myName);
+    document.getElementById('yourRank').textContent =
+      myRank >= 0 ? 'Rank #' + (myRank + 1) : 'Not ranked yet';
 
+    // ── Podium ────────────────────────────────────────────────────────────────
     const podium = document.getElementById('podium');
-    if (!board.length) {
+    if (!players.length) {
       podium.innerHTML = '<div style="color:var(--muted);font-size:0.85rem;padding:20px">No players yet — complete a challenge to appear!</div>';
     } else {
-      const top3 = board.slice(0,3);
+      const top3 = players.slice(0, 3);
       let podiumOrder, podiumClass, medals;
       if (top3.length >= 3) {
         podiumOrder = [top3[1], top3[0], top3[2]];
-        podiumClass = ['p-second','p-first','p-third'];
-        medals = ['🥈','🥇','🥉'];
+        podiumClass = ['p-second', 'p-first', 'p-third'];
+        medals = ['🥈', '🥇', '🥉'];
       } else if (top3.length === 2) {
         podiumOrder = [top3[1], top3[0]];
-        podiumClass = ['p-second','p-first'];
-        medals = ['🥈','🥇'];
+        podiumClass = ['p-second', 'p-first'];
+        medals = ['🥈', '🥇'];
       } else {
         podiumOrder = [top3[0]];
         podiumClass = ['p-first'];
         medals = ['🥇'];
       }
-      podium.innerHTML = podiumOrder.map((p,i) => `
+      podium.innerHTML = podiumOrder.map((p, i) => `
         <div class="podium-card ${podiumClass[i]}">
           <div class="pod-medal">${medals[i]}</div>
-          <div class="pod-name">${p.name}${p.name===myName?'<span class="you-tag">YOU</span>':''}</div>
+          <div class="pod-name">${p.name}${p.name === myName ? '<span class="you-tag">YOU</span>' : ''}</div>
           <div class="pod-pts">${p.pts} pts</div>
         </div>`).join('');
     }
 
+    // ── Full list ─────────────────────────────────────────────────────────────
     const list = document.getElementById('lbList');
-    if (!board.length) {
+    if (!players.length) {
       list.innerHTML = '<div class="empty-lb">No solves yet — be the first on the board!</div>';
-    } else {
-      list.innerHTML = '';
-      board.forEach((p,i) => {
-        const isYou = p.name === myName;
-        const av = avatars[i % avatars.length];
-        const rankStr = i < 3 ? ['🥇','🥈','🥉'][i] : '#'+(i+1);
-        const row = document.createElement('div');
-        row.className = 'lb-row' + (isYou ? ' is-you' : '');
-        const owned = isYou ? JSON.parse(localStorage.getItem('bloomOwned')||'[]') : [];
-        let badges = '';
-        if (isYou) {
-          ['badge_crown','badge_trophy','badge_star','badge_robot','badge_bloom'].forEach(b => {
-            if (owned.includes(b)) badges += {'badge_crown':'👑','badge_trophy':'🏆','badge_star':'⭐','badge_robot':'🤖','badge_bloom':'🌸'}[b]||'';
-          });
-        }
-        row.innerHTML = `
-          <div class="lb-rank-n${i<3?' top':''}">${rankStr}</div>
-          <div class="lb-avatar">${av}</div>
-          <div class="lb-info">
-            <div class="lb-name-d">${p.name}${isYou?'<span class="you-tag">YOU</span>':''} ${badges}</div>
-            <div class="lb-sub-d">bloom_coder · ${p.pts} pts total</div>
-          </div>
-          <div class="lb-pts-d">${p.pts}</div>`;
-        list.appendChild(row);
-      });
+      return;
     }
+    list.innerHTML = '';
+    players.forEach((p, i) => {
+      const isYou  = p.name === myName;
+      const av     = avatars[i % avatars.length];
+      const rankStr = i < 3 ? ['🥇', '🥈', '🥉'][i] : '#' + (i + 1);
+      const owned  = isYou ? JSON.parse(localStorage.getItem('bloomOwned') || '[]') : [];
+      const badgeMap = { badge_crown:'👑', badge_trophy:'🏆', badge_star:'⭐', badge_robot:'🤖', badge_bloom:'🌸' };
+      const badges = isYou
+        ? Object.keys(badgeMap).filter(b => owned.includes(b)).map(b => badgeMap[b]).join('')
+        : '';
+      const joined = p.joinedAt ? new Date(p.joinedAt).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '';
+      const row = document.createElement('div');
+      row.className = 'lb-row' + (isYou ? ' is-you' : '');
+      row.innerHTML = `
+        <div class="lb-rank-n${i < 3 ? ' top' : ''}">${rankStr}</div>
+        <div class="lb-avatar">${av}</div>
+        <div class="lb-info">
+          <div class="lb-name-d">${p.name}${isYou ? '<span class="you-tag">YOU</span>' : ''} ${badges}</div>
+          <div class="lb-sub-d">bloom_coder${joined ? ' · joined ' + joined : ''} · ${p.pts} pts total</div>
+        </div>
+        <div class="lb-pts-d">${p.pts}</div>`;
+      list.appendChild(row);
+    });
   }
 
-  loadBoard();
+  // ── Poll every 15 seconds so scores update without a page refresh ───────────
+  async function init() {
+    await pushScore();
+    await loadBoard();
+    clearInterval(pollTimer);
+    pollTimer = setInterval(loadBoard, 15000);
+  }
+
+  init();
   </script>
 </body>
 </html>

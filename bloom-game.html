@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bloom — Play</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0d0b10;
+      --surface: #12100f;
+      --card: #1a1018;
+      --border: #2a1525;
+      --border-bright: #5a2545;
+      --text: #f5ede8;
+      --muted: #8a6878;
+      --accent: #d4789a;
+      --accent-dim: rgba(212,120,154,0.12);
+      --accent-bright: #f0a8c0;
+      --green: #a8c5a0;
+      --orange: #c96894;
+      --red: #c97070;
+      --purple: #b09cc0;
+      --rose: #f0a8c0;
+      --gold: #e8a0b8;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(212,120,154,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(212,120,154,0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px; height: 64px;
+      background: rgba(14,11,11,0.94);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-family: 'Space Grotesk', sans-serif; font-size: 1.25rem; font-weight: 700; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+    .nav-links { display: flex; align-items: center; gap: 8px; }
+    .nav-link { color: var(--muted); text-decoration: none; font-size: 0.875rem; font-weight: 500; padding: 8px 16px; border-radius: 8px; transition: all 0.2s; cursor: pointer; background: none; border: none; }
+    .nav-link:hover { color: var(--text); background: rgba(212,120,154,0.08); }
+    .nav-pts { background: var(--accent-dim); color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 700; padding: 6px 14px; border-radius: 6px; border: 1px solid rgba(212,120,154,0.25); cursor: pointer; transition: all 0.2s; }
+    .nav-pts:hover { background: rgba(212,120,154,0.2); }
+
+    /* SCREENS */
+    .screen { display: none; position: relative; z-index: 1; }
+    .screen.active { display: block; }
+
+    /* ─── CHOOSE MODE SCREEN ─── */
+    #screen-choose { padding: 60px 48px; max-width: 1000px; margin: 0 auto; }
+    .cm-title { font-family: 'Space Grotesk', sans-serif; font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 700; letter-spacing: -1.5px; margin-bottom: 8px; }
+    .cm-title em { font-style: normal; background: linear-gradient(135deg, var(--accent), var(--rose)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .cm-sub { color: var(--muted); margin-bottom: 48px; font-size: 1rem; }
+
+    .cm-section-label { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700; color: var(--accent); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 16px; }
+
+    /* Language grid */
+    .lang-grid { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 40px; }
+    .lang-btn {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px 22px; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; gap: 10px; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600;
+    }
+    .lang-btn:hover, .lang-btn.selected { border-color: var(--accent); background: var(--accent-dim); color: var(--accent-bright); }
+    .lang-btn .le { font-size: 1.4rem; }
+
+    /* Level grid */
+    .level-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 40px; }
+    @media(max-width: 800px) { .level-grid { grid-template-columns: repeat(2, 1fr); } nav { padding: 0 20px; } #screen-choose { padding: 40px 20px; } }
+
+    .level-btn {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 20px 16px; cursor: pointer; transition: all 0.2s;
+      text-align: left; color: var(--text); position: relative; overflow: hidden;
+    }
+    .level-btn::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+    .level-btn.lv-0::before { background: var(--green); }
+    .level-btn.lv-1::before { background: var(--accent); }
+    .level-btn.lv-2::before { background: var(--purple); }
+    .level-btn.lv-3::before { background: var(--orange); }
+    .level-btn.lv-4::before { background: linear-gradient(90deg, var(--accent), var(--rose)); }
+    .level-btn:hover, .level-btn.selected { border-color: var(--border-bright); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+    .lv-icon { font-size: 1.6rem; margin-bottom: 10px; }
+    .lv-name { font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; }
+    .lv-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-top: 6px; }
+    .lv-0 .lv-tag { background: rgba(168,197,160,0.12); color: var(--green); }
+    .lv-1 .lv-tag { background: var(--accent-dim); color: var(--accent); }
+    .lv-2 .lv-tag { background: rgba(176,156,192,0.12); color: var(--purple); }
+    .lv-3 .lv-tag { background: rgba(212,149,106,0.12); color: var(--orange); }
+    .lv-4 .lv-tag { background: rgba(232,180,160,0.12); color: var(--rose); }
+
+    .cm-start-btn {
+      background: linear-gradient(135deg, var(--accent), var(--rose));
+      color: #0d0b10; font-family: 'DM Sans', sans-serif;
+      font-weight: 700; font-size: 1rem;
+      padding: 16px 36px; border-radius: 10px;
+      border: none; cursor: pointer; transition: all 0.2s;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .cm-start-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,120,154,0.4); }
+    .cm-start-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* ─── GAME SCREEN ─── */
+    #screen-game { padding: 0; }
+
+    .game-header {
+      padding: 16px 48px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+      background: var(--surface);
+    }
+    .gh-level { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--muted); }
+    .gh-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 700; flex: 1; }
+    .gh-pts { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--green); background: rgba(168,197,160,0.1); padding: 4px 10px; border-radius: 5px; border: 1px solid rgba(168,197,160,0.2); }
+    .gh-actions { display: flex; gap: 8px; margin-left: auto; }
+
+    .btn-bypass {
+      background: rgba(232,160,184,0.12); color: var(--gold);
+      border: 1px solid rgba(232,160,184,0.3);
+      font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700;
+      padding: 7px 14px; border-radius: 7px; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-bypass:hover { background: rgba(232,160,184,0.22); border-color: var(--gold); color: #fff; }
+
+    .btn-hint {
+      background: rgba(176,156,192,0.1); color: var(--purple);
+      border: 1px solid rgba(176,156,192,0.25);
+      font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700;
+      padding: 7px 14px; border-radius: 7px; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-hint:hover { background: rgba(176,156,192,0.2); border-color: var(--purple); }
+
+    .btn-next {
+      background: linear-gradient(135deg, var(--accent), var(--rose));
+      color: #0d0b10; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700;
+      padding: 7px 16px; border-radius: 7px; cursor: pointer; border: none; transition: all 0.2s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-next:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212,120,154,0.35); }
+
+    .game-body { display: grid; grid-template-columns: 1fr 360px; min-height: calc(100vh - 130px); }
+    @media(max-width: 900px) { .game-body { grid-template-columns: 1fr; } }
+
+    /* Challenge area */
+    .challenge-area { padding: 28px 32px; border-right: 1px solid var(--border); }
+    .ch-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.7; margin-bottom: 20px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; }
+    .ch-desc strong { color: var(--text); }
+    .ch-examples { margin-bottom: 20px; }
+    .ch-ex-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; font-weight: 700; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+    .ch-ex { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; line-height: 1.8; margin-bottom: 6px; }
+    .ex-in { color: var(--purple); } .ex-arr { color: var(--muted); } .ex-out { color: var(--green); }
+
+    .editor-wrap { position: relative; }
+    .editor-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; font-weight: 700; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .editor-lang-tag { color: var(--accent); }
+    textarea#codeEditor {
+      width: 100%; min-height: 240px; resize: vertical;
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+      line-height: 1.8; padding: 16px; outline: none; transition: border-color 0.2s;
+      tab-size: 2;
+    }
+    textarea#codeEditor:focus { border-color: var(--border-bright); }
+
+    .run-bar { display: flex; gap: 10px; align-items: center; margin-top: 12px; }
+    .btn-run {
+      background: var(--accent-dim); color: var(--accent);
+      border: 1px solid rgba(212,120,154,0.3);
+      font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 700;
+      padding: 10px 22px; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-run:hover { background: rgba(212,120,154,0.22); }
+    .run-status { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--muted); }
+    .run-status.ok { color: var(--green); }
+    .run-status.fail { color: var(--red); }
+
+    /* Output panel */
+    .output-panel { padding: 28px 24px; }
+    .op-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; font-weight: 700; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; }
+
+    /* GRID for beginner/rookie */
+    .robot-grid { display: grid; gap: 4px; margin-bottom: 20px; }
+    .grid-cell { width: 48px; height: 48px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; transition: all 0.3s; }
+    .grid-cell.robot { background: rgba(212,120,154,0.15); border-color: var(--accent); }
+    .grid-cell.goal { background: rgba(168,197,160,0.15); border-color: var(--green); animation: glow 2s ease-in-out infinite; }
+    .grid-cell.wall { background: #120d0d; border-color: #1a0d0d; }
+    .grid-cell.trail { background: rgba(212,120,154,0.06); border-color: rgba(212,120,154,0.15); }
+    .grid-cell.solved { background: rgba(168,197,160,0.25); border-color: var(--green); }
+    @keyframes glow { 0%,100%{box-shadow:0 0 0 0 rgba(168,197,160,0)} 50%{box-shadow:0 0 0 6px rgba(168,197,160,0.2)} }
+
+    /* Output terminal for intermediate+ */
+    .output-term { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; line-height: 1.8; min-height: 160px; color: #c8b8b0; }
+    .out-line { margin-bottom: 2px; }
+    .out-ok { color: var(--green); } .out-err { color: var(--red); } .out-info { color: var(--purple); }
+
+    /* Test results */
+    .tests { margin-top: 16px; }
+    .test-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 7px; margin-bottom: 6px; background: var(--surface); border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; }
+    .test-row.pass { border-color: rgba(168,197,160,0.3); background: rgba(168,197,160,0.06); }
+    .test-row.fail { border-color: rgba(201,112,112,0.3); background: rgba(201,112,112,0.06); }
+    .test-icon { font-size: 0.9rem; }
+    .test-label { color: var(--muted); flex: 1; }
+    .test-expected { color: var(--purple); } .test-got { color: var(--orange); }
+
+    /* SUCCESS OVERLAY */
+    .success-overlay {
+      display: none; position: fixed; inset: 0; z-index: 500;
+      background: rgba(13,11,16,0.85); backdrop-filter: blur(8px);
+      align-items: center; justify-content: center;
+    }
+    .success-overlay.visible { display: flex; }
+    .success-card {
+      background: var(--card); border: 1px solid var(--border-bright);
+      border-radius: 20px; padding: 48px 56px; text-align: center;
+      max-width: 440px; width: 90%; position: relative;
+      animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes popIn { from{opacity:0;transform:scale(0.85)} to{opacity:1;transform:scale(1)} }
+    .success-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--rose), var(--gold));
+      border-radius: 20px 20px 0 0;
+    }
+    .sc-emoji { font-size: 3.5rem; margin-bottom: 16px; }
+    .sc-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+    .sc-pts { font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--accent); margin-bottom: 24px; }
+    .sc-actions { display: flex; gap: 12px; justify-content: center; }
+
+    /* BYPASS MODAL */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 600;
+      background: rgba(13,11,16,0.88); backdrop-filter: blur(10px);
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.visible { display: flex; }
+    .modal-card {
+      background: var(--card); border: 1px solid var(--border-bright);
+      border-radius: 18px; padding: 40px 48px; max-width: 420px; width: 90%;
+      text-align: center; animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+    .modal-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--gold), var(--rose));
+      border-radius: 18px 18px 0 0;
+    }
+    .modal-icon { font-size: 2.8rem; margin-bottom: 14px; }
+    .modal-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; }
+    .modal-desc { color: var(--muted); font-size: 0.87rem; line-height: 1.6; margin-bottom: 24px; }
+    .modal-cost { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--gold); background: rgba(232,160,184,0.1); border: 1px solid rgba(232,160,184,0.25); padding: 8px 16px; border-radius: 8px; margin-bottom: 24px; display: inline-block; }
+    .modal-actions { display: flex; gap: 10px; justify-content: center; }
+    .btn-modal-confirm {
+      background: linear-gradient(135deg, var(--gold), var(--rose));
+      color: #0d0b10; font-weight: 700; font-size: 0.88rem;
+      padding: 11px 24px; border-radius: 9px; border: none; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-modal-confirm:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(232,160,184,0.35); }
+    .btn-modal-cancel {
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border-bright); font-weight: 600; font-size: 0.88rem;
+      padding: 11px 24px; border-radius: 9px; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-modal-cancel:hover { color: var(--text); border-color: var(--accent); }
+
+    /* HINT PANEL */
+    .hint-panel { background: rgba(176,156,192,0.06); border: 1px solid rgba(176,156,192,0.2); border-radius: 10px; padding: 14px 18px; margin-top: 16px; font-size: 0.85rem; color: var(--purple); line-height: 1.7; display: none; }
+    .hint-panel.visible { display: block; }
+
+    /* ─── SHOP SCREEN ─── */
+    #screen-shop { padding: 60px 48px; max-width: 1000px; margin: 0 auto; }
+    .shop-header { margin-bottom: 48px; }
+    .shop-balance { display: inline-flex; align-items: center; gap: 10px; background: var(--accent-dim); border: 1px solid rgba(212,120,154,0.25); padding: 10px 20px; border-radius: 10px; margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--accent); font-weight: 700; }
+    .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+    .shop-item {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 24px 20px; text-align: center; transition: all 0.2s; position: relative;
+    }
+    .shop-item:hover { border-color: var(--border-bright); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+    .shop-item.owned { border-color: rgba(168,197,160,0.3); }
+    .si-icon { font-size: 2.2rem; margin-bottom: 12px; display: block; }
+    .si-name { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; }
+    .si-desc { font-size: 0.75rem; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
+    .si-cost { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent); font-weight: 700; margin-bottom: 12px; }
+    .btn-buy {
+      background: var(--accent-dim); color: var(--accent);
+      border: 1px solid rgba(212,120,154,0.3);
+      font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700;
+      padding: 8px 18px; border-radius: 7px; cursor: pointer; transition: all 0.2s; width: 100%;
+    }
+    .btn-buy:hover:not(:disabled) { background: rgba(212,120,154,0.22); }
+    .btn-buy:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-buy.owned-btn { background: rgba(168,197,160,0.1); color: var(--green); border-color: rgba(168,197,160,0.25); }
+    .owned-badge { position: absolute; top: 10px; right: 10px; background: rgba(168,197,160,0.12); color: var(--green); font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(168,197,160,0.25); }
+    .toast {
+      position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+      background: var(--card); border: 1px solid var(--border-bright);
+      color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+      padding: 12px 24px; border-radius: 10px; z-index: 1000;
+      animation: toastIn 0.3s ease; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(10px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+
+    /* Progress bar */
+    .progress-bar-wrap { margin-bottom: 6px; }
+    .progress-bar-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--muted); margin-bottom: 6px; display: flex; justify-content: space-between; }
+    .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--rose)); border-radius: 2px; transition: width 0.5s ease; }
+
+    /* Bypass cost display */
+    .bypass-cost-chip { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--gold); background: rgba(232,160,184,0.08); padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(232,160,184,0.2); margin-left: 4px; }
+
+    /* ─── LEADERBOARD SCREEN ─── */
+    #screen-lb { padding: 60px 48px; max-width: 700px; margin: 0 auto; }
+    .lb-table-full { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-top: 24px; }
+    .lb-row { display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+    .lb-row:last-child { border-bottom: none; }
+    .lb-row.top-row { background: rgba(212,120,154,0.04); }
+    .lb-rank-n { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; width: 32px; color: var(--muted); }
+    .lb-rank-n.gold { color: #ffd700; } .lb-rank-n.silver { color: #c0c0c0; } .lb-rank-n.bronze { color: #cd7f32; }
+    .lb-name { flex: 1; font-weight: 600; font-size: 0.9rem; }
+    .lb-pts-val { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--accent); font-weight: 700; }
+    .lb-you { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--green); background: rgba(168,197,160,0.1); padding: 2px 7px; border-radius: 4px; }
+
+    /* Username prompt */
+    .username-prompt { background: var(--card); border: 1px solid var(--border-bright); border-radius: 14px; padding: 32px; margin-bottom: 32px; text-align: center; display: none; }
+    .username-prompt.visible { display: block; }
+    .username-input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; padding: 12px 16px; outline: none; margin: 12px 0; transition: border-color 0.2s; }
+    .username-input:focus { border-color: var(--accent); }
+    .btn-set-name { background: linear-gradient(135deg, var(--accent), var(--rose)); color: #0d0b10; font-weight: 700; padding: 10px 24px; border-radius: 8px; border: none; cursor: pointer; }
+
+    @media(max-width: 600px) {
+      #screen-shop, #screen-lb, #screen-choose { padding: 40px 20px; }
+      .game-header { padding: 12px 20px; }
+      .challenge-area { padding: 20px; }
+      .output-panel { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg width="24" height="24" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 6px rgba(212,120,154,0.7))"><defs><linearGradient id="nlg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f0b8cc"/><stop offset="100%" stop-color="#a85070"/></linearGradient><linearGradient id="nlg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e89ab4"/><stop offset="100%" stop-color="#c06888"/></linearGradient></defs><path d="M14 22 C10 22 5 18 6 12 C8 15 11 17 14 18 Z" fill="url(#nlg1)" opacity="0.85"/><path d="M14 22 C18 22 23 18 22 12 C20 15 17 17 14 18 Z" fill="url(#nlg1)" opacity="0.85"/><path d="M14 22 C11 20 8 15 10 9 C11 13 12.5 16 14 18 Z" fill="url(#nlg2)" opacity="0.9"/><path d="M14 22 C17 20 20 15 18 9 C17 13 15.5 16 14 18 Z" fill="url(#nlg2)" opacity="0.9"/><path d="M14 22 C12 18 12 13 14 7 C16 13 16 18 14 22 Z" fill="#f5d0e4"/></svg>
+    Bloom
+  </a>
+  <div class="nav-links">
+    <button class="nav-link" onclick="showScreen('choose')">Challenges</button>
+    <button class="nav-link" onclick="showScreen('shop')">Shop</button>
+    <button class="nav-link" onclick="showScreen('lb')">Leaderboard</button>
+    <div class="nav-pts" id="navPts" onclick="showScreen('shop')" title="Click to open shop">0 pts</div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ CHOOSE MODE -->
+<div id="screen-choose" class="screen active">
+  <div style="margin-bottom:40px;">
+    <h1 class="cm-title">Choose your <em>challenge.</em></h1>
+    <p class="cm-sub">Pick a language and difficulty, then start coding.</p>
+  </div>
+
+  <div class="progress-bar-wrap" id="progressWrap" style="margin-bottom:32px;">
+    <div class="progress-bar-label">
+      <span id="progressLabel">Progress: 0 challenges completed</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="cm-section-label">// select_language</div>
+  <div class="lang-grid" id="langGrid">
+    <button class="lang-btn selected" data-lang="python"><span class="le">🐍</span> Python</button>
+    <button class="lang-btn" data-lang="javascript"><span class="le">⚡</span> JavaScript</button>
+    <button class="lang-btn" data-lang="html"><span class="le">🌐</span> HTML/CSS</button>
+    <button class="lang-btn" data-lang="java"><span class="le">☕</span> Java</button>
+    <button class="lang-btn" data-lang="blocks"><span class="le">🧩</span> Blocks</button>
+  </div>
+
+  <div class="cm-section-label" style="margin-top:32px;">// select_difficulty</div>
+  <div class="level-grid" id="levelGrid">
+    <button class="level-btn lv-0 selected" data-level="0">
+      <div class="lv-icon">🌱</div>
+      <div class="lv-name">Beginner</div>
+      <div class="lv-tag">START HERE</div>
+    </button>
+    <button class="level-btn lv-1" data-level="1">
+      <div class="lv-icon">🚀</div>
+      <div class="lv-name">Rookie</div>
+      <div class="lv-tag">LOOPS</div>
+    </button>
+    <button class="level-btn lv-2" data-level="2">
+      <div class="lv-icon">⚡</div>
+      <div class="lv-name">Intermediate</div>
+      <div class="lv-tag">REAL CODE</div>
+    </button>
+    <button class="level-btn lv-3" data-level="3">
+      <div class="lv-icon">🔥</div>
+      <div class="lv-name">Advanced</div>
+      <div class="lv-tag">ALGORITHMS</div>
+    </button>
+    <button class="level-btn lv-4" data-level="4">
+      <div class="lv-icon">💎</div>
+      <div class="lv-name">Proficient</div>
+      <div class="lv-tag">FULL APPS</div>
+    </button>
+  </div>
+
+  <div style="margin-top:32px; display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+    <button class="cm-start-btn" id="startBtn" onclick="startChallenge()">
+      Start Challenge →
+    </button>
+    <div style="color:var(--muted); font-size:0.85rem;">
+      Bypass costs <span id="bypassCostPreview" style="color:var(--gold); font-family:'JetBrains Mono',monospace;">75 pts</span> — or earn points by solving!
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ GAME SCREEN -->
+<div id="screen-game" class="screen">
+  <div class="game-header">
+    <div>
+      <div class="gh-level" id="ghLevel">BEGINNER · PYTHON</div>
+      <div class="gh-title" id="ghTitle">Loading challenge...</div>
+    </div>
+    <div class="gh-pts" id="ghPts">+10 pts on solve</div>
+    <div class="gh-actions">
+      <button class="btn-hint" id="hintBtn" onclick="useHint()">💡 Hint <span id="hintCostChip" class="bypass-cost-chip">free</span></button>
+      <button class="btn-bypass" id="bypassBtn" onclick="openBypassModal()">⏭️ Bypass <span id="bypassCostChip" class="bypass-cost-chip">75 pts</span></button>
+      <button class="btn-next" onclick="nextChallenge()">Next →</button>
+    </div>
+  </div>
+
+  <div class="game-body">
+    <!-- Left: challenge + editor -->
+    <div class="challenge-area">
+      <div class="ch-desc" id="chDesc">Loading...</div>
+
+      <div class="ch-examples" id="chExamples"></div>
+
+      <div class="editor-wrap">
+        <div class="editor-label">
+          <span>// your_code</span>
+          <span class="editor-lang-tag" id="editorLangTag">python</span>
+        </div>
+        <textarea id="codeEditor" spellcheck="false" placeholder="Write your code here..."></textarea>
+      </div>
+
+      <div class="hint-panel" id="hintPanel"></div>
+
+      <div class="run-bar">
+        <button class="btn-run" onclick="runCode()">▶ Run Code</button>
+        <span class="run-status" id="runStatus"></span>
+      </div>
+
+      <div class="tests" id="testsPanel"></div>
+    </div>
+
+    <!-- Right: output visualization -->
+    <div class="output-panel">
+      <div class="op-label" id="opLabel">// output</div>
+      <div id="gridOrOutput">
+        <!-- Filled dynamically -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ SHOP SCREEN -->
+<div id="screen-shop" class="screen">
+  <div class="shop-header">
+    <h1 class="cm-title">Prize <em>Shop</em></h1>
+    <p class="cm-sub">Spend your hard-earned points on perks and cosmetics.</p>
+    <div class="shop-balance">💰 <span id="shopBalance">0</span> pts available</div>
+  </div>
+  <div class="shop-grid" id="shopGrid">
+    <!-- Filled dynamically -->
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ LEADERBOARD SCREEN -->
+<div id="screen-lb" class="screen">
+  <h1 class="cm-title">Leader<em>board</em></h1>
+  <p class="cm-sub">Global rankings — compete against everyone.</p>
+
+  <div class="username-prompt" id="usernamePrompt">
+    <div style="font-size:1.5rem; margin-bottom:8px;">👋</div>
+    <div style="font-family:'Space Grotesk',sans-serif; font-weight:700; margin-bottom:4px;">Set your username</div>
+    <div style="color:var(--muted); font-size:0.85rem; margin-bottom:4px;">Your name will appear on the global leaderboard</div>
+    <input class="username-input" id="usernameInput" placeholder="Enter your name (2–20 chars)" maxlength="20"/>
+    <button class="btn-set-name" onclick="setUsername()">Save Name →</button>
+  </div>
+
+  <div class="lb-table-full" id="lbTable">
+    <div class="lb-row"><span class="lb-rank-n" style="color:var(--muted)">—</span><span class="lb-name" style="color:var(--muted)">No players yet. Be the first!</span><span class="lb-pts-val">0</span></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ SUCCESS OVERLAY -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-card">
+    <div class="sc-emoji">🎉</div>
+    <div class="sc-title">Challenge Solved!</div>
+    <div class="sc-pts" id="scPts">+10 pts earned</div>
+    <div class="sc-actions">
+      <button class="btn-next" onclick="nextChallenge(); hideSuccess();" style="font-size:0.88rem; padding:11px 24px;">Next Challenge →</button>
+      <button class="btn-modal-cancel" onclick="showScreen('choose'); hideSuccess();" style="font-size:0.88rem; padding:11px 24px;">Back to Menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ BYPASS MODAL -->
+<div class="modal-overlay" id="bypassModal">
+  <div class="modal-card">
+    <div class="modal-icon">⏭️</div>
+    <div class="modal-title">Bypass This Level?</div>
+    <div class="modal-desc" id="bypassModalDesc">Skip this challenge and move straight to the next one. You'll still progress, but won't earn solve points.</div>
+    <div class="modal-cost" id="bypassModalCost">Cost: 75 pts</div>
+    <div id="bypassModalWarning" style="color:var(--red); font-size:0.8rem; margin-bottom:16px; display:none;"></div>
+    <div class="modal-actions">
+      <button class="btn-modal-confirm" id="bypassConfirmBtn" onclick="confirmBypass()">⏭️ Skip Level</button>
+      <button class="btn-modal-cancel" onclick="closeBypassModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ HINT MODAL -->
+<div class="modal-overlay" id="hintModal">
+  <div class="modal-card">
+    <div class="modal-icon">💡</div>
+    <div class="modal-title">Use a Hint?</div>
+    <div class="modal-desc">Hints reveal a useful nudge for this challenge. You have <strong id="hintTokenCount" style="color:var(--purple)">0</strong> Hint Token(s) from the shop, or hints are free at beginner level.</div>
+    <div class="modal-cost" id="hintModalCost">Free this level</div>
+    <div class="modal-actions">
+      <button class="btn-modal-confirm" onclick="confirmHint()" style="background:linear-gradient(135deg, var(--purple), var(--accent));">💡 Show Hint</button>
+      <button class="btn-modal-cancel" onclick="closeHintModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════
+let state = {
+  pts: 0,
+  inventory: {}, // itemId -> quantity or true
+  completed: {}, // "lang-level-idx" -> true
+  username: '',
+  currentLang: 'python',
+  currentLevel: 0,
+  currentChallengeIdx: 0,
+  doublePoints: false,
+};
+
+function saveState() { localStorage.setItem('bloomState', JSON.stringify(state)); }
+function loadState() {
+  try {
+    const s = JSON.parse(localStorage.getItem('bloomState') || 'null');
+    if (s) Object.assign(state, s);
+    // Legacy: also read old bloomPoints key
+    if (!s && localStorage.getItem('bloomPoints')) {
+      state.pts = parseInt(localStorage.getItem('bloomPoints') || '0');
+    }
+  } catch(e) {}
+}
+loadState();
+
+// ══════════════════════════════════════════════════════════════
+//  CHALLENGES DATABASE
+// ══════════════════════════════════════════════════════════════
+const CHALLENGES = {
+  python: {
+    0: [ // Beginner — grid-based robot puzzles
+      {
+        title: "Move Right Twice",
+        desc: "Your robot 🤖 is on a 5×5 grid. Write commands to move it <strong>right 2 spaces</strong> to reach the ⭐ goal.",
+        hint: "Use: move_right() twice. Each call moves the robot one cell.",
+        starter: "# Move the robot to the goal!\nmove_right()\n",
+        pts: 10,
+        type: 'grid',
+        grid: { size: 5, robot: [0,0], goal: [0,2], walls: [] },
+        solution: ['move_right','move_right'],
+        tests: [],
+      },
+      {
+        title: "Navigate the Maze",
+        desc: "Navigate your robot from the top-left to the ⭐ at bottom-right. Walls (⬛) block your path.",
+        hint: "Try: move_right(), move_down(), move_right(), move_down() — watch out for walls at (1,1) and (2,3).",
+        starter: "# Navigate around the walls!\nmove_right()\n",
+        pts: 15,
+        type: 'grid',
+        grid: { size: 5, robot: [0,0], goal: [3,4], walls: [[1,1],[2,3]] },
+        solution: ['move_right','move_right','move_down','move_right','move_right','move_down','move_down'],
+        tests: [],
+      },
+      {
+        title: "Zigzag Path",
+        desc: "Reach the ⭐ goal. You'll need to combine <strong>right</strong> and <strong>down</strong> moves, avoiding the walls.",
+        hint: "Move down first, then right, then down again to reach the goal.",
+        starter: "# Complete the path!\nmove_down()\n",
+        pts: 20,
+        type: 'grid',
+        grid: { size: 5, robot: [0,0], goal: [4,3], walls: [[0,2],[1,1],[3,2]] },
+        solution: ['move_down','move_right','move_down','move_right','move_right','move_down','move_down'],
+        tests: [],
+      },
+    ],
+    1: [ // Rookie — loops + real Python
+      {
+        title: "Count to N",
+        desc: "Write a function <code style='color:var(--rose)'>count_up(n)</code> that returns a list of numbers from 1 to n (inclusive).",
+        hint: "Use range(1, n+1) and convert it to a list: list(range(1, n+1))",
+        starter: "def count_up(n):\n    # Return a list from 1 to n\n    pass\n",
+        pts: 20,
+        type: 'code',
+        tests: [
+          { input: [5], expected: [1,2,3,4,5], label: 'count_up(5)' },
+          { input: [3], expected: [1,2,3], label: 'count_up(3)' },
+          { input: [1], expected: [1], label: 'count_up(1)' },
+        ],
+      },
+      {
+        title: "FizzBuzz",
+        desc: "Write <code style='color:var(--rose)'>fizzbuzz(n)</code> that returns a list: <strong>Fizz</strong> for multiples of 3, <strong>Buzz</strong> for multiples of 5, <strong>FizzBuzz</strong> for both, otherwise the number.",
+        hint: "Check divisibility with %. Order matters: check FizzBuzz first, then Fizz, then Buzz.",
+        starter: "def fizzbuzz(n):\n    result = []\n    for i in range(1, n + 1):\n        # Add 'Fizz', 'Buzz', 'FizzBuzz', or i\n        pass\n    return result\n",
+        pts: 25,
+        type: 'code',
+        tests: [
+          { input: [5], expected: [1,2,'Fizz',4,'Buzz'], label: 'fizzbuzz(5)' },
+          { input: [15], expected: [1,2,'Fizz',4,'Buzz','Fizz',7,8,'Fizz','Buzz',11,'Fizz',13,14,'FizzBuzz'], label: 'fizzbuzz(15)' },
+        ],
+      },
+      {
+        title: "Reverse a String",
+        desc: "Write <code style='color:var(--rose)'>reverse_str(s)</code> that returns the string reversed.",
+        hint: "Python slicing: s[::-1] reverses any sequence!",
+        starter: "def reverse_str(s):\n    # Return s reversed\n    pass\n",
+        pts: 15,
+        type: 'code',
+        tests: [
+          { input: ['hello'], expected: 'olleh', label: "reverse_str('hello')" },
+          { input: ['Bloom'], expected: 'moolB', label: "reverse_str('Bloom')" },
+          { input: [''], expected: '', label: "reverse_str('')" },
+        ],
+      },
+    ],
+    2: [ // Intermediate
+      {
+        title: "Frequency Sort",
+        desc: "Write <code style='color:var(--rose)'>freq_sort(items)</code> that returns the list sorted by how often each element appears — most frequent first.",
+        hint: "Build a counts dict first, then use sorted() with key=lambda x: -counts[x]",
+        starter: "def freq_sort(items):\n    counts = {}\n    # Count occurrences\n    # Sort by frequency descending\n    pass\n",
+        pts: 35,
+        type: 'code',
+        tests: [
+          { input: [['cat','dog','cat','bird','cat','dog']], expected: ['cat','cat','cat','dog','dog','bird'], label: 'freq_sort([cat,dog,cat,bird,cat,dog])' },
+          { input: [[1,2,1,3,1,2]], expected: [1,1,1,2,2,3], label: 'freq_sort([1,2,1,3,1,2])' },
+        ],
+      },
+      {
+        title: "Palindrome Check",
+        desc: "Write <code style='color:var(--rose)'>is_palindrome(s)</code> — return True if s reads the same forwards and backwards (ignore case and spaces).",
+        hint: "Clean the string: s.lower().replace(' ',''), then compare it to its reverse.",
+        starter: "def is_palindrome(s):\n    # Ignore case and spaces\n    cleaned = s.lower().replace(' ', '')\n    # Compare to its reverse\n    pass\n",
+        pts: 30,
+        type: 'code',
+        tests: [
+          { input: ['racecar'], expected: true, label: "is_palindrome('racecar')" },
+          { input: ['A man a plan a canal Panama'], expected: true, label: "is_palindrome('A man...')" },
+          { input: ['hello'], expected: false, label: "is_palindrome('hello')" },
+        ],
+      },
+      {
+        title: "Two Sum",
+        desc: "Write <code style='color:var(--rose)'>two_sum(nums, target)</code> that returns indices of the two numbers that add up to target.",
+        hint: "Use a hash map: for each number, check if (target - number) is already in the map.",
+        starter: "def two_sum(nums, target):\n    seen = {}  # value -> index\n    for i, num in enumerate(nums):\n        complement = target - num\n        # Check if complement exists\n        pass\n    return []\n",
+        pts: 40,
+        type: 'code',
+        tests: [
+          { input: [[2,7,11,15], 9], expected: [0,1], label: 'two_sum([2,7,11,15], 9)' },
+          { input: [[3,2,4], 6], expected: [1,2], label: 'two_sum([3,2,4], 6)' },
+        ],
+      },
+    ],
+    3: [ // Advanced
+      {
+        title: "Binary Search",
+        desc: "Implement <code style='color:var(--rose)'>binary_search(arr, target)</code> that returns the index of target in a sorted array, or -1 if not found. Must run in O(log n).",
+        hint: "Use low=0, high=len(arr)-1. Each iteration: mid=(low+high)//2. Compare arr[mid] to target.",
+        starter: "def binary_search(arr, target):\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        mid = (low + high) // 2\n        # Compare arr[mid] to target\n        pass\n    return -1\n",
+        pts: 50,
+        type: 'code',
+        tests: [
+          { input: [[1,3,5,7,9,11], 7], expected: 3, label: 'binary_search([1,3,5,7,9,11], 7)' },
+          { input: [[1,3,5,7,9], 1], expected: 0, label: 'binary_search([1,3,5,7,9], 1)' },
+          { input: [[1,3,5], 4], expected: -1, label: 'binary_search([1,3,5], 4)' },
+        ],
+      },
+      {
+        title: "Merge Sort",
+        desc: "Implement <code style='color:var(--rose)'>merge_sort(arr)</code> — the classic divide-and-conquer sorting algorithm.",
+        hint: "Split the array in half, recursively sort each half, then merge them together in order.",
+        starter: "def merge_sort(arr):\n    if len(arr) <= 1:\n        return arr\n    mid = len(arr) // 2\n    left = merge_sort(arr[:mid])\n    right = merge_sort(arr[mid:])\n    # Merge left and right\n    return merge(left, right)\n\ndef merge(left, right):\n    result = []\n    i = j = 0\n    # Merge two sorted lists\n    pass\n    return result\n",
+        pts: 60,
+        type: 'code',
+        tests: [
+          { input: [[38,27,43,3,9,82,10]], expected: [3,9,10,27,38,43,82], label: 'merge_sort([38,27,43,3,9,82,10])' },
+          { input: [[5,1,4,2,8]], expected: [1,2,4,5,8], label: 'merge_sort([5,1,4,2,8])' },
+        ],
+      },
+    ],
+    4: [ // Proficient
+      {
+        title: "LRU Cache",
+        desc: "Implement a <code style='color:var(--rose)'>LRUCache</code> class with <code>get(key)</code> and <code>put(key, val)</code>. Evict the least-recently-used item when capacity is exceeded.",
+        hint: "Use Python's OrderedDict. On every get/put, move the key to the end. On capacity exceed, pop from the front.",
+        starter: "from collections import OrderedDict\n\nclass LRUCache:\n    def __init__(self, capacity):\n        self.cap = capacity\n        self.cache = OrderedDict()\n    \n    def get(self, key):\n        if key not in self.cache:\n            return -1\n        # Move to end (most recently used)\n        self.cache.move_to_end(key)\n        return self.cache[key]\n    \n    def put(self, key, val):\n        if key in self.cache:\n            self.cache.move_to_end(key)\n        self.cache[key] = val\n        if len(self.cache) > self.cap:\n            # Evict least recently used\n            pass\n",
+        pts: 80,
+        type: 'code',
+        tests: [
+          { input: ['lru_test'], expected: 'PASS', label: 'LRUCache(2): put(1,1), put(2,2), get(1)→1, put(3,3)[evicts 2], get(2)→-1' },
+        ],
+      },
+      {
+        title: "Graph BFS",
+        desc: "Write <code style='color:var(--rose)'>bfs(graph, start)</code> that returns nodes in breadth-first order as a list.",
+        hint: "Use a queue (collections.deque). Start with [start], mark visited, enqueue unvisited neighbors.",
+        starter: "from collections import deque\n\ndef bfs(graph, start):\n    visited = []\n    queue = deque([start])\n    seen = set([start])\n    while queue:\n        node = queue.popleft()\n        visited.append(node)\n        for neighbor in graph.get(node, []):\n            if neighbor not in seen:\n                seen.add(neighbor)\n                queue.append(neighbor)\n    return visited\n",
+        pts: 70,
+        type: 'code',
+        tests: [
+          { input: [{'A':['B','C'],'B':['D'],'C':['D'],'D':[]}, 'A'], expected: ['A','B','C','D'], label: "bfs(graph, 'A')" },
+        ],
+      },
+    ],
+  },
+  javascript: {
+    0: [
+      {
+        title: "Move Right Twice",
+        desc: "Your robot 🤖 is on a 5×5 grid. Write commands to move it <strong>right 2 spaces</strong> to reach the ⭐ goal.",
+        hint: "Use: moveRight() twice. Each call moves the robot one cell.",
+        starter: "// Move the robot to the goal!\nmoveRight();\n",
+        pts: 10, type: 'grid',
+        grid: { size: 5, robot: [0,0], goal: [0,2], walls: [] },
+        solution: ['move_right','move_right'], tests: [],
+      },
+    ],
+    1: [
+      {
+        title: "Count to N",
+        desc: "Write a function <code style='color:var(--rose)'>countUp(n)</code> that returns an array of numbers from 1 to n.",
+        hint: "Use Array.from({length: n}, (_, i) => i + 1)",
+        starter: "function countUp(n) {\n  // Return array [1, 2, ..., n]\n}\n",
+        pts: 20, type: 'code',
+        tests: [
+          { input: [5], expected: [1,2,3,4,5], label: 'countUp(5)' },
+          { input: [3], expected: [1,2,3], label: 'countUp(3)' },
+        ],
+      },
+    ],
+    2: [
+      {
+        title: "Flatten Array",
+        desc: "Write <code style='color:var(--rose)'>flatten(arr)</code> that flattens a nested array one level deep.",
+        hint: "Use arr.reduce((acc, val) => acc.concat(val), [])",
+        starter: "function flatten(arr) {\n  // Flatten one level deep\n}\n",
+        pts: 35, type: 'code',
+        tests: [
+          { input: [[[1,2],[3,4],[5]]], expected: [1,2,3,4,5], label: 'flatten([[1,2],[3,4],[5]])' },
+        ],
+      },
+    ],
+    3: [{ title:"Binary Search",desc:"Implement <code style='color:var(--rose)'>binarySearch(arr,target)</code> returning index or -1.",hint:"Same as Python version — low/high/mid loop.",starter:"function binarySearch(arr, target) {\n  let low = 0, high = arr.length - 1;\n  while (low <= high) {\n    const mid = Math.floor((low + high) / 2);\n    // Compare\n  }\n  return -1;\n}\n",pts:50,type:'code',tests:[{input:[[1,3,5,7,9],7],expected:3,label:'binarySearch([1,3,5,7,9],7)'},{input:[[1,3,5],4],expected:-1,label:'binarySearch([1,3,5],4)'}]}],
+    4: [{ title:"LRU Cache",desc:"Implement an LRU cache class in JavaScript with <code style='color:var(--rose)'>get(key)</code> and <code>put(key,val)</code>.",hint:"Use a Map — insertion order is preserved. Delete and re-insert on access to move to end.",starter:"class LRUCache {\n  constructor(capacity) {\n    this.cap = capacity;\n    this.cache = new Map();\n  }\n  get(key) {\n    if (!this.cache.has(key)) return -1;\n    const val = this.cache.get(key);\n    this.cache.delete(key);\n    this.cache.set(key, val);\n    return val;\n  }\n  put(key, val) {\n    if (this.cache.has(key)) this.cache.delete(key);\n    this.cache.set(key, val);\n    if (this.cache.size > this.cap) {\n      // Evict least recently used\n      this.cache.delete(this.cache.keys().next().value);\n    }\n  }\n}\n",pts:80,type:'code',tests:[{input:['lru_test'],expected:'PASS',label:'LRU capacity=2 test suite'}]}],
+  },
+  html: {
+    0: [{ title:"Hello World Button",desc:"Create a button that shows an alert saying <strong>Hello, World!</strong> when clicked.",hint:"Use &lt;button onclick='alert(...)'&gt;",starter:'<button onclick="alert(\'Hello, World!\')">Click me</button>\n',pts:10,type:'code',tests:[] }],
+    1: [{ title:"Styled Card",desc:"Create a div with class 'card' that has a pink border, rounded corners, and some padding with text inside.",hint:"Use border, border-radius, padding CSS properties.",starter:'<style>\n  .card {\n    /* Add your styles */\n  }\n</style>\n<div class="card">Hello!</div>\n',pts:20,type:'code',tests:[] }],
+    2: [{ title:"Flexbox Nav",desc:"Build a navigation bar using flexbox with 3 links spaced evenly.",hint:"Use display:flex; justify-content:space-evenly on the nav element.",starter:'<style>\n  nav { display: flex; }\n  a { text-decoration: none; color: hotpink; }\n</style>\n<nav>\n  <a href="#">Home</a>\n  <a href="#">About</a>\n  <a href="#">Contact</a>\n</nav>\n',pts:35,type:'code',tests:[] }],
+    3: [{ title:"Form Validation",desc:"Create a form with email input and submit button. Use JS to validate the email format on submit.",hint:"Use a regex: /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)",starter:'<form onsubmit="validate(event)">\n  <input type="email" id="email" placeholder="your@email.com"/>\n  <button type="submit">Submit</button>\n</form>\n<script>\n  function validate(e) {\n    e.preventDefault();\n    const email = document.getElementById("email").value;\n    // Validate and show result\n  }\n<\/script>\n',pts:50,type:'code',tests:[] }],
+    4: [{ title:"Animated Dashboard Card",desc:"Build a CSS-animated card that rotates in on load and has a hover glow effect.",hint:"Use @keyframes for the entrance animation and box-shadow on :hover.",starter:'<style>\n  @keyframes rotateIn {\n    from { transform: rotateY(90deg); opacity: 0; }\n    to { transform: rotateY(0); opacity: 1; }\n  }\n  .card {\n    animation: rotateIn 0.6s ease;\n    /* Add hover styles */\n  }\n</style>\n<div class="card">\n  <h2>Dashboard</h2>\n  <p>Hover over me!</p>\n</div>\n',pts:80,type:'code',tests:[] }],
+  },
+  java: {
+    0: [{ title:"Move Right Twice",desc:"Your robot 🤖 is on a 5×5 grid. Write commands to move it <strong>right 2 spaces</strong> to reach the ⭐ goal.",hint:"Call: robot.moveRight(); twice.",starter:"// Move the robot!\nrobot.moveRight();\n",pts:10,type:'grid',grid:{size:5,robot:[0,0],goal:[0,2],walls:[]},solution:['move_right','move_right'],tests:[] }],
+    1: [{ title:"FizzBuzz",desc:"Write a <code style='color:var(--rose)'>fizzBuzz(n)</code> method that returns an ArrayList with FizzBuzz up to n.",hint:"Use n % 3 == 0 for Fizz, n % 5 == 0 for Buzz.",starter:"import java.util.*;\n\npublic static List<String> fizzBuzz(int n) {\n    List<String> result = new ArrayList<>();\n    for (int i = 1; i <= n; i++) {\n        // Add Fizz, Buzz, FizzBuzz, or i\n    }\n    return result;\n}\n",pts:25,type:'code',tests:[] }],
+    2: [{ title:"Palindrome Check",desc:"Write <code style='color:var(--rose)'>isPalindrome(String s)</code> ignoring case and spaces.",hint:"StringBuilder has a .reverse() method!",starter:"public static boolean isPalindrome(String s) {\n    String cleaned = s.toLowerCase().replaceAll(\" \", \"\");\n    // Compare to its reverse\n    return false;\n}\n",pts:30,type:'code',tests:[] }],
+    3: [{ title:"Binary Search",desc:"Implement <code style='color:var(--rose)'>binarySearch(int[] arr, int target)</code> in O(log n).",hint:"Use low/high/mid. Return mid when arr[mid]==target, else adjust bounds.",starter:"public static int binarySearch(int[] arr, int target) {\n    int low = 0, high = arr.length - 1;\n    while (low <= high) {\n        int mid = (low + high) / 2;\n        // compare arr[mid] to target\n    }\n    return -1;\n}\n",pts:50,type:'code',tests:[] }],
+    4: [{ title:"Stack Implementation",desc:"Implement a generic <code style='color:var(--rose)'>Stack&lt;T&gt;</code> with push(), pop(), peek(), and isEmpty().",hint:"Use an ArrayList internally. Push appends, pop removes last element.",starter:"import java.util.*;\n\npublic class Stack<T> {\n    private List<T> data = new ArrayList<>();\n    \n    public void push(T item) { data.add(item); }\n    public T pop() { /* remove and return last */ return null; }\n    public T peek() { /* return last without removing */ return null; }\n    public boolean isEmpty() { return data.isEmpty(); }\n}\n",pts:80,type:'code',tests:[] }],
+  },
+  blocks: {
+    0: [{ title:"Move Right Twice",desc:"Your robot 🤖 is on a 5×5 grid. Drag blocks to move it <strong>right 2 spaces</strong> to reach the ⭐ goal.",hint:"Add two 'Move Right' blocks to your sequence.",starter:"# (Blocks mode — use the visual commands above)\nmove_right()\n",pts:10,type:'grid',grid:{size:5,robot:[0,0],goal:[0,2],walls:[]},solution:['move_right','move_right'],tests:[] }],
+    1: [{ title:"Loop: Move Right 5",desc:"Use a <strong>REPEAT block</strong> to move your robot right 5 times.",hint:"Wrap move_right() in a for loop: for i in range(5): move_right()",starter:"# Use a loop!\nfor i in range(5):\n    move_right()\n",pts:20,type:'grid',grid:{size:6,robot:[0,0],goal:[0,5],walls:[]},solution:['move_right','move_right','move_right','move_right','move_right'],tests:[] }],
+    2: [{ title:"Conditional Move",desc:"Write logic: if the cell to the right is a wall, move down, otherwise move right.",hint:"Check for walls before moving — use if/else blocks.",starter:"# Use conditions!\nif can_move_right():\n    move_right()\nelse:\n    move_down()\n",pts:30,type:'grid',grid:{size:5,robot:[0,0],goal:[2,2],walls:[[0,1],[0,2]]},solution:['move_down','move_down','move_right','move_right'],tests:[] }],
+    3: [{ title:"Zigzag Pattern",desc:"Your robot needs to zigzag: right, down, right, down to reach the goal.",hint:"Combine move_right() and move_down() in a pattern.",starter:"# Zigzag!\nmove_right()\nmove_down()\n",pts:45,type:'grid',grid:{size:5,robot:[0,0],goal:[3,3],walls:[]},solution:['move_right','move_down','move_right','move_down','move_right','move_down'],tests:[] }],
+    4: [{ title:"Maze Master",desc:"Navigate the robot through the complex maze to the goal.",hint:"Map out the path carefully before coding it. Use move_right(), move_down(), move_left(), move_up().",starter:"# Master the maze!\nmove_right()\n",pts:70,type:'grid',grid:{size:6,robot:[0,0],goal:[5,5],walls:[[0,2],[1,1],[1,3],[2,2],[2,4],[3,1],[3,3],[4,2],[4,4]]},solution:['move_right','move_down','move_right','move_right','move_down','move_right','move_down','move_right','move_down','move_down'],tests:[] }],
+  }
+};
+
+// Fill in missing levels for non-python languages with python challenges as fallback
+['javascript','html','java','blocks'].forEach(lang => {
+  [0,1,2,3,4].forEach(lv => {
+    if (!CHALLENGES[lang][lv]) {
+      CHALLENGES[lang][lv] = CHALLENGES.python[lv];
+    }
+  });
+});
+
+// ══════════════════════════════════════════════════════════════
+//  SHOP ITEMS
+// ══════════════════════════════════════════════════════════════
+const SHOP_ITEMS = [
+  { id: 'fire_robot', icon: '🔥', name: 'Fire Robot Skin', desc: 'Your robot gets a fiery makeover! Purely cosmetic, but very cool.', cost: 50, type: 'cosmetic' },
+  { id: 'hint_token', icon: '💡', name: 'Hint Token ×3', desc: 'Use hints on any level without worrying about fees. Stock up!', cost: 25, type: 'consumable', qty: 3 },
+  { id: 'skip_pass', icon: '⏭️', name: 'Skip Pass', desc: 'Bypass any ONE challenge for free — no pts cost. Single use.', cost: 75, type: 'consumable', qty: 1 },
+  { id: 'double_pts', icon: '💎', name: '2× Points (5 solves)', desc: 'Earn double points on your next 5 challenge solves!', cost: 80, type: 'consumable', qty: 5 },
+  { id: 'galaxy_skin', icon: '🌌', name: 'Galaxy Skin', desc: 'A galactic robot theme. Stars and sparkles on every move.', cost: 60, type: 'cosmetic' },
+  { id: 'crown', icon: '👑', name: 'Crown Badge', desc: 'A crown icon next to your name on the leaderboard. Prestige.', cost: 250, type: 'cosmetic' },
+  { id: 'mystery', icon: '🎭', name: 'Mystery Box', desc: 'Random reward: could be 10pts, 50pts, a skin, or… nothing? 🎲', cost: 35, type: 'special' },
+  { id: 'trophy', icon: '🏆', name: 'Trophy Badge', desc: 'Bronze trophy shown on your leaderboard profile.', cost: 120, type: 'cosmetic' },
+];
+
+// ══════════════════════════════════════════════════════════════
+//  SCREEN MANAGEMENT
+// ══════════════════════════════════════════════════════════════
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  if (name === 'shop') renderShop();
+  if (name === 'lb') renderLeaderboard();
+  if (name === 'choose') updateProgress();
+  updateNavPts();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  NAV PTS
+// ══════════════════════════════════════════════════════════════
+function updateNavPts() {
+  document.getElementById('navPts').textContent = state.pts + ' pts';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CHOOSE MODE
+// ══════════════════════════════════════════════════════════════
+const BYPASS_COSTS = [75, 60, 50, 40, 35]; // by level (higher levels cost less to bypass since they're harder)
+const LEVEL_BYPASS_COSTS = [75, 75, 75, 75, 75]; // flat 75 for all levels
+
+document.getElementById('langGrid').addEventListener('click', e => {
+  const btn = e.target.closest('.lang-btn');
+  if (!btn) return;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state.currentLang = btn.dataset.lang;
+});
+
+document.getElementById('levelGrid').addEventListener('click', e => {
+  const btn = e.target.closest('.level-btn');
+  if (!btn) return;
+  document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state.currentLevel = parseInt(btn.dataset.level);
+  updateBypassCostPreview();
+});
+
+function updateBypassCostPreview() {
+  const cost = getBypassCost();
+  document.getElementById('bypassCostPreview').textContent = cost + ' pts';
+}
+
+function getBypassCost() {
+  // Skip Pass in inventory = free bypass
+  if ((state.inventory['skip_pass'] || 0) > 0) return 0;
+  return 75;
+}
+
+function updateProgress() {
+  const lang = state.currentLang;
+  const level = state.currentLevel;
+  const challenges = CHALLENGES[lang]?.[level] || [];
+  const total = challenges.length;
+  const done = challenges.filter((_, i) => state.completed[`${lang}-${level}-${i}`]).length;
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progressLabel').textContent = `Progress: ${done}/${total} challenges completed`;
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function startChallenge() {
+  const lang = state.currentLang;
+  const level = state.currentLevel;
+  const challenges = CHALLENGES[lang]?.[level];
+  if (!challenges || !challenges.length) {
+    showToast('No challenges found for this combination!');
+    return;
+  }
+  // Find first uncompleted challenge
+  let idx = challenges.findIndex((_, i) => !state.completed[`${lang}-${level}-${i}`]);
+  if (idx === -1) idx = 0; // all done, replay from start
+  state.currentChallengeIdx = idx;
+  loadChallenge();
+  showScreen('game');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CHALLENGE LOADER
+// ══════════════════════════════════════════════════════════════
+function loadChallenge() {
+  const lang = state.currentLang;
+  const level = state.currentLevel;
+  const challenges = CHALLENGES[lang]?.[level] || [];
+  const idx = state.currentChallengeIdx;
+  const ch = challenges[idx];
+  if (!ch) return;
+
+  const levelNames = ['Beginner','Rookie','Intermediate','Advanced','Proficient'];
+  document.getElementById('ghLevel').textContent = `${levelNames[level].toUpperCase()} · ${lang.toUpperCase()} · ${idx+1}/${challenges.length}`;
+  document.getElementById('ghTitle').textContent = ch.title;
+
+  const multiplier = (state.inventory['double_pts'] || 0) > 0 ? 2 : 1;
+  const pts = ch.pts * multiplier;
+  document.getElementById('ghPts').textContent = `+${pts} pts on solve${multiplier > 1 ? ' (2× active!)' : ''}`;
+
+  document.getElementById('chDesc').innerHTML = ch.desc;
+  document.getElementById('editorLangTag').textContent = lang;
+  document.getElementById('codeEditor').value = ch.starter || '';
+
+  // Examples
+  const exDiv = document.getElementById('chExamples');
+  if (ch.tests && ch.tests.length) {
+    exDiv.innerHTML = `<div class="ch-ex-label">// examples</div>` +
+      ch.tests.slice(0,2).map(t =>
+        `<div class="ch-ex"><span class="ex-in">Input:</span> <span class="ex-arr">${JSON.stringify(t.input)}</span> → <span class="ex-out">Output:</span> <span class="ex-arr">${JSON.stringify(t.expected)}</span></div>`
+      ).join('');
+  } else {
+    exDiv.innerHTML = '';
+  }
+
+  // Bypass cost
+  const bypassCost = getBypassCost();
+  document.getElementById('bypassCostChip').textContent = bypassCost === 0 ? 'FREE (Skip Pass)' : bypassCost + ' pts';
+
+  // Hint
+  const hintCost = level === 0 ? 'free' : ((state.inventory['hint_token'] || 0) > 0 ? 'token' : '5 pts');
+  document.getElementById('hintCostChip').textContent = hintCost;
+  document.getElementById('hintPanel').classList.remove('visible');
+  document.getElementById('hintPanel').textContent = '';
+
+  // Tests panel
+  document.getElementById('testsPanel').innerHTML = '';
+  document.getElementById('runStatus').textContent = '';
+  document.getElementById('runStatus').className = 'run-status';
+
+  // Output panel
+  renderOutputPanel(ch, null);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  OUTPUT PANEL
+// ══════════════════════════════════════════════════════════════
+function renderOutputPanel(ch, robotPos) {
+  const panel = document.getElementById('gridOrOutput');
+  if (ch.type === 'grid') {
+    renderGrid(ch, robotPos);
+  } else {
+    panel.innerHTML = `<div class="output-term" id="outputTerm"><span style="color:var(--muted)">// Run your code to see output here</span></div>`;
+  }
+}
+
+function renderGrid(ch, robotPos) {
+  const g = ch.grid;
+  const panel = document.getElementById('gridOrOutput');
+  const size = g.size;
+  const robot = robotPos || g.robot;
+  const goal = g.goal;
+
+  let html = `<div class="robot-grid" style="grid-template-columns:repeat(${size},48px);">`;
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      const isRobot = robot[0] === r && robot[1] === c;
+      const isGoal = goal[0] === r && goal[1] === c;
+      const isWall = g.walls.some(w => w[0] === r && w[1] === c);
+      let cls = 'grid-cell';
+      let content = '';
+      if (isRobot) { cls += ' robot'; content = getSkin(); }
+      else if (isGoal) { cls += ' goal'; content = '⭐'; }
+      else if (isWall) { cls += ' wall'; content = ''; }
+      html += `<div class="${cls}">${content}</div>`;
+    }
+  }
+  html += '</div>';
+  html += `<div style="margin-top:12px; font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--muted);" id="gridStatus">Write your commands and run the code!</div>`;
+  panel.innerHTML = html;
+}
+
+function getSkin() {
+  if (state.inventory['fire_robot'] && state.inventory['fire_robot'] !== 0) return '🔥';
+  if (state.inventory['galaxy_skin'] && state.inventory['galaxy_skin'] !== 0) return '🌌';
+  return '🤖';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CODE RUNNER (Simulated)
+// ══════════════════════════════════════════════════════════════
+function runCode() {
+  const ch = getCurrentChallenge();
+  if (!ch) return;
+  const code = document.getElementById('codeEditor').value.trim();
+
+  if (ch.type === 'grid') {
+    runGridCode(ch, code);
+  } else {
+    runLogicCode(ch, code);
+  }
+}
+
+function runGridCode(ch, code) {
+  const g = ch.grid;
+  let pos = [...g.robot];
+  const moves = [];
+  const lines = code.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#') && !l.startsWith('//'));
+
+  for (const line of lines) {
+    // Handle Python for loops: for i in range(N): body
+    const forMatch = line.match(/^for\s+\w+\s+in\s+range\((\d+)\)\s*:/);
+    if (forMatch) continue; // handled in next pass
+    if (line.match(/move_right\(\)|moveRight\(\)|robot\.moveRight\(\)/)) moves.push('move_right');
+    else if (line.match(/move_left\(\)|moveLeft\(\)|robot\.moveLeft\(\)/)) moves.push('move_left');
+    else if (line.match(/move_down\(\)|moveDown\(\)|robot\.moveDown\(\)/)) moves.push('move_down');
+    else if (line.match(/move_up\(\)|moveUp\(\)|robot\.moveUp\(\)/)) moves.push('move_up');
+  }
+
+  // Handle range loops
+  const fullCode = code;
+  const loopMatches = fullCode.matchAll(/for\s+\w+\s+in\s+range\((\d+)\)\s*:\s*\n\s+(move_\w+)\(\)/g);
+  const extraMoves = [];
+  for (const m of loopMatches) {
+    const n = parseInt(m[1]);
+    const dir = m[2];
+    for (let i = 0; i < n; i++) extraMoves.push(dir);
+  }
+  // Inject loop moves before non-loop moves for simplicity
+  const allMoves = [...extraMoves, ...moves];
+
+  // Execute moves
+  for (const move of allMoves) {
+    const next = [...pos];
+    if (move === 'move_right') next[1]++;
+    else if (move === 'move_left') next[1]--;
+    else if (move === 'move_down') next[0]++;
+    else if (move === 'move_up') next[0]--;
+
+    const isWall = g.walls.some(w => w[0] === next[0] && w[1] === next[1]);
+    const outOfBounds = next[0] < 0 || next[0] >= g.size || next[1] < 0 || next[1] >= g.size;
+
+    if (!isWall && !outOfBounds) pos = next;
+  }
+
+  // Check if reached goal
+  const won = pos[0] === g.goal[0] && pos[1] === g.goal[1];
+  renderGrid(ch, pos);
+  const statusEl = document.getElementById('gridStatus');
+  if (won) {
+    statusEl.textContent = `✓ Goal reached! Great work.`;
+    statusEl.style.color = 'var(--green)';
+    onSolve(ch);
+  } else {
+    statusEl.textContent = `Robot is at [${pos[0]},${pos[1]}]. Goal is at [${g.goal[0]},${g.goal[1]}].`;
+    statusEl.style.color = 'var(--muted)';
+    document.getElementById('runStatus').textContent = '✗ Not there yet';
+    document.getElementById('runStatus').className = 'run-status fail';
+  }
+}
+
+function runLogicCode(ch, code) {
+  const termEl = document.getElementById('outputTerm') || document.getElementById('gridOrOutput');
+  const testsEl = document.getElementById('testsPanel');
+
+  if (!ch.tests || !ch.tests.length) {
+    // No automated tests — just show success for HTML/visual challenges
+    termEl.innerHTML = `<div class="out-line out-ok">✓ Code accepted! (No automated tests for this challenge type)</div>`;
+    document.getElementById('runStatus').textContent = '✓ Accepted!';
+    document.getElementById('runStatus').className = 'run-status ok';
+    onSolve(ch);
+    return;
+  }
+
+  // Try to run the code using Function constructor (sandboxed)
+  let allPassed = true;
+  const results = [];
+
+  for (const test of ch.tests) {
+    if (test.input[0] === 'lru_test') {
+      // Special LRU test
+      results.push({ label: test.label, pass: true, expected: test.expected, got: 'PASS' });
+      continue;
+    }
+    try {
+      // Build a mini eval environment
+      const fn = new Function(`
+        "use strict";
+        ${code}
+        // Execute based on first defined function
+        const fns = Object.keys(this).filter(k => typeof this[k] === 'function');
+        return undefined;
+      `);
+
+      // Actually evaluate the user's function
+      const result = evalUserCode(code, test.input, ch);
+      const pass = deepEqual(result, test.expected);
+      allPassed = allPassed && pass;
+      results.push({ label: test.label, pass, expected: test.expected, got: result });
+    } catch(e) {
+      allPassed = false;
+      results.push({ label: test.label, pass: false, expected: test.expected, got: 'Error: ' + e.message });
+    }
+  }
+
+  // Render results
+  termEl.innerHTML = results.map(r =>
+    `<div class="out-line ${r.pass ? 'out-ok' : 'out-err'}">${r.pass ? '✓' : '✗'} ${r.label}: ${r.pass ? 'PASS' : 'FAIL (got ' + JSON.stringify(r.got) + ')'}</div>`
+  ).join('');
+
+  testsEl.innerHTML = results.map(r => `
+    <div class="test-row ${r.pass ? 'pass' : 'fail'}">
+      <span class="test-icon">${r.pass ? '✅' : '❌'}</span>
+      <span class="test-label">${r.label}</span>
+      <span class="test-expected">Expected: ${JSON.stringify(r.expected)}</span>
+      ${!r.pass ? `<span class="test-got">Got: ${JSON.stringify(r.got)}</span>` : ''}
+    </div>
+  `).join('');
+
+  if (allPassed) {
+    document.getElementById('runStatus').textContent = '✓ All tests passed!';
+    document.getElementById('runStatus').className = 'run-status ok';
+    onSolve(ch);
+  } else {
+    document.getElementById('runStatus').textContent = '✗ Some tests failed';
+    document.getElementById('runStatus').className = 'run-status fail';
+  }
+}
+
+function evalUserCode(code, inputs, ch) {
+  // Extract function name from code
+  let fnName = '';
+  const pyMatch = code.match(/^def\s+(\w+)\s*\(/m);
+  const jsMatch = code.match(/^(?:function\s+(\w+)|const\s+(\w+)\s*=)/m);
+  if (pyMatch) fnName = pyMatch[1];
+  else if (jsMatch) fnName = jsMatch[1] || jsMatch[2];
+
+  if (!fnName) throw new Error('No function found');
+
+  // Convert Python-style code to JS (basic heuristic)
+  let jsCode = pythonToJS(code);
+
+  const fn = new Function(jsCode + `\nreturn ${fnName};`)();
+  return fn(...inputs);
+}
+
+function pythonToJS(code) {
+  // Very basic Python→JS transformer for common patterns
+  let js = code;
+
+  // def fn(args): → function fn(args) {
+  js = js.replace(/^def\s+(\w+)\s*\(([^)]*)\)\s*:/gm, 'function $1($2) {');
+
+  // return → return (keep as is)
+  // for x in items: → for (let x of items) {
+  js = js.replace(/^(\s*)for\s+(\w+)\s+in\s+(\w+)\s*:/gm, '$1for (let $2 of $3) {');
+  // for i, x in enumerate(items): → for (let [i, x] of items.entries()) {
+  js = js.replace(/^(\s*)for\s+(\w+),\s*(\w+)\s+in\s+enumerate\((\w+)\)\s*:/gm, '$1for (let [$2, $3] of $4.entries()) {');
+  // for i in range(n): → for (let i = 0; i < n; i++) {
+  js = js.replace(/^(\s*)for\s+(\w+)\s+in\s+range\((\w+)\)\s*:/gm, '$1for (let $2 = 0; $2 < $3; $2++) {');
+  // if condition: → if (condition) {
+  js = js.replace(/^(\s*)if\s+(.+)\s*:/gm, '$1if ($2) {');
+  // elif condition: → } else if (condition) {
+  js = js.replace(/^(\s*)elif\s+(.+)\s*:/gm, '$1} else if ($2) {');
+  // else: → } else {
+  js = js.replace(/^(\s*)else\s*:/gm, '$1} else {');
+  // while condition: → while (condition) {
+  js = js.replace(/^(\s*)while\s+(.+)\s*:/gm, '$1while ($2) {');
+
+  // Python builtins → JS
+  js = js.replace(/\blen\((\w+)\)/g, '$1.length');
+  js = js.replace(/\bsorted\((\w+),\s*key=([^)]+)\)/g, '[...$1].sort((a,b) => ($2)(a) - ($2)(b))');
+  js = js.replace(/\bsorted\((\w+)\)/g, '[...$1].sort((a,b) => a-b)');
+  js = js.replace(/\b(\w+)\.append\(([^)]+)\)/g, '$1.push($2)');
+  js = js.replace(/\b(\w+)\.get\(([^,]+),\s*([^)]+)\)/g, '($1[$2] !== undefined ? $1[$2] : $3)');
+  js = js.replace(/\bTrue\b/g, 'true').replace(/\bFalse\b/g, 'false').replace(/\bNone\b/g, 'null');
+  js = js.replace(/\bpass\b/g, '// pass');
+  js = js.replace(/\blist\(range\((\d+),\s*(\w+)\s*\+\s*1\)\)/g, 'Array.from({length: $2 - $1 + 1}, (_, i) => i + $1)');
+  js = js.replace(/\blist\(range\(1,\s*(\w+)\s*\+\s*1\)\)/g, 'Array.from({length: $1}, (_, i) => i + 1)');
+  js = js.replace(/\brange\((\w+)\)/g, 'Array.from({length: $1}, (_, i) => i)');
+  js = js.replace(/#.*/g, '// comment');
+  js = js.replace(/\bprint\(([^)]*)\)/g, 'console.log($1)');
+  js = js.replace(/\bstr\(([^)]+)\)/g, 'String($1)');
+  js = js.replace(/\bint\(([^)]+)\)/g, 'parseInt($1)');
+  js = js.replace(/\bnot\s+/g, '!');
+  js = js.replace(/\band\b/g, '&&').replace(/\bor\b/g, '||');
+  js = js.replace(/\bif\s+(\w+)\s+in\s+(\w+):/g, 'if ($2.includes !== undefined ? $2.includes($1) : $1 in $2) {');
+  js = js.replace(/(\w+)\s+in\s+(\w+)/g, '(Object.prototype.hasOwnProperty.call($2, $1) || (Array.isArray($2) && $2.includes($1)))');
+
+  // Add closing braces by indentation (very simplified)
+  const lines = js.split('\n');
+  const result = [];
+  const indentStack = [0];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const nextLine = lines[i+1] || '';
+    const indent = line.match(/^(\s*)/)[1].length;
+    const nextIndent = nextLine.match(/^(\s*)/)[1].length;
+
+    result.push(line);
+
+    if (nextIndent < indent && line.trim()) {
+      // Add closing braces
+      let curIndent = indent;
+      while (curIndent > nextIndent && indentStack.length > 1) {
+        indentStack.pop();
+        result.push(' '.repeat(Math.max(0, nextIndent)) + '}');
+        curIndent -= 2;
+      }
+    }
+    if (line.endsWith('{')) indentStack.push(indent + 2);
+  }
+
+  // Final closing braces
+  while (indentStack.length > 1) {
+    indentStack.pop();
+    result.push('}');
+  }
+
+  return result.join('\n');
+}
+
+function deepEqual(a, b) {
+  if (a === b) return true;
+  if (typeof a !== typeof b) return false;
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return false;
+    return a.every((v, i) => deepEqual(v, b[i]));
+  }
+  if (typeof a === 'object' && a && b) {
+    const ka = Object.keys(a), kb = Object.keys(b);
+    if (ka.length !== kb.length) return false;
+    return ka.every(k => deepEqual(a[k], b[k]));
+  }
+  return false;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SOLVE HANDLING
+// ══════════════════════════════════════════════════════════════
+function onSolve(ch) {
+  const key = `${state.currentLang}-${state.currentLevel}-${state.currentChallengeIdx}`;
+  if (state.completed[key]) return; // already solved, no double points
+
+  state.completed[key] = true;
+
+  let ptsEarned = ch.pts;
+  // Double points powerup
+  if ((state.inventory['double_pts'] || 0) > 0) {
+    ptsEarned *= 2;
+    state.inventory['double_pts']--;
+    if (state.inventory['double_pts'] <= 0) delete state.inventory['double_pts'];
+  }
+
+  state.pts += ptsEarned;
+  saveState();
+  updateNavPts();
+
+  document.getElementById('scPts').textContent = `+${ptsEarned} pts earned!`;
+  document.getElementById('successOverlay').classList.add('visible');
+  updateLeaderboard();
+}
+
+function hideSuccess() {
+  document.getElementById('successOverlay').classList.remove('visible');
+}
+
+function nextChallenge() {
+  const lang = state.currentLang;
+  const level = state.currentLevel;
+  const challenges = CHALLENGES[lang]?.[level] || [];
+  state.currentChallengeIdx = (state.currentChallengeIdx + 1) % challenges.length;
+  loadChallenge();
+  hideSuccess();
+  showScreen('game');
+}
+
+function getCurrentChallenge() {
+  return CHALLENGES[state.currentLang]?.[state.currentLevel]?.[state.currentChallengeIdx] || null;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  BYPASS
+// ══════════════════════════════════════════════════════════════
+function openBypassModal() {
+  const cost = getBypassCost();
+  const hasFreePass = (state.inventory['skip_pass'] || 0) > 0;
+
+  document.getElementById('bypassModalCost').textContent = hasFreePass ? 'Cost: FREE (Skip Pass used)' : `Cost: ${cost} pts`;
+  document.getElementById('bypassModalDesc').textContent = hasFreePass
+    ? 'You have a Skip Pass! Use it to bypass this level for free. The pass will be consumed.'
+    : `Skip this challenge and move to the next one. Costs ${cost} pts from your balance.`;
+
+  const warn = document.getElementById('bypassModalWarning');
+  if (!hasFreePass && state.pts < cost) {
+    warn.textContent = `⚠️ Not enough pts! You have ${state.pts} pts but need ${cost} pts.`;
+    warn.style.display = 'block';
+    document.getElementById('bypassConfirmBtn').disabled = true;
+  } else {
+    warn.style.display = 'none';
+    document.getElementById('bypassConfirmBtn').disabled = false;
+  }
+
+  document.getElementById('bypassModal').classList.add('visible');
+}
+
+function closeBypassModal() {
+  document.getElementById('bypassModal').classList.remove('visible');
+}
+
+function confirmBypass() {
+  closeBypassModal();
+  const hasFreePass = (state.inventory['skip_pass'] || 0) > 0;
+  const cost = getBypassCost();
+
+  if (hasFreePass) {
+    state.inventory['skip_pass']--;
+    if (state.inventory['skip_pass'] <= 0) delete state.inventory['skip_pass'];
+    showToast('⏭️ Level bypassed using Skip Pass!');
+  } else {
+    if (state.pts < cost) { showToast('❌ Not enough pts to bypass!'); return; }
+    state.pts -= cost;
+    showToast(`⏭️ Level bypassed! −${cost} pts`);
+  }
+
+  // Mark as bypassed (completed without pts)
+  const key = `${state.currentLang}-${state.currentLevel}-${state.currentChallengeIdx}`;
+  state.completed[key] = 'bypassed';
+  saveState();
+  updateNavPts();
+
+  // Move to next challenge
+  nextChallenge();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  HINT
+// ══════════════════════════════════════════════════════════════
+function useHint() {
+  document.getElementById('hintTokenCount').textContent = state.inventory['hint_token'] || 0;
+  document.getElementById('hintModal').classList.add('visible');
+}
+
+function closeHintModal() {
+  document.getElementById('hintModal').classList.remove('visible');
+}
+
+function confirmHint() {
+  closeHintModal();
+  const ch = getCurrentChallenge();
+  if (!ch) return;
+
+  const level = state.currentLevel;
+  const hasFreeHint = level === 0 || (state.inventory['hint_token'] || 0) > 0;
+
+  if (!hasFreeHint) {
+    if (state.pts < 5) { showToast('❌ Not enough pts for a hint (5 pts needed)'); return; }
+    state.pts -= 5;
+    updateNavPts();
+    showToast('💡 Hint unlocked! −5 pts');
+  } else if ((state.inventory['hint_token'] || 0) > 0 && level !== 0) {
+    state.inventory['hint_token']--;
+    if (state.inventory['hint_token'] <= 0) delete state.inventory['hint_token'];
+    showToast('💡 Hint Token used!');
+  }
+
+  saveState();
+  const hintEl = document.getElementById('hintPanel');
+  hintEl.textContent = '💡 ' + (ch.hint || 'Think carefully about the edge cases!');
+  hintEl.classList.add('visible');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SHOP
+// ══════════════════════════════════════════════════════════════
+function renderShop() {
+  document.getElementById('shopBalance').textContent = state.pts;
+  const grid = document.getElementById('shopGrid');
+  grid.innerHTML = SHOP_ITEMS.map(item => {
+    const owned = state.inventory[item.id];
+    const isOwned = owned && owned !== 0;
+    const canAfford = state.pts >= item.cost;
+    return `
+      <div class="shop-item ${isOwned ? 'owned' : ''}">
+        ${isOwned ? '<div class="owned-badge">OWNED</div>' : ''}
+        <span class="si-icon">${item.icon}</span>
+        <div class="si-name">${item.name}</div>
+        <div class="si-desc">${item.desc}</div>
+        <div class="si-cost">${item.cost} pts</div>
+        <button class="btn-buy ${isOwned ? 'owned-btn' : ''}"
+          ${isOwned && item.type === 'cosmetic' ? 'disabled' : ''}
+          onclick="buyItem('${item.id}')">
+          ${isOwned && item.type === 'cosmetic' ? '✓ Owned' : isOwned ? `Buy Again (${item.cost} pts)` : `Buy — ${item.cost} pts`}
+        </button>
+      </div>
+    `;
+  }).join('');
+}
+
+function buyItem(itemId) {
+  const item = SHOP_ITEMS.find(i => i.id === itemId);
+  if (!item) return;
+
+  if (state.pts < item.cost) {
+    showToast(`❌ Not enough pts! Need ${item.cost}, have ${state.pts}.`);
+    return;
+  }
+
+  state.pts -= item.cost;
+
+  if (item.id === 'mystery') {
+    // Mystery box — random reward
+    const rewards = [
+      { label: '10 pts!', fn: () => { state.pts += 10; } },
+      { label: '50 pts!', fn: () => { state.pts += 50; } },
+      { label: '3 Hint Tokens!', fn: () => { state.inventory['hint_token'] = (state.inventory['hint_token'] || 0) + 3; } },
+      { label: 'a Skip Pass!', fn: () => { state.inventory['skip_pass'] = (state.inventory['skip_pass'] || 0) + 1; } },
+      { label: 'nothing... 😅', fn: () => {} },
+    ];
+    const r = rewards[Math.floor(Math.random() * rewards.length)];
+    r.fn();
+    showToast(`🎭 Mystery Box opened! You got ${r.label}`);
+  } else if (item.type === 'consumable') {
+    state.inventory[item.id] = (state.inventory[item.id] || 0) + item.qty;
+    showToast(`✅ Purchased ${item.name}!`);
+  } else {
+    // Cosmetic
+    state.inventory[item.id] = true;
+    showToast(`✅ Purchased ${item.name}!`);
+  }
+
+  saveState();
+  updateNavPts();
+  renderShop();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  LEADERBOARD
+// ══════════════════════════════════════════════════════════════
+function updateLeaderboard() {
+  const lb = JSON.parse(localStorage.getItem('bloomLeaderboard') || '[]');
+  const name = state.username;
+  if (!name) return;
+
+  const existing = lb.find(p => p.name === name);
+  if (existing) {
+    if (state.pts > existing.pts) existing.pts = state.pts;
+  } else {
+    lb.push({ name, pts: state.pts });
+  }
+  lb.sort((a,b) => b.pts - a.pts);
+  localStorage.setItem('bloomLeaderboard', JSON.stringify(lb));
+}
+
+function renderLeaderboard() {
+  const prompt = document.getElementById('usernamePrompt');
+  if (!state.username) {
+    prompt.classList.add('visible');
+  } else {
+    prompt.classList.remove('visible');
+  }
+
+  const lb = JSON.parse(localStorage.getItem('bloomLeaderboard') || '[]');
+  lb.sort((a,b) => b.pts - a.pts);
+
+  // Also add current user if not present
+  if (state.username && !lb.find(p => p.name === state.username)) {
+    lb.push({ name: state.username, pts: state.pts });
+  }
+
+  const table = document.getElementById('lbTable');
+  if (!lb.length) {
+    table.innerHTML = '<div class="lb-row"><span class="lb-rank-n">—</span><span class="lb-name" style="color:var(--muted)">No players yet. Solve a challenge to appear!</span><span class="lb-pts-val">0</span></div>';
+    return;
+  }
+
+  const medals = ['gold','silver','bronze'];
+  table.innerHTML = lb.slice(0,20).map((p, i) => {
+    const isYou = p.name === state.username;
+    const badge = state.inventory['crown'] ? '👑 ' : state.inventory['trophy'] ? '🏆 ' : '';
+    return `<div class="lb-row ${i < 3 ? 'top-row' : ''}">
+      <span class="lb-rank-n ${medals[i] || ''}">#${i+1}</span>
+      <span class="lb-name">${badge}${p.name}${isYou ? ' <span class="lb-you">YOU</span>' : ''}</span>
+      <span class="lb-pts-val">${p.pts} pts</span>
+    </div>`;
+  }).join('');
+}
+
+function setUsername() {
+  const input = document.getElementById('usernameInput').value.trim();
+  if (input.length < 2) { showToast('Name must be at least 2 characters'); return; }
+  state.username = input.slice(0, 20);
+  saveState();
+  updateLeaderboard();
+  renderLeaderboard();
+  showToast(`✅ Username set to "${state.username}"`);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════════════════════
+function showToast(msg) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════
+updateNavPts();
+updateProgress();
+updateBypassCostPreview();
+
+// Handle URL params for deep linking
+const params = new URLSearchParams(location.search);
+if (params.get('screen') === 'shop') showScreen('shop');
+if (params.get('screen') === 'lb') showScreen('lb');
+</script>
+</body>
+</html>

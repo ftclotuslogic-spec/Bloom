@@ -216,6 +216,52 @@
 
     @media(max-width:700px){.scratch-mode.visible{flex-direction:column;}.palette-area{width:100%;max-height:none;}.palette-col{flex-direction:row;flex-wrap:wrap;}}
     @media(max-width:600px){nav{padding:0 16px;}.game-layout{padding:12px 16px 40px;}.ch-header,.ch-nav,.level-bar{padding-left:16px;padding-right:16px;}}
+
+    /* ── MINI-LESSON CARD ── */
+    .lesson-card{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:0 24px 40px;}
+    .lesson-inner{background:var(--card);border:1px solid var(--border-bright);border-radius:20px;overflow:hidden;}
+    .lesson-hero{background:linear-gradient(135deg,rgba(212,120,154,0.15),rgba(59,130,246,0.08));padding:32px 36px 24px;border-bottom:1px solid var(--border);}
+    .lesson-badge{display:inline-flex;align-items:center;gap:6px;background:var(--accent-dim);border:1px solid rgba(212,120,154,0.3);color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:0.68rem;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:0.5px;margin-bottom:16px;}
+    .lesson-icon{font-size:3rem;margin-bottom:12px;display:block;}
+    .lesson-concept{font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px;}
+    .lesson-body{font-size:0.88rem;color:var(--muted);line-height:1.9;white-space:pre-line;}
+    .lesson-body code{background:rgba(212,120,154,0.12);color:var(--accent);padding:1px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.82rem;}
+    .lesson-example{background:#0b1220;border:1px solid rgba(59,130,246,0.2);border-radius:12px;padding:18px 20px;margin:20px 36px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:#94c8f0;line-height:1.9;white-space:pre;}
+    .lesson-ex-label{font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+    .lesson-tip{background:rgba(168,197,160,0.08);border:1px solid rgba(168,197,160,0.25);border-radius:10px;padding:14px 18px;margin:0 36px 24px;font-size:0.82rem;color:var(--green);}
+    .lesson-tip strong{color:#c8e8c0;}
+    .lesson-footer{padding:20px 36px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+    .lesson-pts-note{font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted);}
+    .lesson-next{background:linear-gradient(135deg,var(--accent),var(--rose));color:#0d0b10;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;padding:12px 28px;border:none;border-radius:10px;cursor:pointer;transition:all .2s;}
+    .lesson-next:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(212,120,154,0.4);}
+
+    /* Extra level button color */
+    .lv-btn.lv-2.active{background:#7c9ecf;border-color:#7c9ecf;}
+    .lv-btn.lv-3.active{background:var(--purple);border-color:var(--purple);}
+    .lv-btn.lv-4.active{background:var(--orange);border-color:var(--orange);}
+    .lv-btn.lv-5.active{background:var(--red);border-color:var(--red);}
+
+    /* ── DEV MODE PANEL ── */
+    #devToggle{position:fixed;bottom:20px;right:20px;z-index:9999;width:38px;height:38px;border-radius:50%;background:rgba(30,16,24,0.85);border:1px solid var(--border);color:var(--muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;backdrop-filter:blur(8px);}
+    #devToggle:hover{border-color:var(--accent);color:var(--accent);}
+    #devToggle.active{background:rgba(212,120,154,0.15);border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 3px rgba(212,120,154,0.2);}
+    #devPanel{display:none;position:fixed;bottom:68px;right:20px;z-index:9998;background:var(--card);border:1px solid var(--border-bright);border-radius:16px;padding:20px;width:260px;box-shadow:0 16px 48px rgba(0,0,0,0.7);backdrop-filter:blur(16px);}
+    #devPanel.show{display:block;animation:popIn .2s ease;}
+    .dev-header{font-family:'Space Grotesk',sans-serif;font-size:0.88rem;font-weight:700;color:var(--accent);margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+    .dev-sub{font-size:0.72rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:14px;}
+    .dev-sep{border:none;border-top:1px solid var(--border);margin:12px 0;}
+    .dev-section{font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+    .dev-btn{width:100%;padding:8px 12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.8rem;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text);text-align:left;transition:all .15s;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+    .dev-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .dev-btn:active{transform:scale(0.98);}
+    .dev-btn.danger{border-color:rgba(239,68,68,0.3);color:var(--red);}
+    .dev-btn.danger:hover{background:rgba(239,68,68,0.08);}
+    .dev-pts-row{display:flex;gap:6px;margin-bottom:6px;}
+    .dev-pts-btn{flex:1;padding:7px 4px;border-radius:7px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:0.72rem;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--green);text-align:center;transition:all .15s;}
+    .dev-pts-btn:hover{border-color:var(--green);background:rgba(168,197,160,0.08);}
+    .dev-status{font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--muted);margin-top:10px;padding:8px 10px;background:var(--surface);border-radius:6px;line-height:1.8;}
+    .dev-status span{color:var(--accent);}
+    .dev-badge{font-family:'JetBrains Mono',monospace;font-size:0.58rem;background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3);padding:2px 7px;border-radius:10px;margin-left:auto;}
   </style>
 </head>
 <body>
@@ -224,19 +270,20 @@
 <div id="dragGhost"></div>
 
 <nav>
-  <a href="index.html" class="nav-logo"><span class="logo-lotus"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 8px rgba(212,120,154,0.7));flex-shrink:0"><defs><linearGradient id="llg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f0b8cc"/><stop offset="100%" stop-color="#a85070"/></linearGradient><linearGradient id="llg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e89ab4"/><stop offset="100%" stop-color="#c06888"/></linearGradient></defs><path d="M14 22 C10 22 5 18 6 12 C8 15 11 17 14 18 Z" fill="url(#llg1)" opacity="0.85"/><path d="M14 22 C18 22 23 18 22 12 C20 15 17 17 14 18 Z" fill="url(#llg1)" opacity="0.85"/><path d="M14 22 C11 20 8 15 10 9 C11 13 12.5 16 14 18 Z" fill="url(#llg2)" opacity="0.9"/><path d="M14 22 C17 20 20 15 18 9 C17 13 15.5 16 14 18 Z" fill="url(#llg2)" opacity="0.9"/><path d="M14 22 C12 18 12 13 14 7 C16 13 16 18 14 22 Z" fill="#f5d0e4"/><ellipse cx="14" cy="18" rx="2" ry="2.2" fill="#fff0f6" opacity="0.8"/></svg></span>Bloom</a>
+  <a href="../index.html" class="nav-logo"><span class="logo-lotus"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 8px rgba(212,120,154,0.7));flex-shrink:0"><defs><linearGradient id="llg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f0b8cc"/><stop offset="100%" stop-color="#a85070"/></linearGradient><linearGradient id="llg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e89ab4"/><stop offset="100%" stop-color="#c06888"/></linearGradient></defs><path d="M14 22 C10 22 5 18 6 12 C8 15 11 17 14 18 Z" fill="url(#llg1)" opacity="0.85"/><path d="M14 22 C18 22 23 18 22 12 C20 15 17 17 14 18 Z" fill="url(#llg1)" opacity="0.85"/><path d="M14 22 C11 20 8 15 10 9 C11 13 12.5 16 14 18 Z" fill="url(#llg2)" opacity="0.9"/><path d="M14 22 C17 20 20 15 18 9 C17 13 15.5 16 14 18 Z" fill="url(#llg2)" opacity="0.9"/><path d="M14 22 C12 18 12 13 14 7 C16 13 16 18 14 22 Z" fill="#f5d0e4"/><ellipse cx="14" cy="18" rx="2" ry="2.2" fill="#fff0f6" opacity="0.8"/></svg></span>Bloom</a>
   <div class="nav-right">
     <div class="nav-pts">⭐ <span id="navPts">0</span></div>
-    <a href="index.html" class="back-btn">← Home</a>
+    <a href="../index.html" class="back-btn">← Home</a>
   </div>
 </nav>
 
 <div class="level-bar">
   <button class="lv-btn lv-0" onclick="selectLevel(0)">🌱 Beginner</button>
   <button class="lv-btn lv-1" onclick="selectLevel(1)">🚀 Rookie</button>
-  <button class="lv-btn lv-2" onclick="selectLevel(2)">⚡ Intermediate</button>
-  <button class="lv-btn lv-3" onclick="selectLevel(3)">🔥 Advanced</button>
-  <button class="lv-btn lv-4" onclick="selectLevel(4)">💎 Proficient</button>
+  <button class="lv-btn lv-2" onclick="selectLevel(2)">🗺️ Explorer</button>
+  <button class="lv-btn lv-3" onclick="selectLevel(3)">⚡ Intermediate</button>
+  <button class="lv-btn lv-4" onclick="selectLevel(4)">🔥 Advanced</button>
+  <button class="lv-btn lv-5" onclick="selectLevel(5)">💎 Proficient</button>
 </div>
 
 <div class="ch-header">
@@ -252,7 +299,28 @@
 
 <div class="ch-nav" id="chalNav"></div>
 
-<div class="game-layout">
+<!-- MINI-LESSON CARD (shown instead of game-layout for lesson challenges) -->
+<div class="lesson-card" id="lessonCard" style="display:none;">
+  <div class="lesson-inner">
+    <div class="lesson-hero">
+      <div class="lesson-badge">📖 MINI-LESSON</div>
+      <span class="lesson-icon" id="lessonIcon">📚</span>
+      <div class="lesson-concept" id="lessonConcept">Concept</div>
+      <div class="lesson-body" id="lessonBody"></div>
+    </div>
+    <div style="padding:20px 36px 0;">
+      <div class="lesson-ex-label">// EXAMPLE</div>
+    </div>
+    <div class="lesson-example" id="lessonExample"></div>
+    <div class="lesson-tip" id="lessonTip"></div>
+    <div class="lesson-footer">
+      <div class="lesson-pts-note">💡 Read, then try the practice challenge →</div>
+      <button class="lesson-next" onclick="advancePastLesson()">Got it — Let's Practice! →</button>
+    </div>
+  </div>
+</div>
+
+<div class="game-layout" id="gameLayout">
   <div class="grid-panel" id="gridPanel">
     <div class="panel-label">// grid</div>
     <div id="gameGrid"></div>
@@ -361,7 +429,7 @@
     <p id="winMessage">Great work!</p>
     <div class="modal-btns">
       <button class="m-next" onclick="nextChallenge()">Next Challenge →</button>
-      <a href="index.html" class="m-home">Home</a>
+      <a href="../index.html" class="m-home">Home</a>
     </div>
   </div>
 </div>
@@ -661,58 +729,243 @@ function makeHatSVG() {
 // ═══════════════════════════════════════════════════════════════
 // DATA — LEVELS
 // ═══════════════════════════════════════════════════════════════
+// MINI-LESSON FORMAT: challenges with type:'lesson' show a
+// teaching card before the interactive challenge.
+// All grids verified solvable via BFS before inclusion.
+// ═══════════════════════════════════════════════════════════════
 const LEVELS = [
   {
     name:'Beginner', key:'lv0', isGrid:true,
     challenges:[
-      { title:'Move to the Star', desc:'Guide your robot to the goal — no walls, just open space.', pts:10, rows:4, cols:4, start:[0,0], goal:[3,3], walls:[], hint:'Try adding move right blocks, then move down blocks.', steps:7 },
-      { title:'First Turn', desc:'You must turn — reach the star in the corner.', pts:12, rows:4, cols:4, start:[0,0], goal:[0,3], walls:[], hint:'Only move right — three times!', steps:4 },
-      { title:'Navigate the Edge', desc:'Stay along the bottom row to reach the goal.', pts:14, rows:4, cols:5, start:[3,0], goal:[3,4], walls:[], hint:'Four "move right" blocks will do it!', steps:5 },
-      { title:'Simple Cross', desc:'Go across then down. Two directions, one path.', pts:16, rows:5, cols:5, start:[0,0], goal:[4,4], walls:[], hint:'4 right, then 4 down.', steps:9 },
-      { title:'S-Curve', desc:'Navigate from top-right to bottom-left.', pts:18, rows:5, cols:5, start:[0,4], goal:[4,0], walls:[], hint:'4 left, then 4 down.', steps:9 },
+      // ── MINI-LESSON: What is a robot grid? ──────────────────
+      { type:'lesson', title:'Meet Your Robot 🤖',
+        lesson:{
+          icon:'🤖',
+          concept:'The Grid World',
+          body:'Your robot lives on a grid — like a chessboard. Each square is one step. The robot starts at the 🟣 purple square and needs to reach the 🟢 green goal square.\n\nYou control the robot by giving it commands:\n• move("right") → moves one step right\n• move("left") → moves one step left\n• move("down") → moves one step down\n• move("up") → moves one step up\n\nThe robot does EXACTLY what you say — no more, no less.',
+          example:'move("right")\nmove("right")\nmove("down")',
+          tip:'Think of the grid like a map. Right = east, Down = south.'
+        },
+        pts:0, rows:3, cols:3, start:[0,0], goal:[2,2], walls:[], hint:'Try: right, right, down, down', steps:5
+      },
+      { title:'Move to the Star', desc:'Guide your robot to the goal — open space, no walls. Just pick a direction and go!', pts:10, rows:3, cols:3, start:[0,0], goal:[2,2], walls:[], hint:'move("right") twice, then move("down") twice.', steps:5 },
+      { title:'Go Right', desc:'The goal is on the same row. You only need to move in one direction.', pts:10, rows:3, cols:4, start:[1,0], goal:[1,3], walls:[], hint:'move("right") three times.', steps:4 },
+      { title:'Go Down', desc:'The goal is directly below you. Move straight down.', pts:10, rows:4, cols:3, start:[0,1], goal:[3,1], walls:[], hint:'move("down") three times.', steps:4 },
+      // ── MINI-LESSON: Two directions ──────────────────────────
+      { type:'lesson', title:'Using Two Directions 🧭',
+        lesson:{
+          icon:'🧭',
+          concept:'Combining Moves',
+          body:'When the goal is not in a straight line, you need to combine directions.\n\nImagine you need to go 3 steps right AND 2 steps down:\n\nmove("right")\nmove("right")\nmove("right")\nmove("down")\nmove("down")\n\nThe ORDER matters — you can go right-then-down OR down-then-right. Both work!',
+          example:'move("right")\nmove("right")\nmove("down")\nmove("down")',
+          tip:'You can mix any directions — the robot follows them one at a time.'
+        },
+        pts:0, rows:4, cols:4, start:[0,0], goal:[2,3], walls:[], hint:'Right 3, down 2.', steps:6
+      },
+      { title:'Two Directions', desc:'The goal is diagonally across. You need to move both right AND down.', pts:12, rows:4, cols:4, start:[0,0], goal:[2,3], walls:[], hint:'Try: right, right, right, down, down', steps:6 },
+      { title:'First Turn', desc:'The goal is to the right only. Get to the far corner of the same row.', pts:12, rows:4, cols:4, start:[0,0], goal:[0,3], walls:[], hint:'Only move right — three times!', steps:4 },
+      { title:'Navigate the Edge', desc:'Start at the left edge of the bottom row — reach the goal at the far right.', pts:14, rows:4, cols:5, start:[3,0], goal:[3,4], walls:[], hint:'Four move("right") blocks will do it!', steps:5 },
+      { title:'Simple Cross', desc:'Go across then down. Two directions, one clear path.', pts:16, rows:5, cols:5, start:[0,0], goal:[4,4], walls:[], hint:'4 right, then 4 down.', steps:9 },
+      { title:'S-Curve', desc:'Navigate from top-right to bottom-left — you need to go LEFT and DOWN.', pts:18, rows:5, cols:5, start:[0,4], goal:[4,0], walls:[], hint:'4 left, then 4 down.', steps:9 },
     ]
   },
   {
     name:'Rookie', key:'lv1', isGrid:true,
     challenges:[
-      { title:'First Wall', desc:'A wall blocks the straight path — find the way around it!', pts:20, rows:5, cols:5, start:[0,0], goal:[4,4], walls:[[2,2],[2,3]], hint:'Go around the wall: try going right, then down, then right again.', steps:10 },
-      { title:'The Maze', desc:'Multiple walls force you to think ahead.', pts:25, rows:5, cols:5, start:[0,0], goal:[4,4], walls:[[1,1],[1,2],[2,1],[3,3],[3,4]], hint:'Try going right first then down to avoid the cluster.', steps:10 },
-      { title:'Tight Corridor', desc:'A narrow corridor — only one route works.', pts:30, rows:6, cols:6, start:[0,0], goal:[5,5], walls:[[0,1],[1,1],[2,1],[3,1],[4,1],[4,2],[4,3],[4,4],[3,4],[2,4]], hint:'Go down the left edge, then navigate across the bottom.', steps:12 },
-      { title:'Repeat Yourself', desc:'Use repeat blocks — this path is long but has a pattern.', pts:35, rows:5, cols:8, start:[0,0], goal:[4,7], walls:[[1,2],[1,3],[1,4],[3,2],[3,3],[3,4]], hint:'Combine repeat blocks with direction blocks for efficiency!', steps:15 },
-      { title:'The Gauntlet', desc:'Navigate a complex 7×7 maze. Only experts find the path first try.', pts:40, rows:7, cols:7, start:[0,0], goal:[6,6], walls:[[0,2],[1,2],[2,0],[2,1],[2,2],[2,4],[3,4],[4,4],[4,5],[4,6],[5,1],[5,2],[5,3]], hint:'Try exploring the top edge first.', steps:18 },
+      // ── MINI-LESSON: Walls ───────────────────────────────────
+      { type:'lesson', title:'Walls Block Your Path 🧱',
+        lesson:{
+          icon:'🧱',
+          concept:'Navigating Around Walls',
+          body:'Now the grid has walls — dark squares you CANNOT enter. If you try to walk into a wall, your robot stops and you get an error.\n\nStrategy: look at the wall and ask — can I go around it from above? From below? From the side?\n\nAlways plan your full path BEFORE running.',
+          example:'// Wall at [1,2] — go around it:\nmove("right")   // col 1\nmove("down")    // avoid the wall row\nmove("right")   // col 3\nmove("up")      // back to goal row',
+          tip:'Walls are shown in dark blue. You MUST go around them — not through.'
+        },
+        pts:0, rows:4, cols:4, start:[0,0], goal:[3,3], walls:[[1,2]], hint:'Go right then down avoiding the dark wall square.', steps:6
+      },
+      { title:'One Wall', desc:'A single wall blocks the direct path. Find the way around it!', pts:20, rows:4, cols:4, start:[0,0], goal:[3,3], walls:[[1,2]], hint:'Go right to col 1, down to row 3, then right to the goal.', steps:6 },
+      { title:'Side Step', desc:'Two walls in a column. You must slip past them.', pts:22, rows:4, cols:5, start:[0,0], goal:[3,4], walls:[[1,2],[2,2]], hint:'Go right to col 1, down, then continue right past the walls.', steps:7 },
+      { title:'Corner Dodge', desc:'A wall sits in the middle. Navigate around the center.', pts:24, rows:5, cols:5, start:[0,0], goal:[4,4], walls:[[2,2]], hint:'You can go around above or below the center wall.', steps:8 },
+      { title:'Double Wall', desc:'Two walls diagonally placed. Plan which side to take.', pts:26, rows:5, cols:5, start:[0,0], goal:[4,4], walls:[[1,1],[3,3]], hint:'Go right first to avoid [1,1], then weave around [3,3].', steps:8 },
+      // ── MINI-LESSON: Planning paths ─────────────────────────
+      { type:'lesson', title:'Plan Before You Code 📋',
+        lesson:{
+          icon:'📋',
+          concept:'Tracing Your Path',
+          body:'With walls, you need to PLAN before writing moves. Here is a method:\n\n1. Look at the grid — find the walls\n2. Trace a path with your finger (or eyes)\n3. Count each step\n4. Write the moves in that order\n\nExample — wall across the middle row forces a detour:\n\nmove("right")  // 1\nmove("right")  // 2\nmove("up")     // detour above wall\nmove("right")  // 3\nmove("down")   // back on track',
+          example:'// Always count your steps!\n// right×2, up×1, right×1, down×1 = 5 moves',
+          tip:'Count squares between you and each wall — that tells you when to turn.'
+        },
+        pts:0, rows:5, cols:5, start:[0,0], goal:[4,4], walls:[[2,1],[2,2],[2,3]], hint:'The wall blocks row 2. Go down to row 1, right across, then down to row 4.', steps:8
+      },
+      { title:'The Detour', desc:'A wall spans the middle — you must go above it then come back down.', pts:28, rows:5, cols:5, start:[0,0], goal:[4,4], walls:[[2,1],[2,2],[2,3]], hint:'Go right to col 0, down to row 1, right across, down past the wall.', steps:8 },
+      { title:'Zigzag', desc:'Two wall pairs force a zigzag path. Stay flexible!', pts:30, rows:5, cols:6, start:[0,0], goal:[4,5], walls:[[1,2],[1,3],[3,2],[3,3]], hint:'Go right past col 1, then navigate below wall 1, then above wall 2.', steps:9 },
+      { title:'Corridor', desc:'Walls close in from the right — find the narrow corridor down the left.', pts:35, rows:6, cols:5, start:[0,0], goal:[5,4], walls:[[0,2],[1,2],[2,2],[2,3],[2,4]], hint:'Go down the left side (col 0-1), then cut right at the bottom.', steps:9 },
+      { title:'L-Shape Wall', desc:'An L-shaped wall. The gap is there — find it!', pts:38, rows:6, cols:6, start:[0,0], goal:[5,5], walls:[[2,1],[2,2],[2,3],[3,3],[4,3]], hint:'Go down to row 2, right to col 0-1, then find the opening below the wall.', steps:10 },
+    ]
+  },
+  {
+    name:'Explorer', key:'lv1b', isGrid:true,
+    challenges:[
+      // ── MINI-LESSON: Bigger grids ────────────────────────────
+      { type:'lesson', title:'Bigger Grids, Bigger Thinking 🗺️',
+        lesson:{
+          icon:'🗺️',
+          concept:'Multi-Step Planning',
+          body:'As grids get bigger, you need to think in SECTIONS. Instead of planning every single step, plan your route in phases:\n\nPhase 1: get past the first obstacle\nPhase 2: navigate the middle section\nPhase 3: reach the goal\n\nThis is called "divide and conquer" — a real programming strategy!',
+          example:'// Phase 1: clear the top\nmove("right") // ×4\n// Phase 2: get through middle\nmove("down")  // ×3\n// Phase 3: reach goal\nmove("right") // ×2',
+          tip:'Break any big problem into smaller steps. This works in all of programming!'
+        },
+        pts:0, rows:7, cols:7, start:[0,0], goal:[6,6], walls:[[2,1],[2,2],[2,3],[3,4],[4,4],[4,5],[4,6]], hint:'Phase 1: go right to col 4, then down, navigating around the walls.', steps:12
+      },
+      { title:'Island', desc:'Walls form an island in the middle. Navigate the outside edges.', pts:40, rows:6, cols:6, start:[0,0], goal:[5,5], walls:[[2,1],[2,2],[2,3],[3,1],[3,2],[3,3]], hint:'Go right across the top to col 4-5, then come down the right side.', steps:10 },
+      { title:'Fixed Gauntlet', desc:'A complex 7×7 maze. Take it section by section.', pts:45, rows:7, cols:7, start:[0,0], goal:[6,6], walls:[[0,2],[1,2],[2,2],[2,4],[3,4],[4,2],[4,3],[4,4],[5,1],[5,2]], hint:'Go down the left side to row 3, cut right at row 3, then navigate down.', steps:12 },
+      { title:'S-Maze', desc:'Three horizontal wall sections create an S-shape. Find the gaps!', pts:50, rows:7, cols:7, start:[0,0], goal:[6,6], walls:[[1,0],[1,1],[1,2],[1,3],[3,3],[3,4],[3,5],[3,6],[5,0],[5,1],[5,2],[5,3]], hint:'Each wall has exactly one gap. Find it and slip through.', steps:16 },
+      // ── MINI-LESSON: Introduction to code mode ──────────────
+      { type:'lesson', title:'Typing Code: Your First Step 💻',
+        lesson:{
+          icon:'💻',
+          concept:'Switching to Type Code',
+          body:'You have been using drag blocks. Now try TYPING your moves directly.\n\nIn code mode, you write:\nmove("right")\nmove("down")\n\nEach command is on its own line. The computer reads them top to bottom — just like reading a book.\n\nThis is real Python syntax! The same style professional programmers use.',
+          example:'move("right")\nmove("right")\nmove("down")\nmove("down")',
+          tip:'Try switching to the 💻 Type Code tab on the next challenge!'
+        },
+        pts:0, rows:5, cols:5, start:[0,0], goal:[4,4], walls:[[1,3],[2,3],[3,1],[3,2]], hint:'Go right to col 2, down to row 4, then right to the goal.', steps:8
+      },
+      { title:'Cross Pattern', desc:'Walls form a cross in the center. Navigate the outer ring.', pts:48, rows:5, cols:5, start:[0,0], goal:[4,4], walls:[[1,3],[2,3],[3,1],[3,2]], hint:'Hug the top-right edge then come down the right side.', steps:8 },
+      { title:'Staircase', desc:'Wall steps diagonally. Follow the staircase gap!', pts:52, rows:6, cols:6, start:[0,0], goal:[5,5], walls:[[1,1],[2,2],[3,3],[4,4]], hint:'Each wall is one step diagonally — navigate between each step.', steps:10 },
+      { title:'The Fork', desc:'Two paths exist. One is longer — find the shorter one!', pts:55, rows:6, cols:7, start:[0,0], goal:[5,6], walls:[[2,0],[2,1],[2,2],[2,3],[4,3],[4,4],[4,5],[4,6]], hint:'The top wall forces you right. Navigate around wall 2 from below.', steps:11 },
+      { title:'The Switchback', desc:'Walls force you to backtrack. Embrace the zigzag.', pts:58, rows:7, cols:6, start:[0,0], goal:[6,5], walls:[[1,1],[1,2],[1,3],[1,4],[3,0],[3,1],[3,2],[3,3],[5,1],[5,2],[5,3],[5,4]], hint:'Three horizontal walls — each has one end open. Find each gap.', steps:14 },
     ]
   },
   {
     name:'Intermediate', key:'lv2', isGrid:false,
     challenges:[
-      { title:'Build a Calculator', desc:'Write a function called `calculate(a, op, b)` that takes two numbers and an operator (+, -, *, /) and returns the result. Handle division by zero by returning "Error".', pts:50, hint:'Use if/elif statements to check the op value. Return a/b for division.', example:'calculate(10, "+", 5)  →  15\ncalculate(10, "/", 0)  →  "Error"\ncalculate(8, "*", 3)  →  24', difficulty:'Medium', tests:[{code:'calculate(10, "+", 5)',expected:'15'},{code:'calculate(10, "-", 3)',expected:'7'},{code:'calculate(4, "*", 3)',expected:'12'},{code:'calculate(10, "/", 2)',expected:'5.0'},{code:'calculate(10, "/", 0)',expected:'Error'}], starterCode:'def calculate(a, op, b):\n    # Your code here\n    pass\n' },
-      { title:'Reverse Words', desc:'Write a function `reverse_words(sentence)` that reverses the ORDER of words in a sentence, but keeps each word intact.', pts:55, hint:'Split the sentence, reverse the list, then join it back.', example:'reverse_words("hello world")  →  "world hello"\nreverse_words("I love coding")  →  "coding love I"', difficulty:'Medium', tests:[{code:'reverse_words("hello world")',expected:'"world hello"'},{code:'reverse_words("I love coding")',expected:'"coding love I"'},{code:'reverse_words("one")',expected:'"one"'}], starterCode:'def reverse_words(sentence):\n    # Your code here\n    pass\n' },
-      { title:'Count Vowels', desc:'Write a function `count_vowels(text)` that returns the number of vowels (a, e, i, o, u — case insensitive) in a string.', pts:55, hint:'Loop through each character and check if it is in "aeiouAEIOU".', example:'count_vowels("hello")  →  2\ncount_vowels("BLOOM")  →  2\ncount_vowels("xyz")  →  0', difficulty:'Easy', tests:[{code:'count_vowels("hello")',expected:'2'},{code:'count_vowels("BLOOM")',expected:'2'},{code:'count_vowels("xyz")',expected:'0'},{code:'count_vowels("aeiou")',expected:'5'}], starterCode:'def count_vowels(text):\n    # Your code here\n    pass\n' },
-      { title:'FizzBuzz List', desc:'Write a function `fizzbuzz(n)` that returns a list from 1 to n where multiples of 3 are "Fizz", multiples of 5 are "Buzz", and multiples of both are "FizzBuzz".', pts:60, hint:'Use the modulo operator %. Check 15 first, then 3, then 5.', example:'fizzbuzz(5)  →  [1, 2, "Fizz", 4, "Buzz"]\nfizzbuzz(15)[-1]  →  "FizzBuzz"', difficulty:'Medium', tests:[{code:'fizzbuzz(5)',expected:"[1, 2, 'Fizz', 4, 'Buzz']"},{code:'fizzbuzz(3)[-1]',expected:"'Fizz'"},{code:'fizzbuzz(15)[-1]',expected:"'FizzBuzz'"}], starterCode:"def fizzbuzz(n):\n    result = []\n    for i in range(1, n+1):\n        # Your code here\n        pass\n    return result\n" },
-      { title:'Sort by Length', desc:'Write a function `sort_by_length(words)` that sorts a list of strings by their length, shortest first. If two words are the same length, keep alphabetical order.', pts:65, hint:'Use sorted() with a key. You can use a tuple (len(w), w) as the key.', example:'sort_by_length(["apple","cat","hi","dog"])  →  ["hi","cat","dog","apple"]', difficulty:'Hard', tests:[{code:'sort_by_length(["apple","cat","hi","dog"])',expected:"['hi', 'cat', 'dog', 'apple']"},{code:'sort_by_length(["a","bb","ccc"])',expected:"['a', 'bb', 'ccc']"},{code:'sort_by_length(["bat","cat","ant"])',expected:"['ant', 'bat', 'cat']"}], starterCode:'def sort_by_length(words):\n    # Your code here\n    pass\n' },
+      // ── MINI-LESSON: Functions ───────────────────────────────
+      { type:'lesson', title:'What is a Function? 🧩',
+        lesson:{
+          icon:'🧩',
+          concept:'Functions — Reusable Blocks of Code',
+          body:'A function is a named block of code you can use over and over.\n\ndef greet(name):\n    return "Hello, " + name\n\ngreet("Alice")  →  "Hello, Alice"\ngreet("Bob")    →  "Hello, Bob"\n\nParts of a function:\n• def — tells Python this is a function\n• greet — the name you give it\n• (name) — the INPUT it receives\n• return — what it sends BACK',
+          example:'def add(a, b):\n    return a + b\n\nadd(3, 4)   →  7\nadd(10, 5)  →  15',
+          tip:'Think of a function like a recipe — ingredients go IN, a dish comes OUT.'
+        },
+        pts:0, rows:0, cols:0, start:[0,0], goal:[0,0], walls:[],
+        isLesson:true,
+        hint:'', steps:0
+      },
+      { title:'Hello Function', desc:'Write a function called `greet(name)` that returns the string "Hello, " followed by the name.', pts:30, hint:'Use the return keyword. String joining: "Hello, " + name', example:'greet("Alice")  →  "Hello, Alice"\ngreet("World")  →  "Hello, World"', difficulty:'Intro', tests:[{code:'greet("Alice")',expected:'"Hello, Alice"'},{code:'greet("World")',expected:'"Hello, World"'},{code:'greet("Bloom")',expected:'"Hello, Bloom"'}], starterCode:'def greet(name):\n    # Your code here\n    pass\n' },
+      { title:'Double It', desc:'Write a function `double(n)` that returns a number multiplied by 2.', pts:30, hint:'Just return n * 2', example:'double(5)   →  10\ndouble(3)   →  6', difficulty:'Intro', tests:[{code:'double(5)',expected:'10'},{code:'double(3)',expected:'6'},{code:'double(0)',expected:'0'}], starterCode:'def double(n):\n    # Your code here\n    pass\n' },
+      { title:'Is Even?', desc:'Write a function `is_even(n)` that returns True if n is even, False if odd.', pts:32, hint:'Use the modulo operator: n % 2 == 0 means even.', example:'is_even(4)  →  True\nis_even(7)  →  False', difficulty:'Intro', tests:[{code:'is_even(4)',expected:'True'},{code:'is_even(7)',expected:'False'},{code:'is_even(0)',expected:'True'},{code:'is_even(99)',expected:'False'}], starterCode:'def is_even(n):\n    # Your code here\n    pass\n' },
+      // ── MINI-LESSON: If/else ─────────────────────────────────
+      { type:'lesson', title:'Making Decisions with If/Else 🔀',
+        lesson:{
+          icon:'🔀',
+          concept:'If / Elif / Else',
+          body:'Code can make decisions. Use if/elif/else to branch:\n\ndef grade(score):\n    if score >= 90:\n        return "A"\n    elif score >= 80:\n        return "B"\n    elif score >= 70:\n        return "C"\n    else:\n        return "F"\n\nPython reads from TOP to BOTTOM — the FIRST true condition wins.',
+          example:'grade(95)  →  "A"\ngrade(82)  →  "B"\ngrade(55)  →  "F"',
+          tip:'Always put the MOST specific condition first (like >= 90 before >= 80).'
+        },
+        pts:0, rows:0, cols:0, start:[0,0], goal:[0,0], walls:[],
+        isLesson:true,
+        hint:'', steps:0
+      },
+      { title:'Hot or Cold', desc:'Write `temperature(t)` that returns "hot" if t > 30, "warm" if t > 20, "cool" if t > 10, or "cold" otherwise.', pts:35, hint:'Use if/elif/else. Check the highest value first.', example:'temperature(35)  →  "hot"\ntemperature(25)  →  "warm"\ntemperature(5)   →  "cold"', difficulty:'Easy', tests:[{code:'temperature(35)',expected:'"hot"'},{code:'temperature(25)',expected:'"warm"'},{code:'temperature(15)',expected:'"cool"'},{code:'temperature(5)',expected:'"cold"'}], starterCode:'def temperature(t):\n    # Your code here\n    pass\n' },
+      { title:'Absolute Value', desc:'Write `my_abs(n)` that returns the absolute value of n WITHOUT using the built-in abs() function.', pts:35, hint:'If n is negative, return -n. Otherwise return n.', example:'my_abs(-5)  →  5\nmy_abs(3)   →  3\nmy_abs(0)   →  0', difficulty:'Easy', tests:[{code:'my_abs(-5)',expected:'5'},{code:'my_abs(3)',expected:'3'},{code:'my_abs(0)',expected:'0'}], starterCode:'def my_abs(n):\n    # Your code here\n    pass\n' },
+      { title:'Build a Calculator', desc:'Write `calculate(a, op, b)` — takes two numbers and an operator (+, -, *, /) and returns the result. Handle division by zero by returning "Error".', pts:45, hint:'Use if/elif to check op. Return a/b for division, but check if b==0 first.', example:'calculate(10, "+", 5)  →  15\ncalculate(10, "/", 0)  →  "Error"', difficulty:'Medium', tests:[{code:'calculate(10, "+", 5)',expected:'15'},{code:'calculate(10, "-", 3)',expected:'7'},{code:'calculate(4, "*", 3)',expected:'12'},{code:'calculate(10, "/", 2)',expected:'5.0'},{code:'calculate(10, "/", 0)',expected:'Error'}], starterCode:'def calculate(a, op, b):\n    # Your code here\n    pass\n' },
+      // ── MINI-LESSON: Loops ───────────────────────────────────
+      { type:'lesson', title:'Loops — Doing Things Repeatedly 🔁',
+        lesson:{
+          icon:'🔁',
+          concept:'For Loops',
+          body:'A loop repeats code. A for loop runs once for each item in a list or range:\n\nfor i in range(5):\n    print(i)\n# prints 0, 1, 2, 3, 4\n\nYou can also loop over a string:\n\nfor letter in "hello":\n    print(letter)\n# prints h, e, l, l, o\n\nBuilding results:\nresult = []\nfor i in range(3):\n    result.append(i * 2)\n# result = [0, 2, 4]',
+          example:'# Count from 1 to 5:\nfor i in range(1, 6):\n    print(i)',
+          tip:'range(n) gives 0 to n-1. range(1, n+1) gives 1 to n.'
+        },
+        pts:0, rows:0, cols:0, start:[0,0], goal:[0,0], walls:[],
+        isLesson:true,
+        hint:'', steps:0
+      },
+      { title:'Sum of List', desc:'Write `sum_list(numbers)` that adds up all numbers in a list WITHOUT using the built-in sum() function.', pts:40, hint:'Start with total=0. Loop through the list and add each number to total.', example:'sum_list([1,2,3,4])  →  10\nsum_list([5,5])      →  10\nsum_list([])         →  0', difficulty:'Easy', tests:[{code:'sum_list([1,2,3,4])',expected:'10'},{code:'sum_list([5,5])',expected:'10'},{code:'sum_list([])',expected:'0'},{code:'sum_list([7])',expected:'7'}], starterCode:'def sum_list(numbers):\n    total = 0\n    # Loop and add each number\n    pass\n    return total\n' },
+      { title:'Count Vowels', desc:'Write `count_vowels(text)` that counts how many vowels (a,e,i,o,u) are in a string. Case insensitive.', pts:42, hint:'Loop through each character. Check if it is in "aeiouAEIOU".', example:'count_vowels("hello")  →  2\ncount_vowels("BLOOM")  →  2\ncount_vowels("xyz")    →  0', difficulty:'Easy', tests:[{code:'count_vowels("hello")',expected:'2'},{code:'count_vowels("BLOOM")',expected:'2'},{code:'count_vowels("xyz")',expected:'0'},{code:'count_vowels("aeiou")',expected:'5'}], starterCode:'def count_vowels(text):\n    count = 0\n    for char in text:\n        # check if char is a vowel\n        pass\n    return count\n' },
+      { title:'Reverse Words', desc:'Write `reverse_words(sentence)` that reverses the ORDER of words, but keeps each word intact.', pts:45, hint:'Split the sentence into a list, reverse the list, then join with spaces.', example:'reverse_words("hello world")    →  "world hello"\nreverse_words("I love coding")  →  "coding love I"', difficulty:'Medium', tests:[{code:'reverse_words("hello world")',expected:'"world hello"'},{code:'reverse_words("I love coding")',expected:'"coding love I"'},{code:'reverse_words("one")',expected:'"one"'}], starterCode:'def reverse_words(sentence):\n    # Split, reverse, join\n    pass\n' },
+      { title:'FizzBuzz List', desc:'Write `fizzbuzz(n)` that returns a list from 1 to n where multiples of 3 are "Fizz", multiples of 5 are "Buzz", and multiples of both are "FizzBuzz".', pts:50, hint:'Check 15 first, then 3, then 5. Use % (modulo) operator.', example:'fizzbuzz(5)     →  [1, 2, "Fizz", 4, "Buzz"]\nfizzbuzz(15)[-1]  →  "FizzBuzz"', difficulty:'Medium', tests:[{code:'fizzbuzz(5)',expected:"[1, 2, 'Fizz', 4, 'Buzz']"},{code:'fizzbuzz(3)[-1]',expected:"'Fizz'"},{code:'fizzbuzz(15)[-1]',expected:"'FizzBuzz'"}], starterCode:'def fizzbuzz(n):\n    result = []\n    for i in range(1, n+1):\n        # check divisibility\n        pass\n    return result\n' },
     ]
   },
   {
     name:'Advanced', key:'lv3', isGrid:false,
     challenges:[
-      { title:'Binary Search', desc:'Implement `binary_search(arr, target)` that searches a SORTED list for target and returns its index, or -1 if not found. Must run in O(log n) — no using .index()!', pts:80, hint:'Track low/mid/high pointers. Compare arr[mid] to target each iteration.', example:'binary_search([1,3,5,7,9,11], 7)  →  3\nbinary_search([1,3,5,7,9], 6)  →  -1', difficulty:'Hard', tests:[{code:'binary_search([1,3,5,7,9,11], 7)',expected:'3'},{code:'binary_search([1,3,5,7,9], 6)',expected:'-1'},{code:'binary_search([2,4,6,8], 2)',expected:'0'},{code:'binary_search([2,4,6,8], 8)',expected:'3'}], starterCode:'def binary_search(arr, target):\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        # Your code here\n        pass\n    return -1\n' },
-      { title:'Flatten Nested List', desc:'Write `flatten(lst)` that takes a deeply nested list and returns a flat list of all values. Must handle any depth of nesting.', pts:85, hint:'Use recursion: if an item is a list, flatten it too. Otherwise append the item.', example:'flatten([1,[2,[3,4]],5])  →  [1,2,3,4,5]', difficulty:'Hard', tests:[{code:'flatten([1,[2,[3,4]],5])',expected:'[1, 2, 3, 4, 5]'},{code:'flatten([[1,2],[3,[4,5]]])',expected:'[1, 2, 3, 4, 5]'},{code:'flatten([1,2,3])',expected:'[1, 2, 3]'}], starterCode:'def flatten(lst):\n    result = []\n    for item in lst:\n        # Your code here\n        pass\n    return result\n' },
-      { title:'Group by Key', desc:'Write `group_by(items, key_fn)` that groups a list of items using a key function. Returns a dict where keys are the results of key_fn and values are lists of matching items.', pts:90, hint:'Call key_fn(item) for each item. Build a dict: if key not in dict, create an empty list. Then append.', example:'group_by([1,2,3,4,5,6], lambda x: x%2)  →  {1:[1,3,5], 0:[2,4,6]}', difficulty:'Hard', tests:[{code:'group_by([1,2,3,4,5,6], lambda x: x%2)',expected:'{1: [1, 3, 5], 0: [2, 4, 6]}'},{code:'group_by(["hi","hello","hey","bye"], lambda s: s[0])',expected:"{'h': ['hi', 'hello', 'hey'], 'b': ['bye']}"}], starterCode:'def group_by(items, key_fn):\n    result = {}\n    for item in items:\n        # Your code here\n        pass\n    return result\n' },
-      { title:'LRU Cache', desc:'Implement a simple LRU (Least Recently Used) cache class with capacity. It must have `get(key)` and `put(key, value)` methods. get returns -1 if key not found.', pts:100, hint:'Use an OrderedDict from collections. Move accessed items to the end. When full, remove the first item.', example:'cache = LRUCache(2)\ncache.put(1,1)\ncache.put(2,2)\ncache.get(1)  →  1\ncache.put(3,3)\ncache.get(2)  →  -1', difficulty:'Expert', tests:[{code:'c=LRUCache(2);c.put(1,1);c.put(2,2);c.get(1)',expected:'1'},{code:'c=LRUCache(2);c.put(1,1);c.put(2,2);c.get(1);c.put(3,3);c.get(2)',expected:'-1'}], starterCode:'from collections import OrderedDict\n\nclass LRUCache:\n    def __init__(self, capacity):\n        self.cap = capacity\n        self.cache = OrderedDict()\n    def get(self, key):\n        pass\n    def put(self, key, value):\n        pass\n' },
-      { title:'Graph BFS', desc:'Write `bfs(graph, start, end)` that returns the shortest path from start to end in an undirected graph (adjacency list). Return the path as a list, or [] if no path.', pts:110, hint:'Use a queue and a visited set. Track the path by storing (node, path_so_far) in the queue.', example:'graph = {"A":["B","C"],"B":["D"],"C":["D"],"D":[]}\nbfs(graph,"A","D")  →  ["A","B","D"]', difficulty:'Expert', tests:[{code:'g={"A":["B","C"],"B":["D"],"C":["D"],"D":[]};len(bfs(g,"A","D"))',expected:'3'},{code:'g={"A":["B"],"B":["C"],"C":[]};bfs(g,"A","C")',expected:"['A', 'B', 'C']"},{code:'g={"A":["B"],"B":[]};bfs(g,"A","Z")',expected:'[]'}], starterCode:'from collections import deque\n\ndef bfs(graph, start, end):\n    queue = deque([[start]])\n    visited = set()\n    while queue:\n        path = queue.popleft()\n        node = path[-1]\n        if node == end:\n            return path\n        if node not in visited:\n            visited.add(node)\n            for neighbor in graph.get(node, []):\n                pass\n    return []\n' },
+      // ── MINI-LESSON: Sorting ─────────────────────────────────
+      { type:'lesson', title:'Sorting and Keys 🔢',
+        lesson:{
+          icon:'🔢',
+          concept:'Sorting with Custom Keys',
+          body:'Python can sort lists with sorted():\n\nsorted([3,1,2])  →  [1,2,3]\n\nFor custom sorting, use a KEY function:\n\nwords = ["banana","apple","kiwi"]\nsorted(words, key=len)\n→  ["kiwi", "apple", "banana"]\n\nThe key= tells Python WHAT to sort by. You can use any function as a key — even a lambda:\n\nsorted(words, key=lambda w: len(w))',
+          example:'# Sort numbers by their absolute value:\nnums = [-5, 2, -1, 4]\nsorted(nums, key=abs)\n→  [-1, 2, -5, 4]',
+          tip:'lambda x: expression creates a quick one-line function inline.'
+        },
+        pts:0, rows:0, cols:0, start:[0,0], goal:[0,0], walls:[],
+        isLesson:true,
+        hint:'', steps:0
+      },
+      { title:'Sort by Length', desc:'Write `sort_by_length(words)` that sorts strings by length, shortest first. Same length = alphabetical.', pts:60, hint:'Use sorted() with key=(len(w), w) as a tuple — Python sorts tuples element by element.', example:'sort_by_length(["apple","cat","hi"])  →  ["hi","cat","apple"]', difficulty:'Medium', tests:[{code:'sort_by_length(["apple","cat","hi","dog"])',expected:"['hi', 'cat', 'dog', 'apple']"},{code:'sort_by_length(["a","bb","ccc"])',expected:"['a', 'bb', 'ccc']"},{code:'sort_by_length(["bat","cat","ant"])',expected:"['ant', 'bat', 'cat']"}], starterCode:'def sort_by_length(words):\n    # Use sorted() with a key\n    pass\n' },
+      { title:'Find Maximum', desc:'Write `find_max(numbers)` that finds the largest number WITHOUT using max() or sort().', pts:58, hint:'Start with the first number as your "current max". Loop and compare.', example:'find_max([3,1,4,1,5,9])  →  9\nfind_max([-1,-5,-2])     →  -1', difficulty:'Easy', tests:[{code:'find_max([3,1,4,1,5,9])',expected:'9'},{code:'find_max([-1,-5,-2])',expected:'-1'},{code:'find_max([7])',expected:'7'}], starterCode:'def find_max(numbers):\n    current_max = numbers[0]\n    for n in numbers:\n        # update current_max if n is bigger\n        pass\n    return current_max\n' },
+      // ── MINI-LESSON: Recursion ───────────────────────────────
+      { type:'lesson', title:'Recursion — Functions that Call Themselves 🪆',
+        lesson:{
+          icon:'🪆',
+          concept:'Recursion',
+          body:'A recursive function calls ITSELF to solve a smaller version of the same problem.\n\nExample — countdown:\ndef countdown(n):\n    if n <= 0:       # BASE CASE — stop!\n        return\n    print(n)\n    countdown(n-1)   # smaller problem\n\ncountdown(3)  →  3, 2, 1\n\nTwo rules for recursion:\n1. BASE CASE: a condition where you stop (no more calling yourself)\n2. RECURSIVE CASE: call yourself with a SMALLER input',
+          example:'def factorial(n):\n    if n <= 1:        # base case\n        return 1\n    return n * factorial(n-1)  # recursive\n\nfactorial(5)  →  120',
+          tip:'Without a base case, your function loops forever. Always have one!'
+        },
+        pts:0, rows:0, cols:0, start:[0,0], goal:[0,0], walls:[],
+        isLesson:true,
+        hint:'', steps:0
+      },
+      { title:'Flatten Nested List', desc:'Write `flatten(lst)` that takes a deeply nested list and returns a flat list. Must handle any depth.', pts:70, hint:'If an item is a list, flatten it recursively. Otherwise append it directly.', example:'flatten([1,[2,[3,4]],5])   →  [1,2,3,4,5]\nflatten([[1,2],[3,[4,5]]])  →  [1,2,3,4,5]', difficulty:'Medium', tests:[{code:'flatten([1,[2,[3,4]],5])',expected:'[1, 2, 3, 4, 5]'},{code:'flatten([[1,2],[3,[4,5]]])',expected:'[1, 2, 3, 4, 5]'},{code:'flatten([1,2,3])',expected:'[1, 2, 3]'}], starterCode:'def flatten(lst):\n    result = []\n    for item in lst:\n        if isinstance(item, list):\n            # recursively flatten\n            pass\n        else:\n            # append directly\n            pass\n    return result\n' },
+      // ── MINI-LESSON: Dictionaries ────────────────────────────
+      { type:'lesson', title:'Dictionaries — Key/Value Storage 🗂️',
+        lesson:{
+          icon:'🗂️',
+          concept:'Python Dictionaries',
+          body:'A dictionary stores data as key → value pairs:\n\nstudent = {"name": "Alice", "grade": 95}\nstudent["name"]   →  "Alice"\nstudent["grade"]  →  95\n\nAdding and checking:\nstudent["age"] = 16\n"name" in student  →  True\n\nLooping over a dict:\nfor key, value in student.items():\n    print(key, "=", value)',
+          example:'# Count letters in a word:\ndef count_letters(word):\n    counts = {}\n    for ch in word:\n        counts[ch] = counts.get(ch, 0) + 1\n    return counts',
+          tip:'dict.get(key, default) returns the default if the key is missing — very useful!'
+        },
+        pts:0, rows:0, cols:0, start:[0,0], goal:[0,0], walls:[],
+        isLesson:true,
+        hint:'', steps:0
+      },
+      { title:'Word Frequency', desc:'Write `word_frequency(text)` that returns a dictionary of how many times each word appears. Case insensitive.', pts:65, hint:'Split the text into words. Use a dict and count each word.', example:'word_frequency("hi hi hello")  →  {"hi": 2, "hello": 1}', difficulty:'Medium', tests:[{code:'word_frequency("hi hi hello")',expected:"{'hi': 2, 'hello': 1}"},{code:'word_frequency("a b a b a")',expected:"{'a': 3, 'b': 2}"},{code:'word_frequency("hello")',expected:"{'hello': 1}"}], starterCode:'def word_frequency(text):\n    words = text.lower().split()\n    counts = {}\n    for word in words:\n        # count each word\n        pass\n    return counts\n' },
+      { title:'Group by Key', desc:'Write `group_by(items, key_fn)` that groups items using a key function. Returns a dict mapping keys to lists.', pts:75, hint:'Call key_fn(item) for each item. Build a dict — if key not in dict, start an empty list.', example:'group_by([1,2,3,4,5,6], lambda x: x%2)\n→  {1:[1,3,5], 0:[2,4,6]}', difficulty:'Hard', tests:[{code:'group_by([1,2,3,4,5,6], lambda x: x%2)',expected:'{1: [1, 3, 5], 0: [2, 4, 6]}'},{code:'group_by(["hi","hello","hey","bye"], lambda s: s[0])',expected:"{'h': ['hi', 'hello', 'hey'], 'b': ['bye']}"}], starterCode:'def group_by(items, key_fn):\n    result = {}\n    for item in items:\n        key = key_fn(item)\n        # add item to the right group\n        pass\n    return result\n' },
+      { title:'Binary Search', desc:'Implement `binary_search(arr, target)` on a SORTED list. Return the index, or -1 if not found. No using .index()!', pts:80, hint:'Track low, mid, high pointers. If arr[mid] == target, return mid. If smaller, search left. If bigger, search right.', example:'binary_search([1,3,5,7,9,11], 7)  →  3\nbinary_search([1,3,5,7,9], 6)     →  -1', difficulty:'Hard', tests:[{code:'binary_search([1,3,5,7,9,11], 7)',expected:'3'},{code:'binary_search([1,3,5,7,9], 6)',expected:'-1'},{code:'binary_search([2,4,6,8], 2)',expected:'0'},{code:'binary_search([2,4,6,8], 8)',expected:'3'}], starterCode:'def binary_search(arr, target):\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            low = mid + 1   # search right half\n        else:\n            pass            # search left half\n    return -1\n' },
     ]
   },
   {
     name:'Proficient', key:'lv4', isGrid:false,
     challenges:[
-      { title:'Trie Data Structure', desc:'Build a complete Trie class with insert(word), search(word), and starts_with(prefix) methods.', pts:130, hint:'Each node is a dict with children. Use a special "_end" key to mark word endings.', example:'t = Trie()\nt.insert("apple")\nt.search("apple")  →  True\nt.search("app")    →  False\nt.starts_with("app")  →  True', difficulty:'Expert', tests:[{code:'t=Trie();t.insert("apple");t.search("apple")',expected:'True'},{code:'t=Trie();t.insert("apple");t.search("app")',expected:'False'},{code:'t=Trie();t.insert("apple");t.starts_with("app")',expected:'True'},{code:'t=Trie();t.insert("apple");t.starts_with("xyz")',expected:'False'}], starterCode:'class Trie:\n    def __init__(self):\n        self.root = {}\n    def insert(self, word):\n        pass\n    def search(self, word):\n        pass\n    def starts_with(self, prefix):\n        pass\n' },
-      { title:'Memoized Fibonacci', desc:'Write an efficient `fib(n)` using memoization. Must compute fib(50) instantly. Also write `fib_sequence(n)` returning the first n Fibonacci numbers.', pts:135, hint:"Use a dictionary to cache already-computed values. Or use Python's functools.lru_cache.", example:'fib(10)  →  55\nfib(50)  →  12586269025\nfib_sequence(6)  →  [0,1,1,2,3,5]', difficulty:'Hard', tests:[{code:'fib(10)',expected:'55'},{code:'fib(50)',expected:'12586269025'},{code:'fib_sequence(6)',expected:'[0, 1, 1, 2, 3, 5]'}], starterCode:'memo = {}\n\ndef fib(n):\n    pass\n\ndef fib_sequence(n):\n    pass\n' },
-      { title:'Rate Limiter', desc:'Build a RateLimiter class that allows at most `max_calls` calls within a `window_seconds` sliding window.', pts:150, hint:'Store a list of timestamps. Remove timestamps older than (current - window). Check if len < max_calls.', example:'rl = RateLimiter(3, 10)\nrl.is_allowed(1)  → True\nrl.is_allowed(9)  → True\nrl.is_allowed(11) → False', difficulty:'Expert', tests:[{code:'rl=RateLimiter(3,10);rl.is_allowed(1);rl.is_allowed(5);rl.is_allowed(9);rl.is_allowed(11)',expected:'False'},{code:'rl=RateLimiter(3,10);rl.is_allowed(1);rl.is_allowed(5);rl.is_allowed(9);rl.is_allowed(12)',expected:'True'}], starterCode:'class RateLimiter:\n    def __init__(self, max_calls, window_seconds):\n        self.max_calls = max_calls\n        self.window = window_seconds\n        self.calls = []\n    def is_allowed(self, timestamp):\n        pass\n' },
-      { title:'Regex Engine (Basic)', desc:'Implement `regex_match(pattern, text)` that supports: . (any char), * (zero or more of previous), ^ (start), $ (end).', pts:180, hint:'Handle ^ and $ by stripping them. Use recursion for * patterns.', example:'regex_match("a.c","abc")  →  True\nregex_match("a*b","aaab") →  True\nregex_match("^abc$","abc") → True', difficulty:'Elite', tests:[{code:'regex_match("a.c","abc")',expected:'True'},{code:'regex_match("a*b","aaab")',expected:'True'},{code:'regex_match("a*b","b")',expected:'True'},{code:'regex_match("a*b","c")',expected:'False'},{code:'regex_match("^abc$","abc")',expected:'True'}], starterCode:'def regex_match(pattern, text):\n    start_anchor = pattern.startswith("^")\n    end_anchor = pattern.endswith("$")\n    if start_anchor: pattern = pattern[1:]\n    if end_anchor: pattern = pattern[:-1]\n    def match(p, t, pi=0, ti=0):\n        pass\n    return match(pattern, text)\n' },
-      { title:'Mini Interpreter', desc:'Build `interpret(program)` that executes: SET x 5, ADD x 3, MUL x 2, PRINT x, IF x > 5 PRINT big. Returns list of printed values.', pts:200, hint:'Parse each line. Store variables in a dict. Handle IF by evaluating the condition then executing the inner command.', example:'interpret("SET x 5\\nADD x 3\\nPRINT x")  →  ["8"]\ninterpret("SET y 10\\nIF y > 5 PRINT big")  →  ["big"]', difficulty:'Elite', tests:[{code:'interpret("SET x 5\\nADD x 3\\nPRINT x")',expected:"['8']"},{code:'interpret("SET y 10\\nIF y > 5 PRINT big")',expected:"['big']"},{code:'interpret("SET n 3\\nMUL n 4\\nPRINT n")',expected:"['12']"}], starterCode:'def interpret(program):\n    vars = {}\n    output = []\n    lines = program.strip().split("\\n")\n    for line in lines:\n        parts = line.split()\n        cmd = parts[0]\n        if cmd == "SET":\n            pass\n        elif cmd == "ADD":\n            pass\n        elif cmd == "MUL":\n            pass\n        elif cmd == "PRINT":\n            pass\n        elif cmd == "IF":\n            pass\n    return output\n' },
+      // ── MINI-LESSON: Classes ─────────────────────────────────
+      { type:'lesson', title:'Classes — Building Your Own Types 🏗️',
+        lesson:{
+          icon:'🏗️',
+          concept:'Object-Oriented Programming',
+          body:'A class is a blueprint for creating objects.\n\nclass Dog:\n    def __init__(self, name):\n        self.name = name     # attribute\n    def bark(self):\n        return self.name + " says Woof!"\n\nrex = Dog("Rex")\nrex.bark()  →  "Rex says Woof!"\n\n• __init__ runs when you create a new object\n• self refers to the object itself\n• Methods are functions that belong to the class',
+          example:'class Counter:\n    def __init__(self):\n        self.count = 0\n    def increment(self):\n        self.count += 1\n    def get(self):\n        return self.count',
+          tip:'Classes let you bundle DATA (attributes) and BEHAVIOR (methods) together.'
+        },
+        pts:0, rows:0, cols:0, start:[0,0], goal:[0,0], walls:[],
+        isLesson:true,
+        hint:'', steps:0
+      },
+      { title:'Memoized Fibonacci', desc:'Write efficient `fib(n)` using memoization — must compute fib(50) instantly. Also write `fib_sequence(n)` returning the first n Fibonacci numbers.', pts:100, hint:'Store computed values in a dict called memo. Check if n is in memo before computing.', example:'fib(10)          →  55\nfib(50)          →  12586269025\nfib_sequence(6)  →  [0,1,1,2,3,5]', difficulty:'Hard', tests:[{code:'fib(10)',expected:'55'},{code:'fib(50)',expected:'12586269025'},{code:'fib_sequence(6)',expected:'[0, 1, 1, 2, 3, 5]'}], starterCode:'memo = {}\n\ndef fib(n):\n    if n in memo:\n        return memo[n]\n    if n <= 1:\n        return n\n    # compute and store in memo\n    pass\n\ndef fib_sequence(n):\n    # return first n fibonacci numbers as a list\n    pass\n' },
+      { title:'Trie Data Structure', desc:'Build a Trie class with insert(word), search(word), and starts_with(prefix) methods.', pts:110, hint:'Each node is a dict. Use a special "_end" key to mark word endings. Traverse char by char.', example:'t = Trie()\nt.insert("apple")\nt.search("apple")      →  True\nt.search("app")        →  False\nt.starts_with("app")  →  True', difficulty:'Expert', tests:[{code:'t=Trie();t.insert("apple");t.search("apple")',expected:'True'},{code:'t=Trie();t.insert("apple");t.search("app")',expected:'False'},{code:'t=Trie();t.insert("apple");t.starts_with("app")',expected:'True'},{code:'t=Trie();t.insert("apple");t.starts_with("xyz")',expected:'False'}], starterCode:'class Trie:\n    def __init__(self):\n        self.root = {}\n    def insert(self, word):\n        node = self.root\n        for char in word:\n            # navigate/create nodes\n            pass\n        # mark end of word\n    def search(self, word):\n        node = self.root\n        for char in word:\n            if char not in node:\n                return False\n            node = node[char]\n        return "_end" in node\n    def starts_with(self, prefix):\n        node = self.root\n        for char in prefix:\n            if char not in node:\n                return False\n            node = node[char]\n        return True\n' },
+      { title:'LRU Cache', desc:'Implement an LRU (Least Recently Used) cache class with capacity. get(key) returns -1 if not found. put(key,value) adds or updates.', pts:120, hint:'Use OrderedDict. move_to_end() when you access a key. Remove from the front when at capacity.', example:'c = LRUCache(2)\nc.put(1,1); c.put(2,2); c.get(1)  →  1\nc.put(3,3); c.get(2)              →  -1', difficulty:'Expert', tests:[{code:'c=LRUCache(2);c.put(1,1);c.put(2,2);c.get(1)',expected:'1'},{code:'c=LRUCache(2);c.put(1,1);c.put(2,2);c.get(1);c.put(3,3);c.get(2)',expected:'-1'}], starterCode:'from collections import OrderedDict\n\nclass LRUCache:\n    def __init__(self, capacity):\n        self.cap = capacity\n        self.cache = OrderedDict()\n    def get(self, key):\n        if key not in self.cache:\n            return -1\n        self.cache.move_to_end(key)\n        return self.cache[key]\n    def put(self, key, value):\n        if key in self.cache:\n            self.cache.move_to_end(key)\n        self.cache[key] = value\n        if len(self.cache) > self.cap:\n            pass  # remove the least recently used\n' },
+      { title:'Rate Limiter', desc:'Build a RateLimiter class — allows at most max_calls within a window_seconds sliding window. is_allowed(timestamp) returns True/False.', pts:130, hint:'Store a list of timestamps. Remove old ones outside the window. Check if count < max_calls.', example:'rl = RateLimiter(3, 10)\nrl.is_allowed(1)   →  True\nrl.is_allowed(9)   →  True\nrl.is_allowed(11)  →  False', difficulty:'Expert', tests:[{code:'rl=RateLimiter(3,10);rl.is_allowed(1);rl.is_allowed(5);rl.is_allowed(9);rl.is_allowed(11)',expected:'False'},{code:'rl=RateLimiter(3,10);rl.is_allowed(1);rl.is_allowed(5);rl.is_allowed(9);rl.is_allowed(12)',expected:'True'}], starterCode:'class RateLimiter:\n    def __init__(self, max_calls, window_seconds):\n        self.max_calls = max_calls\n        self.window = window_seconds\n        self.calls = []\n    def is_allowed(self, timestamp):\n        # remove timestamps outside the window\n        self.calls = [t for t in self.calls if timestamp - t < self.window]\n        if len(self.calls) < self.max_calls:\n            self.calls.append(timestamp)\n            return True\n        return False\n' },
+      { title:'Graph BFS', desc:'Write `bfs(graph, start, end)` — returns shortest path from start to end. Return path as list, or [] if no path.', pts:140, hint:'Use a deque. Store (node, path_so_far). Track visited to avoid loops.', example:'g = {"A":["B","C"],"B":["D"],"C":["D"],"D":[]}\nbfs(g,"A","D")  →  ["A","B","D"]', difficulty:'Expert', tests:[{code:'g={"A":["B","C"],"B":["D"],"C":["D"],"D":[]};len(bfs(g,"A","D"))',expected:'3'},{code:'g={"A":["B"],"B":["C"],"C":[]};bfs(g,"A","C")',expected:"['A', 'B', 'C']"},{code:'g={"A":["B"],"B":[]};bfs(g,"A","Z")',expected:'[]'}], starterCode:'from collections import deque\n\ndef bfs(graph, start, end):\n    queue = deque([[start]])\n    visited = set()\n    while queue:\n        path = queue.popleft()\n        node = path[-1]\n        if node == end:\n            return path\n        if node not in visited:\n            visited.add(node)\n            for neighbor in graph.get(node, []):\n                queue.append(path + [neighbor])\n    return []\n' },
     ]
   }
-];
+]
 
 // ═══════════════════════════════════════════════════════════════
 // STATE
@@ -972,8 +1225,11 @@ function updateLevelButtons() {
 
 function isLevelUnlocked(idx) {
   if (idx === 0) return true;
-  const done = completedMap[LEVELS[idx-1].key] || [];
-  return done.length >= 3;
+  const prev = LEVELS[idx-1];
+  const done = completedMap[prev.key] || [];
+  // Count only non-lesson challenges completed
+  const practiceCount = prev.challenges.filter(ch => ch.type !== 'lesson').length;
+  return done.length >= Math.min(3, Math.ceil(practiceCount * 0.6));
 }
 
 function selectLevel(idx) {
@@ -992,10 +1248,12 @@ function buildChallengeNav() {
   nav.innerHTML = '';
   level.challenges.forEach((ch, i) => {
     const isDone = done.includes(i);
+    const isLesson = ch.type === 'lesson';
     const btn = document.createElement('button');
     btn.className = 'ch-btn' + (isDone?' done':'') + (i===currentChallenge?' active':'');
-    btn.textContent = (isDone?'✓ ':'') + (i+1);
+    btn.textContent = isLesson ? (isDone?'✓ 📖':'📖') : ((isDone?'✓ ':'') + (i+1));
     btn.title = ch.title;
+    btn.style.fontSize = isLesson ? '0.85rem' : '';
     btn.onclick = () => loadChallenge(i);
     nav.appendChild(btn);
   });
@@ -1016,12 +1274,32 @@ function loadChallenge(idx) {
   const level = LEVELS[currentLevelIdx];
   const ch = level.challenges[idx];
 
+  buildChallengeNav();
+
+  // ── MINI-LESSON ──────────────────────────────────────────────
+  if (ch.type === 'lesson') {
+    document.getElementById('lessonCard').style.display = 'block';
+    document.getElementById('gameLayout').style.display = 'none';
+    document.getElementById('chalTitle').textContent = ch.title;
+    document.getElementById('chalDesc').textContent = 'Mini-lesson — read, then practice!';
+    document.getElementById('ptsReward').textContent = '0';
+    document.getElementById('diffStat').innerHTML = 'Type: <b>Lesson</b>';
+    const L = ch.lesson;
+    document.getElementById('lessonIcon').textContent = L.icon;
+    document.getElementById('lessonConcept').textContent = L.concept;
+    document.getElementById('lessonBody').textContent = L.body;
+    document.getElementById('lessonExample').textContent = L.example;
+    document.getElementById('lessonTip').innerHTML = '<strong>💡 Tip:</strong> ' + L.tip;
+    return;
+  }
+
+  document.getElementById('lessonCard').style.display = 'none';
+  document.getElementById('gameLayout').style.display = 'flex';
+
   document.getElementById('chalTitle').textContent = ch.title;
   document.getElementById('chalDesc').textContent = ch.desc;
   document.getElementById('ptsReward').textContent = ch.pts + (doubleActive?' (×2)':'');
   document.getElementById('diffStat').innerHTML = 'Difficulty: <b>' + (ch.difficulty || level.name) + '</b>';
-
-  buildChallengeNav();
 
   // Show tutor button for Intermediate and above
   document.getElementById('tutorBtn').style.display = 'inline-flex';
@@ -1412,19 +1690,16 @@ async function sendTutorMessage() {
   budChatHistory.push(newUserTurn);
 
   try {
-    const GEMINI_KEY = 'AQ.Ab8RN6LvqZh-CT7wey1hcvJul5kHqGmjn9FJ0Ka_0p75XmeG9Q';
-    const response = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + GEMINI_KEY,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: systemPrompt }] },
-          contents: budChatHistory,
-          generationConfig: { maxOutputTokens: 220, temperature: 0.4 }
-        })
-      }
-    );
+    const response = await fetch('/api/bloom', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'gemini-2.5-flash',
+        system_instruction: { parts: [{ text: systemPrompt }] },
+        contents: budChatHistory,
+        generationConfig: { maxOutputTokens: 220, temperature: 0.4 }
+      })
+    });
 
     if (!response.ok) {
       const errData = await response.json().catch(() => ({}));
@@ -1507,11 +1782,11 @@ Return ONLY valid JSON like this (no markdown, no explanation):
 
 Be strict: types matter, None is not "Error", numbers must match exactly.`;
 
-    const GEMINI_KEY = 'AQ.Ab8RN6LvqZh-CT7wey1hcvJul5kHqGmjn9FJ0Ka_0p75XmeG9Q';
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`, {
+    const response = await fetch('/api/bloom', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        model: 'gemini-2.5-flash',
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
         generationConfig: { maxOutputTokens: 1000 }
       })
@@ -1636,23 +1911,74 @@ function showOutput(msg, type) {
   b.textContent = msg; b.className = type; b.style.display = 'block';
 }
 
+function advancePastLesson() {
+  // Mark lesson as "done" in completedMap so the nav shows ✓
+  markDone();
+  buildChallengeNav();
+  // Advance to the next challenge
+  const next = currentChallenge + 1;
+  if (next < LEVELS[currentLevelIdx].challenges.length) {
+    loadChallenge(next);
+  }
+}
+
 async function updateLeaderboard() {
-  const name = localStorage.getItem('bloomName') || 'Anonymous';
+  const name = localStorage.getItem('bloomName') || null;
+  if (!name) return;
   const pts = totalPoints;
-  let board = JSON.parse(localStorage.getItem('bloomLeaderboard') || '[]');
-  const idx = board.findIndex(p => p.name === name);
-  if (idx >= 0) board[idx].pts = pts; else board.push({ name, pts, updated: Date.now() });
-  localStorage.setItem('bloomLeaderboard', JSON.stringify(board));
   try {
-    const STORAGE_KEY = 'bloomLeaderboard_v2';
-    let global = await window.storage.get(STORAGE_KEY, true);
-    let globalBoard = global ? JSON.parse(global.value) : [];
-    const gi = globalBoard.findIndex(p => p.name === name);
-    if (gi >= 0) globalBoard[gi].pts = Math.max(globalBoard[gi].pts, pts);
-    else globalBoard.push({ name, pts, updated: Date.now() });
-    await window.storage.set(STORAGE_KEY, JSON.stringify(globalBoard), true);
-  } catch(e) {}
+    await fetch('/api/leaderboard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, pts })
+    });
+  } catch(e) {
+    console.warn('Could not sync score to leaderboard:', e);
+  }
 }
 </script>
+<!-- ── DEV MODE PANEL ── -->
+<button id="devToggle" title="Dev Mode (or press Ctrl+Shift+D)" onclick="toggleDev()">🛠</button>
+<div id="devPanel">
+  <div class="dev-header">🛠 Dev Mode <span class="dev-badge">PLAYTESTING</span></div>
+  <div class="dev-sub">Not visible to students in production</div>
+
+  <div class="dev-section">Unlock</div>
+  <button class="dev-btn" onclick="devUnlockAll()">🔓 Unlock All Levels</button>
+  <button class="dev-btn" onclick="devCompleteLevel()">✅ Complete Current Level</button>
+  <button class="dev-btn" onclick="devNextChallenge()">⏭ Skip to Next Challenge</button>
+
+  <hr class="dev-sep"/>
+  <div class="dev-section">Points</div>
+  <div class="dev-pts-row">
+    <button class="dev-pts-btn" onclick="devAddPts(100)">+100</button>
+    <button class="dev-pts-btn" onclick="devAddPts(500)">+500</button>
+    <button class="dev-pts-btn" onclick="devAddPts(1000)">+1k</button>
+    <button class="dev-pts-btn" onclick="devAddPts(5000)">+5k</button>
+  </div>
+  <button class="dev-btn" onclick="devAddPts(999999)">💰 Max Points (shop test)</button>
+
+  <hr class="dev-sep"/>
+  <div class="dev-section">Inventory</div>
+  <button class="dev-btn" onclick="devAddHints(10)">💡 +10 Hints</button>
+  <button class="dev-btn" onclick="devGiveAllItems()">🛍 Own All Shop Items</button>
+  <button class="dev-btn" onclick="devActivateSkips()">⏭ Activate Skip Token</button>
+  <button class="dev-btn" onclick="devActivateDouble()">⚡ Activate Double Points</button>
+
+  <hr class="dev-sep"/>
+  <div class="dev-section">Leaderboard</div>
+  <button class="dev-btn" onclick="devFakeLeaderboard()">👥 Add 5 Fake Players</button>
+
+  <hr class="dev-sep"/>
+  <div class="dev-section">Reset</div>
+  <button class="dev-btn danger" onclick="devReset()">🗑 Reset All Progress</button>
+
+  <div class="dev-status" id="devStatus">
+    pts: <span id="ds-pts">0</span> · hints: <span id="ds-hints">0</span><br>
+    level: <span id="ds-level">—</span> · ch: <span id="ds-ch">—</span><br>
+    name: <span id="ds-name">—</span>
+  </div>
+</div>
+
 <footer style="border-top:1px solid var(--border);padding:24px 48px;text-align:center;font-size:0.75rem;color:var(--muted);"><span style="filter:drop-shadow(0 0 5px rgba(212,120,154,0.4));margin-right:8px;">🪷</span><span style="font-family:Space Grotesk,sans-serif;font-weight:600;color:#f0a8c0;">Lotus Logic</span> &nbsp;·&nbsp; A proud initiative of <span style="color:#f0a8c0;">Rising Roots</span></footer></body>
 </html>
